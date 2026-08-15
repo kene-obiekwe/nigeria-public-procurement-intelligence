@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.env
+.env.*
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE / OS
+.vscode/
+.DS_Store
+Thumbs.db
+
+# AI / Agent configuration — LOCAL ONLY
+GEMINI.md
+.geminiignore
+.gemini/
+.agents/
+.agent/
+
+# Raw NOCOPO data
+NOCOPO dataset/
+
+# Local database artifacts
+*.dump
+*.backup
