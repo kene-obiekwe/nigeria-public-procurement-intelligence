@@ -58,8 +58,8 @@ process-snapshot rule defined below.
 **Process-snapshot rule:**
 For a given OCID, the preferred release for each lifecycle section is:
 - Planning data: from the release with the most planning-inclusive tag set.
-- Tender data: from the release that includes the 	ender tag.
-- Award data: from the release that includes the ward tag.
+- Tender data: from the release that includes the tender tag.
+- Award data: from the release that includes the award tag.
 - Contract data: from the release that includes the contract tag.
 - Implementation data: from the release that includes the implementation tag.
 
@@ -115,7 +115,7 @@ Use at buyer level when:
 - Identifying planning-only entities vs. entities with full lifecycle.
 
 Primary grain: buyer ID from 
-eleases[].buyer.id.
+releases[].buyer.id.
 
 ---
 
@@ -143,22 +143,22 @@ Map the universe of planned procurements to procuring entities, sectors, and val
 
 **Required source fields:**
 - 
-eleases[].ocid
+releases[].ocid
 - 
-eleases[].buyer.id, 
-eleases[].buyer.name
+releases[].buyer.id, 
+releases[].buyer.name
 - 
-eleases[].planning.budget.amount
+releases[].planning.budget.amount
 - 
-eleases[].planning.budget.currency
+releases[].planning.budget.currency
 - 
-eleases[].planning.budget.description
+releases[].planning.budget.description
 - 
-eleases[].planning.budget.project
+releases[].planning.budget.project
 - 
-eleases[].tag
+releases[].tag
 - 
-eleases[].tender.procurementMethodDetails
+releases[].tender.procurementMethodDetails
 
 **Minimum data requirements:**
 - Record must have a planning section.
@@ -166,15 +166,16 @@ eleases[].tender.procurementMethodDetails
 - Buyer must be identified.
 
 **Valid population:**
-All releases with planning tag (108,277 releases / 108,277 OCIDs at planning stage).
+All releases carrying the `planning` tag: 108,277 releases in total.
+**Note on OCID grain:** The dataset contains 98,866 unique OCIDs, not 108,277. The number of *distinct procurement processes* at the planning stage cannot be inferred as equal to the release count; it must be calculated during implementation by counting distinct OCIDs across all releases with the planning tag. For process-level (OCID-level) budget aggregation, the process-snapshot rule applies: take ONE budget value per OCID before summing across OCIDs.
 
 **Exclusions:**
-- Records with udget_amount_flag = EXTREME (DQ-06) from aggregate budget totals.
+- Records with budget_amount_flag = EXTREME (DQ-06) from aggregate budget totals.
 - Records with monetary_flag = ZERO_VALUE from average budget calculations.
 - Records with party_flag = NO_PARTIES from buyer-level analysis.
 
 **Flags to apply:**
-- udget_amount_flag
+- budget_amount_flag
 - monetary_flag
 - party_flag
 
@@ -204,50 +205,51 @@ trends in tendering participation.
 
 **Required source fields:**
 - 
-eleases[].ocid
+releases[].ocid
 - 
-eleases[].buyer.id, 
-eleases[].buyer.name
+releases[].buyer.id, 
+releases[].buyer.name
 - 
-eleases[].tender.numberOfTenderers
+releases[].tender.numberOfTenderers
 - 
-eleases[].tender.procurementMethod
+releases[].tender.procurementMethod
 - 
-eleases[].tender.procurementMethodDetails
+releases[].tender.procurementMethodDetails
 - 
-eleases[].tender.value.amount
+releases[].tender.value.amount
 - 
-eleases[].tender.status
+releases[].tender.status
 - 
-eleases[].tender.tenderPeriod.startDate
+releases[].tender.tenderPeriod.startDate
 - 
-eleases[].tender.tenderPeriod.endDate
+releases[].tender.tenderPeriod.endDate
 
 **Minimum data requirements:**
-- Record must have a 	ender section.
-- 
-umberOfTenderers must be non-null (confirmed: 0 null in 18,408 tender releases).
+- Record must have a tender section.
+- numberOfTenderers must be non-null (confirmed: 0 null in 18,408 tender releases).
 - Tender must have a valid status (not null).
 
 **Valid population (primary):**
-Tender releases with 	enderer_count_flag = NORMAL (numberOfTenderers 1-100).
+Tender releases with tenderer_count_flag = NORMAL (numberOfTenderers 1-100).
 
 **Valid population (sensitivity):**
-Tender releases with 	enderer_count_flag IN (NORMAL, ELEVATED) (numberOfTenderers 1-1,000).
+Tender releases with tenderer_count_flag IN (NORMAL, ELEVATED) (numberOfTenderers 1-1,000).
 
 **Exclusions:**
-- Records with 	enderer_count_flag = ANOMALOUS (numberOfTenderers > 1,000 / DQ-05) from primary metrics.
+- Records with tenderer_count_flag = ANOMALOUS (numberOfTenderers > 1,000 / DQ-05) from primary metrics.
 - Planning-only releases (no tender section) from all competition metrics.
 
 **Flags to apply:**
-- 	enderer_count_flag
+- tenderer_count_flag
 
 **Known limitations:**
 - 65 Federal Ministry of Works records carry systematically anomalous tenderer counts.
   These are excluded from primary competition statistics and documented separately.
 - The field meaning (bids submitted vs. expressions of interest) is unconfirmed.
-- Only 18,408 of 108,277 releases (17%) have tender data; competition analysis covers
-  a minority of the full procurement universe.
+- Only 18,408 of 108,277 releases (17%) contain tender-stage data. Because 98,866 unique
+  OCIDs (procurement processes) exist, the number of distinct processes with tender data
+  must be calculated during implementation. Competition analysis covers a minority of the
+  full planning universe.
 
 **Potential double-counting risks:**
 - A procurement process with multiple releases may have a tender section in more than
@@ -268,40 +270,46 @@ single-supplier procurement patterns and potential over-reliance on specific fir
 
 **Required source fields:**
 - 
-eleases[].awards[].id
+releases[].awards[].id
 - 
-eleases[].awards[].value.amount
+releases[].awards[].value.amount
 - 
-eleases[].awards[].value.currency
+releases[].awards[].value.currency
 - 
-eleases[].awards[].suppliers[].id
+releases[].awards[].suppliers[].id
 - 
-eleases[].awards[].suppliers[].name
+releases[].awards[].suppliers[].name
 - 
-eleases[].awards[].status
+releases[].awards[].status
 - 
-eleases[].buyer.id
+releases[].buyer.id
 - 
-eleases[].tender.procurementMethodDetails
+releases[].tender.procurementMethodDetails
 
 **Minimum data requirements:**
 - Award must have a non-null, non-zero value.
 - Award must have at least one supplier with a non-null, non-incomplete ID.
-- Award status must be ctive (exclude cancelled and unsuccessful awards from value concentration).
+- Award status must be active (exclude cancelled and unsuccessful awards from value concentration).
 
 **Valid population:**
 Active awards with:
-- ward_value_flag IS NULL (not extreme) for primary concentration metrics.
-- supplier_id_flag IS NULL or INCOMPLETE (with appropriate caveats for incomplete IDs).
+- `award_value_flag` IS NULL (not extreme) for primary concentration metrics.
+- `supplier_id_flag` IS NULL (i.e., complete, non-flagged supplier identifiers).
+
+**Important:** Records where `supplier_id_flag = INCOMPLETE` are NOT eligible for the primary
+supplier concentration population. They are retained in the underlying data and may be
+included in a separate data-quality or coverage analysis (e.g., 'what share of award value
+has unresolvable supplier identifiers'). This exclusion is a metric-grain requirement, not a
+data-deletion rule.
 
 **Exclusions:**
-- Award with ward_value_flag = EXTREME (DQ-07, FCTA warehouse) from primary distribution metrics.
+- Award with award_value_flag = EXTREME (DQ-07, FCTA warehouse) from primary distribution metrics.
   Include in high-value procurement analysis separately.
 - Awards with monetary_flag = ZERO_VALUE from value concentration metrics.
 - Awards where all associated suppliers have incomplete IDs.
 
 **Flags to apply:**
-- ward_value_flag
+- award_value_flag
 - supplier_id_flag
 - monetary_flag
 
@@ -332,23 +340,23 @@ value deviations and budget utilisation patterns.
 
 **Required source fields:**
 - 
-eleases[].ocid
+releases[].ocid
 - 
-eleases[].planning.budget.amount
+releases[].planning.budget.amount
 - 
-eleases[].tender.value.amount
+releases[].tender.value.amount
 - 
-eleases[].awards[].value.amount
+releases[].awards[].value.amount
 - 
-eleases[].contracts[].value.amount (if present)
+releases[].contracts[].value.amount (if present)
 - 
-eleases[].buyer.id
+releases[].buyer.id
 - 
-eleases[].tender.procurementMethodDetails
+releases[].tender.procurementMethodDetails
 - 
-eleases[].awards[].suppliers[].id
+releases[].awards[].suppliers[].id
 - 
-eleases[].awards[].date
+releases[].awards[].date
 
 **Minimum data requirements:**
 - At minimum, an award value must be present for award-level analysis.
@@ -358,12 +366,12 @@ eleases[].awards[].date
 **Valid population:**
 For budget-to-award comparison:
 - Records where planning budget and award value are both non-null, non-zero.
-- udget_amount_flag IS NULL (exclude extreme budget records from aggregate comparisons).
-- ward_value_flag IS NULL (exclude extreme award records from distribution benchmarks).
+- budget_amount_flag IS NULL (exclude extreme budget records from aggregate comparisons).
+- award_value_flag IS NULL (exclude extreme award records from distribution benchmarks).
 
 **Exclusions:**
-- Records with udget_amount_flag = EXTREME from aggregate budget-to-award comparisons.
-- Records with ward_value_flag = EXTREME from distribution benchmarks.
+- Records with budget_amount_flag = EXTREME from aggregate budget-to-award comparisons.
+- Records with award_value_flag = EXTREME from distribution benchmarks.
 - Records with monetary_flag = ZERO_VALUE from average value calculations.
 
 **Known limitations:**
@@ -393,23 +401,23 @@ Measure the proportion of processes reaching each lifecycle stage.
 
 **Required source fields:**
 - 
-eleases[].ocid
+releases[].ocid
 - 
-eleases[].tender.tenderPeriod.startDate
+releases[].tender.tenderPeriod.startDate
 - 
-eleases[].tender.tenderPeriod.endDate
+releases[].tender.tenderPeriod.endDate
 - 
-eleases[].awards[].date
+releases[].awards[].date
 - 
-eleases[].contracts[].dateSigned
+releases[].contracts[].dateSigned
 - 
-eleases[].contracts[].period.startDate
+releases[].contracts[].period.startDate
 - 
-eleases[].contracts[].period.endDate
+releases[].contracts[].period.endDate
 - 
-eleases[].buyer.id
+releases[].buyer.id
 - 
-eleases[].tag
+releases[].tag
 
 **Minimum data requirements:**
 For any specific timing metric, both the start and end date for that interval must be:
@@ -492,9 +500,9 @@ The template below defines the required fields. Examples are provided for key me
 | Analytical grain | Buyer / procuring entity |
 | Numerator | SUM of planning.budget.amount across all eligible OCIDs for the entity |
 | Denominator | N/A |
-| Required fields | planning.budget.amount (non-null, non-negative); uyer.id (non-null) |
+| Required fields | planning.budget.amount (non-null, non-negative); buyer.id (non-null) |
 | Eligibility conditions | Release has a planning section; budget amount is non-null and >= 0 |
-| Exclusion conditions | udget_amount_flag = EXTREME; monetary_flag = ZERO_VALUE; party_flag = NO_PARTIES |
+| Exclusion conditions | budget_amount_flag = EXTREME; monetary_flag = ZERO_VALUE; party_flag = NO_PARTIES |
 | Anomaly flags | budget_amount_flag, monetary_flag, party_flag |
 | Aggregation rule | One budget value per OCID (process-snapshot rule); then SUM across OCIDs per buyer |
 | Double-counting risk | Multi-release OCIDs may repeat the budget value. Mitigation: take ONE budget per OCID before summing. NPHCDA per-state replication: mitigation via budget_amount_flag exclusion. |
@@ -511,11 +519,11 @@ The template below defines the required fields. Examples are provided for key me
 | Pillar | Pillar 2 - Competition and Tendering |
 | Business question | What is the typical level of competition in federal procurement tenders? |
 | Analytical grain | OCID (one tender per process) |
-| Numerator | MEDIAN of 	ender.numberOfTenderers across eligible tender processes |
+| Numerator | MEDIAN of tender.numberOfTenderers across eligible tender processes |
 | Denominator | N/A |
-| Required fields | 	ender.numberOfTenderers (non-null - confirmed: 0 null) |
-| Eligibility conditions | Release has a tender section; 	enderer_count_flag = NORMAL |
-| Exclusion conditions | 	enderer_count_flag IN (ELEVATED, ANOMALOUS) for primary median; 	enderer_count_flag = ANOMALOUS only for sensitivity median |
+| Required fields | tender.numberOfTenderers (non-null - confirmed: 0 null) |
+| Eligibility conditions | Release has a tender section; tenderer_count_flag = NORMAL |
+| Exclusion conditions | tenderer_count_flag IN (ELEVATED, ANOMALOUS) for primary median; tenderer_count_flag = ANOMALOUS only for sensitivity median |
 | Anomaly flags | tenderer_count_flag |
 | Aggregation rule | One tender record per OCID (process-snapshot rule); then compute MEDIAN across OCIDs |
 | Double-counting risk | Low - numberOfTenderers is a property of a single tender event; not subject to release-level duplication if deduplicated correctly. |
@@ -532,11 +540,11 @@ The template below defines the required fields. Examples are provided for key me
 | Pillar | Pillar 2 - Competition and Tendering |
 | Business question | What proportion of tenders received only one bid? |
 | Analytical grain | OCID (one tender per process) |
-| Numerator | COUNT of OCIDs where 	ender.numberOfTenderers = 1 |
-| Denominator | COUNT of all eligible OCIDs with a tender record and 	enderer_count_flag = NORMAL |
-| Required fields | 	ender.numberOfTenderers (non-null) |
-| Eligibility conditions | 	enderer_count_flag = NORMAL |
-| Exclusion conditions | 	enderer_count_flag IN (ELEVATED, ANOMALOUS) |
+| Numerator | COUNT of OCIDs where tender.numberOfTenderers = 1 |
+| Denominator | COUNT of all eligible OCIDs with a tender record and tenderer_count_flag = NORMAL |
+| Required fields | tender.numberOfTenderers (non-null) |
+| Eligibility conditions | tenderer_count_flag = NORMAL |
+| Exclusion conditions | tenderer_count_flag IN (ELEVATED, ANOMALOUS) |
 | Anomaly flags | tenderer_count_flag |
 | Aggregation rule | One tender record per OCID; count distinct OCIDs |
 | Double-counting risk | Low - same as M-C01 |
@@ -555,9 +563,9 @@ The template below defines the required fields. Examples are provided for key me
 | Analytical grain | Supplier (by supplier ID); award |
 | Numerator | SUM of award values for the top N suppliers by award value |
 | Denominator | SUM of award values across all eligible awards |
-| Required fields | wards[].value.amount (non-null, non-zero); wards[].suppliers[].id (non-null, not INCOMPLETE) |
-| Eligibility conditions | Award status = ctive; ward_value_flag IS NULL; monetary_flag IS NULL; supplier_id_flag IS NULL |
-| Exclusion conditions | ward_value_flag = EXTREME (FCTA warehouse); monetary_flag = ZERO_VALUE; supplier_id_flag = INCOMPLETE |
+| Required fields | awards[].value.amount (non-null, non-zero); awards[].suppliers[].id (non-null, not INCOMPLETE) |
+| Eligibility conditions | Award status = active; award_value_flag IS NULL; monetary_flag IS NULL; supplier_id_flag IS NULL |
+| Exclusion conditions | award_value_flag = EXTREME (FCTA warehouse); monetary_flag = ZERO_VALUE; supplier_id_flag = INCOMPLETE |
 | Anomaly flags | award_value_flag, monetary_flag, supplier_id_flag |
 | Aggregation rule | Deduplicate awards by award ID across all releases per OCID. Then SUM per supplier ID. |
 | Double-counting risk | HIGH - an award appearing in multiple releases for the same OCID would be double-counted. Mitigation: deduplicate at award ID level within each OCID before aggregating. |
@@ -574,11 +582,11 @@ The template below defines the required fields. Examples are provided for key me
 | Pillar | Pillar 4 - Contracting and Value Analysis |
 | Business question | What is the typical monetary size of a federal procurement award? |
 | Analytical grain | Award (deduplicated by award ID across releases per OCID) |
-| Numerator | MEDIAN of wards[].value.amount across eligible awards |
+| Numerator | MEDIAN of awards[].value.amount across eligible awards |
 | Denominator | N/A |
-| Required fields | wards[].value.amount (non-null, > 0) |
-| Eligibility conditions | Award status = ctive; ward_value_flag IS NULL; monetary_flag IS NULL |
-| Exclusion conditions | ward_value_flag = EXTREME; monetary_flag = ZERO_VALUE |
+| Required fields | awards[].value.amount (non-null, > 0) |
+| Eligibility conditions | Award status = active; award_value_flag IS NULL; monetary_flag IS NULL |
+| Exclusion conditions | award_value_flag = EXTREME; monetary_flag = ZERO_VALUE |
 | Anomaly flags | award_value_flag, monetary_flag |
 | Aggregation rule | Deduplicate awards by award ID within OCID; then compute MEDIAN |
 | Double-counting risk | HIGH - same as M-S01. Award ID deduplication is mandatory. |
@@ -597,13 +605,13 @@ The template below defines the required fields. Examples are provided for key me
 | Analytical grain | OCID (one tender per process) |
 | Numerator | MEDIAN of (tenderPeriod.endDate - tenderPeriod.startDate) in days |
 | Denominator | N/A |
-| Required fields | 	ender.tenderPeriod.startDate; 	ender.tenderPeriod.endDate; both non-null, date_quality_flag = VALID, endDate >= startDate |
+| Required fields | tender.tenderPeriod.startDate; tender.tenderPeriod.endDate; both non-null, date_quality_flag = VALID, endDate >= startDate |
 | Eligibility conditions | Both dates non-null and VALID; computed duration >= 0 |
 | Exclusion conditions | date_quality_flag IN (PLACEHOLDER, FUTURE, IMPOSSIBLE) for either date; negative computed duration |
 | Anomaly flags | date_quality_flag |
 | Aggregation rule | One tender record per OCID; compute date difference; then MEDIAN |
 | Double-counting risk | Low - duration is a computed value from one pair of dates per process. |
-| Interpretation caveat | Coverage is limited: tender start date is null in 47.7% of tender releases. The eligible population (~9,593 OCIDs) may not be representative of all procurement. |
+| Interpretation caveat | Coverage is limited: tender start date is null in 47.7% of tender releases (8,786 of 18,408). The figure ~9,593 refers to the number of tender *releases* with a valid start date; the number of distinct procurement *processes* (OCIDs) in this eligible population will be confirmed during implementation. This eligible population may not be representative of all procurement. |
 
 ---
 
@@ -618,13 +626,21 @@ The template below defines the required fields. Examples are provided for key me
 | Analytical grain | OCID |
 | Numerator | MEDIAN of (awards[].date - tender.tenderPeriod.startDate) in days |
 | Denominator | N/A |
-| Required fields | 	ender.tenderPeriod.startDate; wards[].date; both non-null and date_quality_flag = VALID; award date >= tender start date |
-| Eligibility conditions | Both dates non-null and VALID; award date >= tender start date; OCID has exactly one definitive award record |
+| Required fields | tender.tenderPeriod.startDate; awards[].date; both non-null and date_quality_flag = VALID; award date >= tender start date |
+| Eligibility conditions | Both dates non-null and VALID; award date >= tender start date; OCID has exactly one award record at OCID level (single-award processes only — see multi-award note below) |
 | Exclusion conditions | date_quality_flag IN (PLACEHOLDER, FUTURE, IMPOSSIBLE) for either date; negative computed lag |
 | Anomaly flags | date_quality_flag |
-| Aggregation rule | One tender and one award date per OCID (process-snapshot rule); compute lag; MEDIAN |
+| Aggregation rule | Restrict to single-award OCIDs (OCIDs with exactly one award record). For those, take one tender start date and one award date per OCID (process-snapshot rule); compute lag in days; then MEDIAN across all eligible single-award OCIDs. Multi-award OCIDs are excluded from this primary calculation. |
 | Double-counting risk | Low if dates are correctly deduplicated per OCID |
-| Interpretation caveat | Negative lag values (award before tender start) would indicate chronological impossibility; such records must be excluded. Coverage limited by date availability. |
+| Interpretation caveat | **Single-award processes only.** OCIDs with multiple awards (e.g. multi-lot procurements) are excluded from this primary metric because selecting a single representative award date would require an arbitrary rule. This is a metric-grain limitation, not a data-quality issue. Multi-award processes are available for separate multi-award cycle-time analysis. Negative lag (award before tender start) indicates chronological impossibility and must be excluded. Coverage limited by date availability. |
+
+
+> **Phase 3.1 Correction C-03:** M-E02 now explicitly restricts to single-award OCIDs.
+> Multi-award OCIDs (e.g. multi-lot procurements) are excluded from the primary metric
+> to avoid arbitrary award-selection decisions. This is a metric-grain limitation.
+> A companion metric for multi-award cycle-time analysis should be defined in Phase 5.
+> **Terminology note:** One OCID = one procurement process. One procurement process may
+> produce multiple awards (lots). M-E02 is specified at the single-award-process grain.
 
 ---
 
@@ -640,8 +656,8 @@ The template below defines the required fields. Examples are provided for key me
 | Numerator | COUNT of OCIDs reaching each lifecycle stage |
 | Denominator | COUNT of OCIDs at the preceding stage |
 | Required fields | 
-eleases[].ocid; 
-eleases[].tag |
+releases[].ocid; 
+releases[].tag |
 | Eligibility conditions | None beyond having an OCID and tag |
 | Exclusion conditions | None - all OCIDs are eligible for this coverage metric |
 | Anomaly flags | None required |
@@ -690,7 +706,7 @@ All segmentation by method should use procurementMethodDetails, not procurementM
 
 ### 4.3 Lifecycle Stage Tagging
 
-The 	ag field in each release identifies the lifecycle stage(s) present. The full
+The tag field in each release identifies the lifecycle stage(s) present. The full
 set of observed tag combinations is documented in docs/data_profiling_report.md Section 3.
 The primary tag combinations relevant to analysis are:
 - [planning] only: 89,869 releases
@@ -702,16 +718,19 @@ The primary tag combinations relevant to analysis are:
 For temporal analysis, use the following priority chain when selecting the best available
 event date for a procurement process:
 
-1. 	ender.tenderPeriod.startDate (for tender event date)
-2. wards[].date (for award event date)
+1. tender.tenderPeriod.startDate (for tender event date)
+2. awards[].date (for award event date)
 3. contracts[].dateSigned (for contract event date)
 4. contracts[].period.startDate (for contract commencement)
 
 Do not use 
-eleases[].date for procurement event timing (it is the publication batch date).
+releases[].date for procurement event timing (it is the publication batch date).
 
 ---
 
-*Document version: 1.0 - 2026-08-16. Approved by project owner.*
+*Document version: 1.1 - 2026-08-18. Phase 3.1 correction pass applied.*
+*Version 1.0 approved by project owner on 2026-08-16.*
+*Phase 3.1 corrections: C-01 (planning population), C-02 (supplier eligibility),*
+*C-03 (M-E02 multi-award), C-04 (terminology), C-05 (escape-character repair).*
 *No SQL has been written. No schema has been designed.*
 *Next reference: docs/phase3_data_dictionary.md*

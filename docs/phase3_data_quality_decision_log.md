@@ -49,7 +49,7 @@ RETAIN + FLAG + EXCLUDE_FROM_METRIC for a given metric.
 | **Issue ID** | DQ-01 |
 | **Data field / entity** | 
 eleases[].ocid |
-| **Observed problem** | 6,280 OCIDs appear in more than one release (maximum 74 releases per OCID; 9,411 excess releases total; 98,866 unique OCIDs). Release IDs are unique but OCIDs are repeated across lifecycle stages. |
+| **Observed problem** | 6,280 OCIDs appear in more than one release (maximum 74 releases per OCID; 9,411 excess releases total). The dataset contains 108,277 releases and 98,866 unique OCIDs (procurement processes). Release IDs are unique across the entire dataset; OCIDs are repeated across lifecycle stages of the same process. 108,277 releases ≠ 108,277 unique procurement processes. |
 | **Evidence** | docs/targeted_validation_report.md Section 1; docs/data_profiling_report.md Section 2 |
 | **Severity** | Critical - affects monetary aggregation, process counting, and all OCID-level analytics |
 | **Treatment** | RETAIN + DEFER (release-level) |
@@ -69,7 +69,7 @@ eleases[].ocid |
 | **Issue ID** | DQ-02 |
 | **Data field / entity** | 
 eleases[].tag |
-| **Observed problem** | 89,869 releases (83.0%) carry only the planning tag; they contain no 	ender, wards, or contracts sub-sections. |
+| **Observed problem** | 89,869 releases (83.0%) carry only the planning tag; they contain no tender, wards, or contracts sub-sections. |
 | **Evidence** | docs/data_profiling_report.md Section 3 |
 | **Severity** | High - defines the eligible population for most analytical pillars |
 | **Treatment** | RETAIN |
@@ -188,7 +188,7 @@ eleases[].awards[].value.amount |
 | Attribute | Detail |
 |-----------|--------|
 | **Issue ID** | DQ-08 |
-| **Data field / entity** | 	ender.tenderPeriod.startDate (24 occurrences), wards[].date (119), contracts[].dateSigned (77), milestone fields |
+| **Data field / entity** | 	ender.tenderPeriod.startDate (24 occurrences), wards[].date (119), contracts[].dateSigned (77), milestone fields |
 | **Observed problem** | The date 2001-01-01T00:00:00Z appears across multiple date fields. Given the dataset covers procurements from approximately 2010 onwards, this date is a known system data-entry artefact indicating date not recorded. |
 | **Evidence** | docs/targeted_validation_report.md Section 5; docs/data_profiling_report.md Section 6 |
 | **Severity** | High |
@@ -207,7 +207,7 @@ eleases[].awards[].value.amount |
 | Attribute | Detail |
 |-----------|--------|
 | **Issue ID** | DQ-09 |
-| **Data field / entity** | wards[].date (year 2922, year 2033); 	ender.tenderPeriod.startDate (up to 2029); contracts[].period.endDate (up to 2027) |
+| **Data field / entity** | wards[].date (year 2922, year 2033); 	ender.tenderPeriod.startDate (up to 2029); contracts[].period.endDate (up to 2027) |
 | **Observed problem** | At least one award date of 2922-08-26 (almost certainly 2022-08-26). One award date of year 2033. Multiple tender/contract period dates in 2026-2029. |
 | **Evidence** | docs/targeted_validation_report.md Section 5.3 |
 | **Severity** | High for year-2922 (clear error); Medium for 2026-2029 (ambiguous) |
@@ -341,7 +341,7 @@ eleases[].date |
 | Attribute | Detail |
 |-----------|--------|
 | **Issue ID** | DQ-16 |
-| **Data field / entity** | planning.budget.amount (561 zeros), 	ender.value.amount (1,259 zeros), wards[].value.amount (268 zeros) |
+| **Data field / entity** | planning.budget.amount (561 zeros), 	ender.value.amount (1,259 zeros), wards[].value.amount (268 zeros) |
 | **Observed problem** | Exact zero values appear across all three monetary fields. May represent legitimate zero-value contracts, placeholder entries, in-kind procurements, or framework agreements. |
 | **Evidence** | docs/data_profiling_report.md Section 5 |
 | **Severity** | Medium |
@@ -436,6 +436,7 @@ columns are not yet created.
 
 ---
 
-*Document version: 1.0 - 2026-08-16. Approved by project owner.*
+*Document version: 1.1 - 2026-08-18. Phase 3.1 correction pass applied.*
+*Version 1.0 approved by project owner on 2026-08-16.*
 *No data has been modified. No schema has been designed.*
 *Next reference: docs/phase3_metric_eligibility.md, docs/phase3_data_dictionary.md*

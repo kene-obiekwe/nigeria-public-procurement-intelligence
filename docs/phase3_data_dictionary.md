@@ -617,6 +617,8 @@ eventual table structure (that is a Phase 4 concern).
 
 ---
 
-*Document version: 1.0 — 2026-08-16. Approved by project owner.*
+*Document version: 1.1 — 2026-08-18. Phase 3.1 correction pass applied.*
+*Version 1.0 approved by project owner on 2026-08-16.*
+*No substantive corrections required in this document during Phase 3.1.*
 *No relational tables have been designed. No SQL has been written.*
 *Next reference: Phase 4 — Staging schema design and data loading.*
