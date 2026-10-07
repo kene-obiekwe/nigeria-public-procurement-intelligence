@@ -123,7 +123,7 @@ releases[].buyer.id.
 
 | Scenario | Risk | Rule |
 |----------|------|------|
-| Summing budget amounts across all releases | A repeated OCID with a budget in each release would be counted multiple times | Apply process-snapshot rule; take budget from ONE release per OCID |
+| Summing budget amounts across all releases | A repeated OCID with a budget in each release would be counted multiple times | Apply process-snapshot rule; take ONE budget per budget line `(OCID, projectID)` from its latest release (C-06) |
 | Summing award values across releases | Same award value may appear in the award release and the implementation release for the same OCID | Deduplicate at award ID level within an OCID before aggregation |
 | Summing transaction values | May represent cumulative rather than incremental payments (DQ-12) | Do not sum transaction values until semantic meaning is confirmed in Phase 4 |
 | Counting procurement processes | Each OCID = one process; counting releases would overcount | Always count distinct OCIDs, not total releases |
@@ -167,7 +167,7 @@ releases[].tender.procurementMethodDetails
 
 **Valid population:**
 All releases carrying the `planning` tag: 108,277 releases in total.
-**Note on OCID grain:** The dataset contains 98,866 unique OCIDs, not 108,277. The number of *distinct procurement processes* at the planning stage cannot be inferred as equal to the release count; it must be calculated during implementation by counting distinct OCIDs across all releases with the planning tag. For process-level (OCID-level) budget aggregation, the process-snapshot rule applies: take ONE budget value per OCID before summing across OCIDs.
+**Note on OCID grain:** The dataset contains 98,866 unique OCIDs, not 108,277. The number of *distinct procurement processes* at the planning stage cannot be inferred as equal to the release count; it must be calculated during implementation by counting distinct OCIDs across all releases with the planning tag. For process-level (OCID-level) budget aggregation, the process-snapshot rule applies: take ONE budget value per OCID before summing across OCIDs. **(Amended by C-06:** take ONE budget value per budget line, `(OCID, planning.budget.projectID)`, from the latest release carrying that line. 192 OCIDs hold more than one unrelated budget line; see `docs/phase3_2_correction_log.md`.**)**
 
 **Exclusions:**
 - Records with budget_amount_flag = EXTREME (DQ-06) from aggregate budget totals.
@@ -187,7 +187,7 @@ All releases carrying the `planning` tag: 108,277 releases in total.
   for meaningful total-budget figures.
 
 **Potential double-counting risks:**
-- Budgets repeated across multi-release OCIDs: apply process-snapshot rule.
+- Budgets repeated across multi-release OCIDs: apply process-snapshot rule (one value per budget line, C-06).
 - NPHCDA per-state budget replication: apply budget_amount_flag exclusion.
 
 **Analytical grain:** OCID-level for value aggregation; buyer-level for entity comparisons.
@@ -504,8 +504,8 @@ The template below defines the required fields. Examples are provided for key me
 | Eligibility conditions | Release has a planning section; budget amount is non-null and >= 0 |
 | Exclusion conditions | budget_amount_flag = EXTREME; monetary_flag = ZERO_VALUE; party_flag = NO_PARTIES |
 | Anomaly flags | budget_amount_flag, monetary_flag, party_flag |
-| Aggregation rule | One budget value per OCID (process-snapshot rule); then SUM across OCIDs per buyer |
-| Double-counting risk | Multi-release OCIDs may repeat the budget value. Mitigation: take ONE budget per OCID before summing. NPHCDA per-state replication: mitigation via budget_amount_flag exclusion. |
+| Aggregation rule | One budget value per budget line `(OCID, projectID)`, taken from the latest release (integer release order) carrying that line; then SUM across lines per buyer. OCIDs with >1 line flagged `multi_project_flag = MULTI_PROJECT`. *(C-06; was: one budget value per OCID)* |
+| Double-counting risk | Multi-release OCIDs may repeat the budget value. Mitigation: take ONE budget per budget line (C-06) before summing. NPHCDA per-state replication: mitigation via budget_amount_flag exclusion. |
 | Interpretation caveat | This is a planned budget, not actual spend. Extreme values excluded. Result represents a lower bound on total visible planned procurement. |
 
 ---
@@ -728,7 +728,8 @@ releases[].date for procurement event timing (it is the publication batch date).
 
 ---
 
-*Document version: 1.1 - 2026-08-18. Phase 3.1 correction pass applied.*
+*Document version: 1.2 - 2026-10-07. Phase 3.2 correction pass applied (C-06, M-P01 budget-line grain).*
+*Version 1.1 - 2026-08-18. Phase 3.1 correction pass applied.*
 *Version 1.0 approved by project owner on 2026-08-16.*
 *Phase 3.1 corrections: C-01 (planning population), C-02 (supplier eligibility),*
 *C-03 (M-E02 multi-award), C-04 (terminology), C-05 (escape-character repair).*

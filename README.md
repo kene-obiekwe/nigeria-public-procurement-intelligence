@@ -117,6 +117,7 @@ All figures below are measured. Each is documented in `docs/`.
 | [`docs/phase3_data_quality_decision_log.md`](docs/phase3_data_quality_decision_log.md) | Issues DQ-01 to DQ-18 with treatment decisions |
 | [`docs/phase3_metric_eligibility.md`](docs/phase3_metric_eligibility.md) | Analytical grain and per-metric eligibility rules |
 | [`docs/phase3_data_dictionary.md`](docs/phase3_data_dictionary.md) | Source field → meaning → target column |
+| [`docs/phase3_2_correction_log.md`](docs/phase3_2_correction_log.md) | C-06: budget metric aggregated per budget line |
 | [`docs/phase4_relational_model.md`](docs/phase4_relational_model.md) | Relational design, release strategy, flag placement (v1.1) |
 | [`docs/phase4_1_snapshot_validation_report.md`](docs/phase4_1_snapshot_validation_report.md) | Evidence behind the v1.1 snapshot rule |
 | [`diagrams/erd/nocopo_erd.md`](diagrams/erd/nocopo_erd.md) | Entity-relationship diagram |
