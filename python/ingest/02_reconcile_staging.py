@@ -25,7 +25,7 @@ Usage
 
 Output
 ------
-    docs/phase5_staging_results.md   (context: docs/phase5_staging_reconciliation.md)
+    docs/phase5_staging/phase5_staging_results.md   (context: docs/phase5_staging/phase5_staging_reconciliation.md)
     Exit code 1 if any check fails.
 """
 
@@ -41,7 +41,7 @@ import psycopg
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SOURCE = os.path.join(ROOT, "NOCOPO dataset", "all07010.json")
-OUTPUT = os.path.join(ROOT, "docs", "phase5_staging_results.md")
+OUTPUT = os.path.join(ROOT, "docs", "phase5_staging", "phase5_staging_results.md")
 EXPECTED_SHA256 = "615146696f51d18f72c12c0152888280c12f280981096aae8408843e7d1bc90c"
 
 # Phase 4 v1.1 expectations (documented, not measured here)
@@ -231,7 +231,7 @@ def main():
         "",
         "Source values come from an independent traversal of the raw JSON. Staging values come",
         "from SQL against `stg.*`. Context and interpretation are in",
-        "`docs/phase5_staging_reconciliation.md`.",
+        "`docs/phase5_staging/phase5_staging_reconciliation.md`.",
         "",
     ]
     section = None

@@ -1,13 +1,13 @@
 # Phase 5 — Staging Reconciliation Results
 
 > **Script:** `python/ingest/02_reconcile_staging.py`  
-> **Run date:** 2026-10-07 17:37:25  
+> **Run date:** 2026-10-07 17:47:38  
 > **Database:** `nocopo_db` on localhost:5433 (PostgreSQL 17.4)  
 > **Result:** ALL CHECKS PASSED (64 checks)
 
 Source values come from an independent traversal of the raw JSON. Staging values come
 from SQL against `stg.*`. Context and interpretation are in
-`docs/phase5_staging_reconciliation.md`.
+`docs/phase5_staging/phase5_staging_reconciliation.md`.
 
 
 ## Row counts

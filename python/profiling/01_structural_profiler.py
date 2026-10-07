@@ -9,7 +9,7 @@ Purpose
 -------
 This script performs a first-pass structural and data-quality audit of the
 raw NOCOPO OCDS release package. It does NOT modify the raw dataset.
-All findings are written to docs/data_profiling_report.md.
+All findings are written to docs/phase2_profiling/data_profiling_report.md.
 
 IMPORTANT: This script is READ-ONLY with respect to the raw dataset.
 
@@ -19,7 +19,7 @@ Usage
 
 Output
 ------
-    docs/data_profiling_report.md
+    docs/phase2_profiling/data_profiling_report.md
 
 Author: Nigeria Public Procurement Intelligence Project
 Date:   2026-08-15
@@ -36,7 +36,7 @@ from datetime import datetime
 # Paths — relative to project root
 # ---------------------------------------------------------------------------
 RAW_DATA_PATH = os.path.join("NOCOPO dataset", "all07010.json")
-OUTPUT_REPORT = os.path.join("docs", "data_profiling_report.md")
+OUTPUT_REPORT = os.path.join("docs", "phase2_profiling", "data_profiling_report.md")
 
 # ---------------------------------------------------------------------------
 # Helpers

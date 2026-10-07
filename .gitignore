@@ -29,4 +29,4 @@ NOCOPO dataset/
 *.dump
 *.backup
 # Personal career-planning context — LOCAL ONLY
-docs/Portfolio_Career_Plan_Context.docx
+docs/00_project_planning/Portfolio_Career_Plan_Context.docx

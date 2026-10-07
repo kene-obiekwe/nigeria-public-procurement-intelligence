@@ -4,7 +4,7 @@
 > **Phase:** 3 - Metric Eligibility Specification
 > **Decision date:** 2026-08-16
 > **Approved by:** Project owner
-> **Preceding documents:** docs/phase3_data_quality_decision_log.md, docs/targeted_validation_report.md
+> **Preceding documents:** docs/phase3_data_quality/phase3_data_quality_decision_log.md, docs/phase2_profiling/targeted_validation_report.md
 > **This document is SPECIFICATION ONLY. No SQL has been written. No schema has been designed.**
 
 ---
@@ -167,7 +167,7 @@ releases[].tender.procurementMethodDetails
 
 **Valid population:**
 All releases carrying the `planning` tag: 108,277 releases in total.
-**Note on OCID grain:** The dataset contains 98,866 unique OCIDs, not 108,277. The number of *distinct procurement processes* at the planning stage cannot be inferred as equal to the release count; it must be calculated during implementation by counting distinct OCIDs across all releases with the planning tag. For process-level (OCID-level) budget aggregation, the process-snapshot rule applies: take ONE budget value per OCID before summing across OCIDs. **(Amended by C-06:** take ONE budget value per budget line, `(OCID, planning.budget.projectID)`, from the latest release carrying that line. 192 OCIDs hold more than one unrelated budget line; see `docs/phase3_2_correction_log.md`.**)**
+**Note on OCID grain:** The dataset contains 98,866 unique OCIDs, not 108,277. The number of *distinct procurement processes* at the planning stage cannot be inferred as equal to the release count; it must be calculated during implementation by counting distinct OCIDs across all releases with the planning tag. For process-level (OCID-level) budget aggregation, the process-snapshot rule applies: take ONE budget value per OCID before summing across OCIDs. **(Amended by C-06:** take ONE budget value per budget line, `(OCID, planning.budget.projectID)`, from the latest release carrying that line. 192 OCIDs hold more than one unrelated budget line; see `docs/phase3_data_quality/phase3_2_correction_log.md`.**)**
 
 **Exclusions:**
 - Records with budget_amount_flag = EXTREME (DQ-06) from aggregate budget totals.
@@ -707,7 +707,7 @@ All segmentation by method should use procurementMethodDetails, not procurementM
 ### 4.3 Lifecycle Stage Tagging
 
 The tag field in each release identifies the lifecycle stage(s) present. The full
-set of observed tag combinations is documented in docs/data_profiling_report.md Section 3.
+set of observed tag combinations is documented in docs/phase2_profiling/data_profiling_report.md Section 3.
 The primary tag combinations relevant to analysis are:
 - [planning] only: 89,869 releases
 - [planning, tender, award, contract, implementation]: 14,894 releases (most complete)
@@ -734,4 +734,4 @@ releases[].date for procurement event timing (it is the publication batch date).
 *Phase 3.1 corrections: C-01 (planning population), C-02 (supplier eligibility),*
 *C-03 (M-E02 multi-award), C-04 (terminology), C-05 (escape-character repair).*
 *No SQL has been written. No schema has been designed.*
-*Next reference: docs/phase3_data_dictionary.md*
+*Next reference: docs/phase3_data_quality/phase3_data_dictionary.md*

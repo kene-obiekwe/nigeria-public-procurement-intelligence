@@ -144,4 +144,4 @@ erDiagram
 - `release_seq` is the integer form of `release_id`. Every "latest release" decision orders by it.
 - `budget_project_id` defines the budget-line grain `(ocid, budget_project_id)` used by M-P01.
 - Flag columns hold categorical values (e.g. `NORMAL` / `ELEVATED` / `ANOMALOUS`), not booleans.
-- Analytical views (`analytics.*`) are not shown. See `docs/phase4_relational_model.md` §6.
+- Analytical views (`analytics.*`) are not shown. See `docs/phase4_data_model/phase4_relational_model.md` §6.

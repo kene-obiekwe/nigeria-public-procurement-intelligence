@@ -4,7 +4,7 @@
 > **Run date:** 2026-10-07 16:19:52  
 > **Source SHA-256:** `615146696f51d18f72c12c0152888280c12f280981096aae8408843e7d1bc90c`  
 > **Raw data is READ-ONLY. This report contains measured observations only.**
-> Decisions taken on this evidence are recorded in `docs/phase4_relational_model.md` v1.1.
+> Decisions taken on this evidence are recorded in `docs/phase4_data_model/phase4_relational_model.md` v1.1.
 
 ## 1. Population
 

@@ -28,7 +28,7 @@ Usage
 
 Output
 ------
-    docs/targeted_validation_report.md
+    docs/phase2_profiling/targeted_validation_report.md
 
 Author: Nigeria Public Procurement Intelligence Project
 Date:   2026-08-16
@@ -45,7 +45,7 @@ from statistics import median, quantiles
 # Paths — relative to project root
 # ---------------------------------------------------------------------------
 RAW_DATA_PATH = os.path.join("NOCOPO dataset", "all07010.json")
-OUTPUT_REPORT = os.path.join("docs", "targeted_validation_report.md")
+OUTPUT_REPORT = os.path.join("docs", "phase2_profiling", "targeted_validation_report.md")
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -584,7 +584,7 @@ A("> **Phase:** 2 — Targeted follow-up validation  ")
 A("> **Raw data is READ-ONLY. All figures derived directly from the dataset.**")
 A("")
 A("This report addresses specific anomalies and internal inconsistencies identified in the")
-A("initial profiling report (`docs/data_profiling_report.md`). All statistics are freshly")
+A("initial profiling report (`docs/phase2_profiling/data_profiling_report.md`). All statistics are freshly")
 A("calculated from the raw source file.")
 A("")
 
@@ -650,7 +650,7 @@ interp("The repeated OCIDs represent procurement processes with multiple lifecyc
        "The maximum of 74 releases for one OCID warrants closer inspection to confirm this is "
        "legitimate lifecycle history and not a data loading artefact.")
 A("")
-issue("Section 13 of the initial profiling report (`docs/data_profiling_report.md`) contained "
+issue("Section 13 of the initial profiling report (`docs/phase2_profiling/data_profiling_report.md`) contained "
       "a stale figure of 9,411 for repeated OCIDs. The correct figure is "
       f"{n_repeated_ocids:,}. The profiling report should be regenerated or annotated.")
 A("")

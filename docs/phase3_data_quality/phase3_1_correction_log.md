@@ -26,7 +26,7 @@ specification errors and internal inconsistencies only.
 | Attribute | Detail |
 |-----------|--------|
 | **Correction ID** | C-01 |
-| **Document** | `docs/phase3_metric_eligibility.md` — Pillar 1 (Procurement Planning and Market Intelligence), Valid population section |
+| **Document** | `docs/phase3_data_quality/phase3_metric_eligibility.md` — Pillar 1 (Procurement Planning and Market Intelligence), Valid population section |
 | **Issue** | The valid-population line stated: "All releases with planning tag (108,277 releases / 108,277 OCIDs at planning stage)." This incorrectly implied 108,277 unique OCIDs, conflating total release count with unique procurement-process count. |
 | **Previous wording** | `All releases with planning tag (108,277 releases / 108,277 OCIDs at planning stage).` |
 | **Corrected wording** | All releases carrying the `planning` tag: 108,277 releases in total. The number of *distinct procurement processes* at the planning stage cannot be inferred as equal to the release count; it must be calculated during implementation by counting distinct OCIDs across all releases with the planning tag. For process-level (OCID-level) budget aggregation, the process-snapshot rule applies: take ONE budget value per OCID before summing across OCIDs. |
@@ -43,7 +43,7 @@ specification errors and internal inconsistencies only.
 | Attribute | Detail |
 |-----------|--------|
 | **Correction ID** | C-02 |
-| **Document** | `docs/phase3_metric_eligibility.md` — Pillar 3 (Supplier and Market Concentration), Valid population and Exclusions sections |
+| **Document** | `docs/phase3_data_quality/phase3_metric_eligibility.md` — Pillar 3 (Supplier and Market Concentration), Valid population and Exclusions sections |
 | **Issue** | A direct contradiction existed between the Valid population section (which permitted records where `supplier_id_flag IS NULL or INCOMPLETE`) and the Exclusions section (which excluded `supplier_id_flag = INCOMPLETE`). These rules were mutually contradictory: a record cannot simultaneously be in the eligible population and excluded. |
 | **Previous wording** | Valid population: `supplier_id_flag IS NULL or INCOMPLETE (with appropriate caveats for incomplete IDs).` |
 | **Corrected wording** | Valid population: `supplier_id_flag IS NULL` (complete, non-flagged supplier identifiers only). Records where `supplier_id_flag = INCOMPLETE` are NOT eligible for the primary supplier concentration population. They are retained in the underlying data and may be included in separate data-quality or coverage analysis. This exclusion is a metric-grain requirement, not a data-deletion rule. |
@@ -60,7 +60,7 @@ specification errors and internal inconsistencies only.
 | Attribute | Detail |
 |-----------|--------|
 | **Correction ID** | C-03 |
-| **Document** | `docs/phase3_metric_eligibility.md` — Metric M-E02 (Median Award Lag) |
+| **Document** | `docs/phase3_data_quality/phase3_metric_eligibility.md` — Metric M-E02 (Median Award Lag) |
 | **Issue** | M-E02's eligibility condition stated: "OCID has exactly one definitive award record." The document separately acknowledged (in Section 1.2 Award level) that one OCID may have multiple awards (e.g. multi-lot procurements). The M-E02 entry did not explain why multi-award OCIDs are excluded, did not distinguish single-award processes from multi-award processes, and gave no guidance for how multi-award records should be handled. |
 | **Previous wording** | Eligibility: `Both dates non-null and VALID; award date >= tender start date; OCID has exactly one definitive award record` |
 | **Corrected wording** | Eligibility: Restrict to single-award OCIDs (OCIDs with exactly one award record at OCID level). Multi-award OCIDs (e.g. multi-lot procurements) are excluded from this primary metric. Aggregation rule: for single-award OCIDs, take one tender start date and one award date per OCID (process-snapshot rule); compute lag in days; MEDIAN. Interpretation: **Single-award processes only.** Exclusion of multi-award OCIDs is a metric-grain limitation, NOT evidence of bad data. Multi-award processes remain available for separate multi-award cycle-time analysis. |
@@ -77,7 +77,7 @@ specification errors and internal inconsistencies only.
 | Attribute | Detail |
 |-----------|--------|
 | **Correction ID** | C-04 |
-| **Document** | `docs/phase3_metric_eligibility.md` — multiple sections |
+| **Document** | `docs/phase3_data_quality/phase3_metric_eligibility.md` — multiple sections |
 | **Issue** | Several passages used "releases" and "OCIDs" (procurement processes) interchangeably when the distinction matters. Specific instances: (1) Pillar 2 Known Limitations: "Only 18,408 of 108,277 releases (17%) have tender data" did not distinguish between releases and processes. (2) M-E01 Interpretation caveat: "The eligible population (~9,593 OCIDs)" used "OCIDs" when the figure 9,593 was derived from releases with valid dates, not from distinct OCIDs. |
 | **Previous wording (Pillar 2)** | `Only 18,408 of 108,277 releases (17%) have tender data; competition analysis covers a minority of the full procurement universe.` |
 | **Corrected wording (Pillar 2)** | Only 18,408 of 108,277 releases (17%) contain tender-stage data. Because 98,866 unique OCIDs (procurement processes) exist, the number of distinct processes with tender data must be calculated during implementation. Competition analysis covers a minority of the full planning universe. |
@@ -96,7 +96,7 @@ specification errors and internal inconsistencies only.
 | Attribute | Detail |
 |-----------|--------|
 | **Correction ID** | C-05 |
-| **Document** | `docs/phase3_metric_eligibility.md` (25 instances); `docs/phase3_data_quality_decision_log.md` (4 instances); `docs/phase3_data_dictionary.md` (0 instances — no repair needed) |
+| **Document** | `docs/phase3_data_quality/phase3_metric_eligibility.md` (25 instances); `docs/phase3_data_quality/phase3_data_quality_decision_log.md` (4 instances); `docs/phase3_data_quality/phase3_data_dictionary.md` (0 instances — no repair needed) |
 | **Issue** | All three Phase 3 documents were generated using Python string literals passed to `python -c`. Python's string literal processing converted the following sequences to control characters: `\a` → BEL (0x07) replacing the letter 'a'; `\b` → BS (0x08) replacing the letter 'b'; `\t` → TAB replacing the letter sequence 't...'. This caused field names to be rendered as: `\x07ward_value_flag` instead of `award_value_flag`; `\x08udget_amount_flag` instead of `budget_amount_flag`; `\tender` instead of `tender`; `eleases[]` instead of `releases[]` (from a carriage-return artefact). |
 | **Affected terms** | `award`, `awards`, `active`, `award_value_flag`, `budget`, `budget_amount_flag`, `buyer`, `tender`, `tenderer_count_flag`, `numberOfTenderers`, `releases[]`, `tag` |
 | **Previous wording (example)** | `\x07ward_value_flag IS NULL` (rendered as a BEL character followed by "ward_value_flag") |

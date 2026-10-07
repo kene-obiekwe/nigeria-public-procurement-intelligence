@@ -93,6 +93,6 @@ These carry forward to the limitations section of the final findings:
   are a reporting-coverage gap, not evidence that the event did not occur.
 - **Repeated releases per process.** 6,280 OCIDs appear in more than one
   release. The content sometimes differs between those releases (see
-  `docs/phase4_1_snapshot_validation_report.md`).
+  `docs/phase4_data_model/phase4_1_snapshot_validation_report.md`).
 - **Coverage scope.** The portal reflects what entities chose or were able to
   publish. It is not a complete record of Nigerian public procurement.

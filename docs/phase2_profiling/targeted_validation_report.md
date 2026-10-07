@@ -7,7 +7,7 @@
 > **Raw data is READ-ONLY. All figures derived directly from the dataset.**
 
 This report addresses specific anomalies and internal inconsistencies identified in the
-initial profiling report (`docs/data_profiling_report.md`). All statistics are freshly
+initial profiling report (`docs/phase2_profiling/data_profiling_report.md`). All statistics are freshly
 calculated from the raw source file.
 
 
@@ -100,7 +100,7 @@ The confirmed correct metrics are:
 
 > **PRELIMINARY INTERPRETATION:** The repeated OCIDs represent procurement processes with multiple lifecycle stages captured as separate OCDS releases. This is standard OCDS 1.1 behaviour, not duplication. The maximum of 74 releases for one OCID warrants closer inspection to confirm this is legitimate lifecycle history and not a data loading artefact.
 
-> **DATA-QUALITY ISSUE:** Section 13 of the initial profiling report (`docs/data_profiling_report.md`) contained a stale figure of 9,411 for repeated OCIDs. The correct figure is 6,280. The profiling report should be regenerated or annotated.
+> **DATA-QUALITY ISSUE:** Section 13 of the initial profiling report (`docs/phase2_profiling/data_profiling_report.md`) contained a stale figure of 9,411 for repeated OCIDs. The correct figure is 6,280. The profiling report should be regenerated or annotated.
 
 > **RECOMMENDED FUTURE TREATMENT:** Retain all releases. The release/version modelling strategy (Phase 3 decision) must specify how repeated OCIDs are handled before monetary aggregation to avoid double-counting.
 

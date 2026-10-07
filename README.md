@@ -89,7 +89,12 @@ All figures below are measured. Each is documented in `docs/`.
 
 ```
 ├── data/README.md            Source inventory, checksum, licence, acquisition notes
-├── docs/                     Planning documents, audit reports, decision logs, design
+├── docs/                     Documentation grouped by phase (see docs/README.md)
+│   ├── 00_project_planning/  Scope, architecture, data-quality plan, implementation plan
+│   ├── phase2_profiling/     Profiling and targeted validation reports
+│   ├── phase3_data_quality/  DQ decision log, metric eligibility, data dictionary, corrections
+│   ├── phase4_data_model/    Relational model and snapshot-rule evidence
+│   └── phase5_staging/       Staging load and reconciliation
 ├── python/
 │   ├── profiling/            Phase 2 profiling and targeted validation scripts
 │   ├── validation/           Design-validation scripts (e.g. snapshot rule)
@@ -113,15 +118,15 @@ All figures below are measured. Each is documented in `docs/`.
 
 | Document | Purpose |
 |---|---|
-| [`docs/data_profiling_report.md`](docs/data_profiling_report.md) | Structural and data-quality profile of the raw file |
-| [`docs/targeted_validation_report.md`](docs/targeted_validation_report.md) | Follow-up checks on profiling anomalies |
-| [`docs/phase3_data_quality_decision_log.md`](docs/phase3_data_quality_decision_log.md) | Issues DQ-01 to DQ-18 with treatment decisions |
-| [`docs/phase3_metric_eligibility.md`](docs/phase3_metric_eligibility.md) | Analytical grain and per-metric eligibility rules |
-| [`docs/phase3_data_dictionary.md`](docs/phase3_data_dictionary.md) | Source field → meaning → target column |
-| [`docs/phase3_2_correction_log.md`](docs/phase3_2_correction_log.md) | C-06: budget metric aggregated per budget line |
-| [`docs/phase4_relational_model.md`](docs/phase4_relational_model.md) | Relational design, release strategy, flag placement (v1.1) |
-| [`docs/phase4_1_snapshot_validation_report.md`](docs/phase4_1_snapshot_validation_report.md) | Evidence behind the v1.1 snapshot rule |
-| [`docs/phase5_staging_reconciliation.md`](docs/phase5_staging_reconciliation.md) | Staging load, schema v1.2 changes, reconciliation and findings |
+| [`docs/phase2_profiling/data_profiling_report.md`](docs/phase2_profiling/data_profiling_report.md) | Structural and data-quality profile of the raw file |
+| [`docs/phase2_profiling/targeted_validation_report.md`](docs/phase2_profiling/targeted_validation_report.md) | Follow-up checks on profiling anomalies |
+| [`docs/phase3_data_quality/phase3_data_quality_decision_log.md`](docs/phase3_data_quality/phase3_data_quality_decision_log.md) | Issues DQ-01 to DQ-18 with treatment decisions |
+| [`docs/phase3_data_quality/phase3_metric_eligibility.md`](docs/phase3_data_quality/phase3_metric_eligibility.md) | Analytical grain and per-metric eligibility rules |
+| [`docs/phase3_data_quality/phase3_data_dictionary.md`](docs/phase3_data_quality/phase3_data_dictionary.md) | Source field → meaning → target column |
+| [`docs/phase3_data_quality/phase3_2_correction_log.md`](docs/phase3_data_quality/phase3_2_correction_log.md) | C-06: budget metric aggregated per budget line |
+| [`docs/phase4_data_model/phase4_relational_model.md`](docs/phase4_data_model/phase4_relational_model.md) | Relational design, release strategy, flag placement (v1.1) |
+| [`docs/phase4_data_model/phase4_1_snapshot_validation_report.md`](docs/phase4_data_model/phase4_1_snapshot_validation_report.md) | Evidence behind the v1.1 snapshot rule |
+| [`docs/phase5_staging/phase5_staging_reconciliation.md`](docs/phase5_staging/phase5_staging_reconciliation.md) | Staging load, schema v1.2 changes, reconciliation and findings |
 | [`diagrams/erd/nocopo_erd.md`](diagrams/erd/nocopo_erd.md) | Entity-relationship diagram |
 | [`sql/02_schema/00_draft_core_schema.sql`](sql/02_schema/00_draft_core_schema.sql) | Draft DDL with constraints tied to DQ issues |
 

@@ -4,7 +4,7 @@
 > **Phase:** 3 - Data-Quality Specification
 > **Decision date:** 2026-08-16
 > **Approved by:** Project owner
-> **Preceding evidence:** docs/data_profiling_report.md, docs/targeted_validation_report.md
+> **Preceding evidence:** docs/phase2_profiling/data_profiling_report.md, docs/phase2_profiling/targeted_validation_report.md
 > **This document is SPECIFICATION ONLY. No data has been modified. No schema has been designed.**
 
 ---
@@ -16,7 +16,7 @@ identified during Phase 2 profiling and targeted validation. It serves as the
 authoritative reference for:
 
 - staging-layer flag column definitions
-- metric eligibility rule authoring (see docs/phase3_metric_eligibility.md)
+- metric eligibility rule authoring (see docs/phase3_data_quality/phase3_metric_eligibility.md)
 - schema design decisions (Phase 4)
 - analytical view construction (Phase 5)
 - interpretation caveats in reporting (Power BI, Phase 6+)
@@ -50,7 +50,7 @@ RETAIN + FLAG + EXCLUDE_FROM_METRIC for a given metric.
 | **Data field / entity** | 
 eleases[].ocid |
 | **Observed problem** | 6,280 OCIDs appear in more than one release (maximum 74 releases per OCID; 9,411 excess releases total). The dataset contains 108,277 releases and 98,866 unique OCIDs (procurement processes). Release IDs are unique across the entire dataset; OCIDs are repeated across lifecycle stages of the same process. 108,277 releases ≠ 108,277 unique procurement processes. |
-| **Evidence** | docs/targeted_validation_report.md Section 1; docs/data_profiling_report.md Section 2 |
+| **Evidence** | docs/phase2_profiling/targeted_validation_report.md Section 1; docs/phase2_profiling/data_profiling_report.md Section 2 |
 | **Severity** | Critical - affects monetary aggregation, process counting, and all OCID-level analytics |
 | **Treatment** | RETAIN + DEFER (release-level) |
 | **Retained?** | Yes - all 108,277 releases retained |
@@ -70,7 +70,7 @@ eleases[].ocid |
 | **Data field / entity** | 
 eleases[].tag |
 | **Observed problem** | 89,869 releases (83.0%) carry only the planning tag; they contain no tender, wards, or contracts sub-sections. |
-| **Evidence** | docs/data_profiling_report.md Section 3 |
+| **Evidence** | docs/phase2_profiling/data_profiling_report.md Section 3 |
 | **Severity** | High - defines the eligible population for most analytical pillars |
 | **Treatment** | RETAIN |
 | **Retained?** | Yes |
@@ -90,7 +90,7 @@ eleases[].tag |
 | **Data field / entity** | 
 eleases[].tender.numberOfTenderers |
 | **Observed problem** | N/A - documents the approved classification of the normal-range population |
-| **Evidence** | docs/targeted_validation_report.md Section 2 |
+| **Evidence** | docs/phase2_profiling/targeted_validation_report.md Section 2 |
 | **Severity** | N/A |
 | **Treatment** | RETAIN |
 | **Retained?** | Yes |
@@ -110,7 +110,7 @@ eleases[].tender.numberOfTenderers |
 | **Data field / entity** | 
 eleases[].tender.numberOfTenderers |
 | **Observed problem** | 79 records report 101-1,000 tenderers. Above the 99th percentile (24). |
-| **Evidence** | docs/targeted_validation_report.md Section 2 |
+| **Evidence** | docs/phase2_profiling/targeted_validation_report.md Section 2 |
 | **Severity** | Medium |
 | **Treatment** | RETAIN + FLAG |
 | **Retained?** | Yes |
@@ -130,7 +130,7 @@ eleases[].tender.numberOfTenderers |
 | **Data field / entity** | 
 eleases[].tender.numberOfTenderers |
 | **Observed problem** | 65 records report > 1,000 tenderers. Maximum = 90,865. All 65 originate from Federal Ministry of Works and Housing (buyer ID: NG-BPP-BPP-NOC-231001001). The value 6,759 appears repeatedly across unrelated procurement types. |
-| **Evidence** | docs/targeted_validation_report.md Section 2.3 |
+| **Evidence** | docs/phase2_profiling/targeted_validation_report.md Section 2.3 |
 | **Severity** | Critical |
 | **Treatment** | RETAIN + FLAG + EXCLUDE_FROM_METRIC |
 | **Retained?** | Yes - original value preserved, not replaced or deleted |
@@ -150,7 +150,7 @@ eleases[].tender.numberOfTenderers |
 | **Data field / entity** | 
 eleases[].planning.budget.amount |
 | **Observed problem** | 32 records have budget amounts >= NGN 1 trillion. All are planning-only releases. Three sub-patterns: (a) NPHCDA Hajj vaccine records (~20 records at NGN 3.02T each), (b) Federal Ministry of Works large infrastructure (NGN 5T, NGN 1.97T), (c) FCT Administration (NGN 2.08T). |
-| **Evidence** | docs/targeted_validation_report.md Section 3 |
+| **Evidence** | docs/phase2_profiling/targeted_validation_report.md Section 3 |
 | **Severity** | Critical |
 | **Treatment** | RETAIN + FLAG + EXCLUDE_FROM_METRIC (aggregate budget totals) |
 | **Retained?** | Yes |
@@ -171,7 +171,7 @@ eleases[].planning.budget.amount |
 | **Data field / entity** | 
 eleases[].awards[].value.amount |
 | **Observed problem** | One record (OCID: ocds-gyl66f-2-004675) carries an award and tender value of NGN 1,004,166,666,735.23. Buyer: FCTA. Supplier: M/S Turaki Trading Company Ltd. Description: warehouse construction. Active award. Award date: 2022-08-09. Tender and award values match exactly. |
-| **Evidence** | docs/targeted_validation_report.md Section 4.2 |
+| **Evidence** | docs/phase2_profiling/targeted_validation_report.md Section 4.2 |
 | **Severity** | High |
 | **Treatment** | RETAIN + FLAG + EXCLUDE_FROM_METRIC (primary distribution statistics) |
 | **Retained?** | Yes |
@@ -190,7 +190,7 @@ eleases[].awards[].value.amount |
 | **Issue ID** | DQ-08 |
 | **Data field / entity** | 	ender.tenderPeriod.startDate (24 occurrences), wards[].date (119), contracts[].dateSigned (77), milestone fields |
 | **Observed problem** | The date 2001-01-01T00:00:00Z appears across multiple date fields. Given the dataset covers procurements from approximately 2010 onwards, this date is a known system data-entry artefact indicating date not recorded. |
-| **Evidence** | docs/targeted_validation_report.md Section 5; docs/data_profiling_report.md Section 6 |
+| **Evidence** | docs/phase2_profiling/targeted_validation_report.md Section 5; docs/phase2_profiling/data_profiling_report.md Section 6 |
 | **Severity** | High |
 | **Treatment** | RETAIN (source value) + FLAG + EXCLUDE_FROM_METRIC (timing metrics) |
 | **Retained?** | Yes - source date value preserved |
@@ -209,7 +209,7 @@ eleases[].awards[].value.amount |
 | **Issue ID** | DQ-09 |
 | **Data field / entity** | wards[].date (year 2922, year 2033); 	ender.tenderPeriod.startDate (up to 2029); contracts[].period.endDate (up to 2027) |
 | **Observed problem** | At least one award date of 2922-08-26 (almost certainly 2022-08-26). One award date of year 2033. Multiple tender/contract period dates in 2026-2029. |
-| **Evidence** | docs/targeted_validation_report.md Section 5.3 |
+| **Evidence** | docs/phase2_profiling/targeted_validation_report.md Section 5.3 |
 | **Severity** | High for year-2922 (clear error); Medium for 2026-2029 (ambiguous) |
 | **Treatment** | RETAIN (source value) + FLAG + EXCLUDE_FROM_METRIC (timing calculations) |
 | **Retained?** | Yes |
@@ -229,7 +229,7 @@ eleases[].awards[].value.amount |
 | **Data field / entity** | 
 eleases[].date |
 | **Observed problem** | All 108,277 releases carry date = 2021-05-03T22:44:00Z - the OCDS package publication date, not the individual procurement event date. |
-| **Evidence** | docs/data_profiling_report.md Section 4; docs/targeted_validation_report.md Section 5 |
+| **Evidence** | docs/phase2_profiling/data_profiling_report.md Section 4; docs/phase2_profiling/targeted_validation_report.md Section 5 |
 | **Severity** | High - affects any time-series or trend analysis |
 | **Treatment** | RETAIN (accurately represents publication metadata) |
 | **Retained?** | Yes |
@@ -248,7 +248,7 @@ eleases[].date |
 | **Issue ID** | DQ-11 |
 | **Data field / entity** | contracts[].implementation.transactions[].date |
 | **Observed problem** | 13,617 transaction objects exist; zero contain a date field. All 13,617 contain a value field. |
-| **Evidence** | docs/targeted_validation_report.md Section 6 |
+| **Evidence** | docs/phase2_profiling/targeted_validation_report.md Section 6 |
 | **Severity** | High |
 | **Treatment** | RETAIN (transactions retained for value analysis) |
 | **Retained?** | Yes |
@@ -267,7 +267,7 @@ eleases[].date |
 | **Issue ID** | DQ-12 |
 | **Data field / entity** | contracts[].implementation.transactions[].value |
 | **Observed problem** | All 13,617 transactions have a value object. Whether values represent cumulative payments, instalments, progress certificates, or another concept is unclear. |
-| **Evidence** | docs/targeted_validation_report.md Section 6.2 |
+| **Evidence** | docs/phase2_profiling/targeted_validation_report.md Section 6.2 |
 | **Severity** | Medium |
 | **Treatment** | RETAIN + DEFER |
 | **Retained?** | Yes |
@@ -286,7 +286,7 @@ eleases[].date |
 | **Issue ID** | DQ-13 |
 | **Data field / entity** | parties[role=supplier].id and parties[role=supplier].name |
 | **Observed problem** | 1,483 supplier IDs are associated with more than one distinct name. Most appear to be formatting/abbreviation variants of the same legal entity. |
-| **Evidence** | docs/targeted_validation_report.md Section 7.2 |
+| **Evidence** | docs/phase2_profiling/targeted_validation_report.md Section 7.2 |
 | **Severity** | Medium |
 | **Treatment** | RETAIN (source values) + DEFER (canonical mapping specification) |
 | **Retained?** | Yes - both source ID and source name preserved |
@@ -305,7 +305,7 @@ eleases[].date |
 | **Issue ID** | DQ-14 |
 | **Data field / entity** | parties[role=supplier].name and parties[role=supplier].id |
 | **Observed problem** | 571 supplier names are associated with more than one distinct ID. Many involve a bare NG-BPP- identifier (incomplete) paired with a proper NG-BPP-BPP-CI-NNNN identifier. |
-| **Evidence** | docs/targeted_validation_report.md Section 7.3 |
+| **Evidence** | docs/phase2_profiling/targeted_validation_report.md Section 7.3 |
 | **Severity** | Medium |
 | **Treatment** | RETAIN (source values) + FLAG (incomplete identifiers) |
 | **Retained?** | Yes |
@@ -324,7 +324,7 @@ eleases[].date |
 | **Issue ID** | DQ-15 |
 | **Data field / entity** | Supplier identity (cross-field) |
 | **Observed problem** | No canonical supplier identity exists in the source data; resolution requires a derived mapping. |
-| **Evidence** | DQ-13, DQ-14; docs/targeted_validation_report.md Section 7 |
+| **Evidence** | DQ-13, DQ-14; docs/phase2_profiling/targeted_validation_report.md Section 7 |
 | **Severity** | Medium (manageable if analytical views use ID as primary key) |
 | **Treatment** | DEFER - specification only |
 | **Retained?** | N/A |
@@ -343,7 +343,7 @@ eleases[].date |
 | **Issue ID** | DQ-16 |
 | **Data field / entity** | planning.budget.amount (561 zeros), 	ender.value.amount (1,259 zeros), wards[].value.amount (268 zeros) |
 | **Observed problem** | Exact zero values appear across all three monetary fields. May represent legitimate zero-value contracts, placeholder entries, in-kind procurements, or framework agreements. |
-| **Evidence** | docs/data_profiling_report.md Section 5 |
+| **Evidence** | docs/phase2_profiling/data_profiling_report.md Section 5 |
 | **Severity** | Medium |
 | **Treatment** | RETAIN + FLAG |
 | **Retained?** | Yes - do not replace zero with NULL |
@@ -362,7 +362,7 @@ eleases[].date |
 | **Issue ID** | DQ-17 |
 | **Data field / entity** | parties[].identifier.scheme |
 | **Observed problem** | All observed party identifier schemes use NG-BPP. This was observed in initial profiling but was not confirmed across all 108,277 releases. |
-| **Evidence** | docs/data_profiling_report.md Section 7 |
+| **Evidence** | docs/phase2_profiling/data_profiling_report.md Section 7 |
 | **Severity** | Low |
 | **Treatment** | DEFER |
 | **Retained?** | N/A |
@@ -382,7 +382,7 @@ eleases[].date |
 | **Data field / entity** | 
 eleases[].parties |
 | **Observed problem** | 20 releases have no parties array or an empty array. These records cannot be linked to buyer/supplier entities through the standard OCDS party mechanism. |
-| **Evidence** | docs/data_profiling_report.md Section 7 |
+| **Evidence** | docs/phase2_profiling/data_profiling_report.md Section 7 |
 | **Severity** | Low (0.02% of the dataset) |
 | **Treatment** | RETAIN + FLAG |
 | **Retained?** | Yes |
@@ -439,4 +439,4 @@ columns are not yet created.
 *Document version: 1.1 - 2026-08-18. Phase 3.1 correction pass applied.*
 *Version 1.0 approved by project owner on 2026-08-16.*
 *No data has been modified. No schema has been designed.*
-*Next reference: docs/phase3_metric_eligibility.md, docs/phase3_data_dictionary.md*
+*Next reference: docs/phase3_data_quality/phase3_metric_eligibility.md, docs/phase3_data_quality/phase3_data_dictionary.md*

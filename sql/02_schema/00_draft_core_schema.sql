@@ -5,15 +5,15 @@
 --
 -- STATUS: v1.2 — EXECUTED IN PHASE 5 (staging load)
 -- Approved design: Phase 4 v1.1. Phase 5 load-readiness changes (v1.2)
--- are listed below and in docs/phase5_staging_reconciliation.md.
+-- are listed below and in docs/phase5_staging/phase5_staging_reconciliation.md.
 --
 -- Design basis:
---   docs/phase3_data_quality_decision_log.md (v1.1)
---   docs/phase3_metric_eligibility.md (v1.1)
---   docs/phase3_data_dictionary.md (v1.1)
---   docs/phase4_relational_model.md
+--   docs/phase3_data_quality/phase3_data_quality_decision_log.md (v1.1)
+--   docs/phase3_data_quality/phase3_metric_eligibility.md (v1.1)
+--   docs/phase3_data_quality/phase3_data_dictionary.md (v1.1)
+--   docs/phase4_data_model/phase4_relational_model.md
 --   Empirical dataset inspection (108,277 releases, 98,866 OCIDs)
---   docs/phase4_1_snapshot_validation_report.md (v1.1 evidence)
+--   docs/phase4_data_model/phase4_1_snapshot_validation_report.md (v1.1 evidence)
 --
 -- Architecture: Three-layer model
 --   stg.*         Staging layer (source-faithful, release-centric)

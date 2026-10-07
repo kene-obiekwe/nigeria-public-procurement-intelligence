@@ -306,7 +306,7 @@ Tag combinations observed within the set of repeated (multi-release) OCIDs:
 > The **confirmed correct figures**, verified by `python/profiling/02_targeted_validation.py`, are:
 > - **6,280 OCIDs** appear in more than one release (repeated/multi-release processes)
 > - **9,411 excess releases** exist (i.e., sum of (count − 1) across all repeated OCIDs)
-> The original text is preserved below for traceability. See `docs/targeted_validation_report.md` Section 1.
+> The original text is preserved below for traceability. See `docs/phase2_profiling/targeted_validation_report.md` Section 1.
 
 | # | Issue | Scope | Preliminary treatment |
 |---|-------|-------|----------------------|

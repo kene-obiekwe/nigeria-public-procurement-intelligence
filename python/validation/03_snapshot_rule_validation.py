@@ -29,7 +29,7 @@ Usage
 
 Output
 ------
-    docs/phase4_1_snapshot_validation_report.md
+    docs/phase4_data_model/phase4_1_snapshot_validation_report.md
 """
 
 import hashlib
@@ -41,7 +41,7 @@ from datetime import datetime
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SOURCE = os.path.join(ROOT, "NOCOPO dataset", "all07010.json")
-OUTPUT = os.path.join(ROOT, "docs", "phase4_1_snapshot_validation_report.md")
+OUTPUT = os.path.join(ROOT, "docs", "phase4_data_model", "phase4_1_snapshot_validation_report.md")
 
 EXTREME_BUDGET = 1e12          # DQ-06 threshold (NGN 1 trillion)
 PLACEHOLDER_DATE = "2001-01-01"  # DQ-08
@@ -289,7 +289,7 @@ def main():
     w(f"> **Run date:** {datetime.now():%Y-%m-%d %H:%M:%S}  ")
     w(f"> **Source SHA-256:** `{sha256}`  ")
     w("> **Raw data is READ-ONLY. This report contains measured observations only.**")
-    w("> Decisions taken on this evidence are recorded in `docs/phase4_relational_model.md` v1.1.")
+    w("> Decisions taken on this evidence are recorded in `docs/phase4_data_model/phase4_relational_model.md` v1.1.")
     w("")
     w("## 1. Population")
     w("")
