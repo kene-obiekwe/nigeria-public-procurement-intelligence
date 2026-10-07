@@ -17,38 +17,41 @@ erDiagram
         VARCHAR supplier_id PK
         VARCHAR supplier_name
         VARCHAR supplier_name_raw
-        BOOLEAN supplier_id_flag
+        VARCHAR supplier_id_flag
     }
 
     %% Staging Tables
     releases {
         VARCHAR release_id PK
+        INT release_seq UK
         VARCHAR ocid
-        DATE release_date
+        TIMESTAMPTZ release_date
         VARCHAR tag
         VARCHAR buyer_id FK
         VARCHAR buyer_name
-        BOOLEAN party_flag
+        VARCHAR party_flag
     }
 
     planning {
         VARCHAR release_id PK, FK
+        VARCHAR budget_id
+        VARCHAR budget_project_id
         DECIMAL budget_amount
         VARCHAR budget_currency
-        BOOLEAN budget_amount_flag
-        BOOLEAN budget_monetary_flag
+        VARCHAR budget_amount_flag
+        VARCHAR budget_monetary_flag
     }
 
     tender {
         VARCHAR release_id PK, FK
-        VARCHAR tender_id
+        VARCHAR tender_id UK
         INT number_of_tenderers
         DECIMAL tender_value_amount
         DATE tender_start_date
         DATE tender_end_date
-        BOOLEAN tenderer_count_flag
-        BOOLEAN tender_start_date_flag
-        BOOLEAN tender_end_date_flag
+        VARCHAR tenderer_count_flag
+        VARCHAR tender_start_date_flag
+        VARCHAR tender_end_date_flag
     }
 
     awards {
@@ -57,9 +60,9 @@ erDiagram
         DECIMAL award_value_amount
         DATE award_date
         VARCHAR status
-        BOOLEAN award_value_flag
-        BOOLEAN award_monetary_flag
-        BOOLEAN award_date_flag
+        VARCHAR award_value_flag
+        VARCHAR award_monetary_flag
+        VARCHAR award_date_flag
     }
 
     award_suppliers {
@@ -79,8 +82,8 @@ erDiagram
         DATE period_end_date
         VARCHAR status
         BOOLEAN has_implementation
-        BOOLEAN contract_monetary_flag
-        BOOLEAN date_signed_flag
+        VARCHAR contract_monetary_flag
+        VARCHAR date_signed_flag
     }
 
     transactions {
@@ -108,7 +111,7 @@ erDiagram
         VARCHAR party_id
         VARCHAR party_name
         VARCHAR roles
-        BOOLEAN supplier_id_flag
+        VARCHAR supplier_id_flag
     }
 
     %% Relationships
@@ -130,7 +133,14 @@ erDiagram
 ## Legend
 - **PK**: Primary Key
 - **FK**: Foreign Key
+- **UK**: Unique (alternate) key
 - **1..N**: One-to-Many
 - **1..1**: One-to-One
 - **1..0-1**: One-to-Zero-or-One
 - **1..0-N**: One-to-Zero-or-Many
+
+## Notes (v1.1, 2026-10-07)
+- `release_seq` is the integer form of `release_id`. Every "latest release" decision orders by it.
+- `budget_project_id` defines the budget-line grain `(ocid, budget_project_id)` used by M-P01.
+- Flag columns hold categorical values (e.g. `NORMAL` / `ELEVATED` / `ANOMALOUS`), not booleans.
+- Analytical views (`analytics.*`) are not shown. See `docs/phase4_relational_model.md` §6.

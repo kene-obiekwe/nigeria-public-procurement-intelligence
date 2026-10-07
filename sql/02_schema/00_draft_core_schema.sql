@@ -13,13 +13,16 @@
 --   docs/phase3_data_dictionary.md (v1.1)
 --   docs/phase4_relational_model.md
 --   Empirical dataset inspection (108,277 releases, 98,866 OCIDs)
+--   docs/phase4_1_snapshot_validation_report.md (v1.1 evidence)
 --
 -- Architecture: Three-layer model
 --   stg.*         Staging layer (source-faithful, release-centric)
 --   core.*        Core dimension tables (deduplicated entities)
---   analytics.*   Analytical views (Phase 5, not defined here)
+--   analytics.*   Analytical views (Phase 7, not defined here)
 --
--- Date: 2026-08-20
+-- Version: 1.1 (2026-10-07). v1.0 issued 2026-08-20.
+-- v1.1: release_seq ordering key, budget-line keys on planning,
+--       UNIQUE tender_id, milestone date notes, revised snapshot spec.
 -- ============================================================
 
 -- ============================================================
@@ -50,6 +53,9 @@ CREATE SCHEMA IF NOT EXISTS analytics;
 -- ------------------------------------------------------------
 CREATE TABLE stg.releases (
     release_id          VARCHAR(64)     NOT NULL,
+    release_seq         INTEGER         GENERATED ALWAYS AS (release_id::INTEGER) STORED,
+                                                    -- v1.1: numeric ordering key; release_id is a numeric
+                                                    -- string and must never be ordered as text
     ocid                VARCHAR(64)     NOT NULL,
     release_date        TIMESTAMPTZ,                -- DQ-10: all = 2021-05-03T22:44:00Z (package pub date, NOT event date)
     tag                 TEXT[]          NOT NULL,    -- e.g. {planning}, {planning,tender,award,contract,implementation}
@@ -60,6 +66,7 @@ CREATE TABLE stg.releases (
     party_flag          VARCHAR(16),                -- DQ-18: NULL | 'NO_PARTIES' (20 releases)
 
     CONSTRAINT pk_releases PRIMARY KEY (release_id),
+    CONSTRAINT uq_releases_seq UNIQUE (release_seq),
     CONSTRAINT chk_releases_party_flag
         CHECK (party_flag IS NULL OR party_flag IN ('NO_PARTIES'))
 );
@@ -69,19 +76,28 @@ COMMENT ON TABLE stg.releases IS
     'release_id is globally unique. ocid groups releases into procurement processes. '
     'DQ-10: release_date is package publication metadata, NOT an event date.';
 
+COMMENT ON COLUMN stg.releases.release_seq IS
+    'Integer form of release_id. All "latest release" logic orders by this column. '
+    'Text ordering of release_id selects a different release in 1,508 of 6,280 '
+    'multi-release OCIDs (Phase 4.1 validation report section 2).';
+
 COMMENT ON COLUMN stg.releases.party_flag IS
     'DQ-18: NULL = parties array present; NO_PARTIES = parties array absent (20 records).';
 
 
 -- ------------------------------------------------------------
 -- stg.planning
--- Grain: One row per release (all 108,277 releases have planning)
+-- Grain: One row per release (all 108,277 releases have planning;
+--        106,628 carry a budget object)
 -- PK/FK: release_id
 -- DQ: budget_amount_flag (DQ-06), monetary_flag (DQ-16)
 -- Metrics: M-P01 (total planned budget by entity)
 -- ------------------------------------------------------------
 CREATE TABLE stg.planning (
     release_id              VARCHAR(64)     NOT NULL,
+    budget_id               VARCHAR(64),                -- Source: planning.budget.id (release-local)
+    budget_project_id       VARCHAR(64),                -- Source: planning.budget.projectID
+                                                        -- v1.1: budget-line key; 97,749 distinct, never spans >1 OCID
     budget_amount           NUMERIC(30,2),              -- NULL = not reported; 0 = reported as zero
     budget_currency         VARCHAR(3),                 -- Uniformly 'NGN' observed
     budget_description      TEXT,
@@ -102,6 +118,10 @@ COMMENT ON TABLE stg.planning IS
     'Planning/budget data per release. All releases have a planning section. '
     'DQ-06: 32 records >= NGN 1T flagged EXTREME (NPHCDA vaccine, infrastructure). '
     'DQ-16: Zero values retained and flagged, never converted to NULL.';
+
+COMMENT ON COLUMN stg.planning.budget_project_id IS
+    'v1.1: Budget line within a process. 192 OCIDs carry >1 unrelated budget line; '
+    'M-P01 takes the latest budget per (ocid, budget_project_id) and sums.';
 
 COMMENT ON COLUMN stg.planning.budget_amount_flag IS
     'DQ-06: NULL = normal range; EXTREME = budget >= NGN 1 trillion. '
@@ -141,6 +161,7 @@ CREATE TABLE stg.tender (
     tender_end_date_flag        VARCHAR(16),                -- DQ-08/09: same
 
     CONSTRAINT pk_tender PRIMARY KEY (release_id),
+    CONSTRAINT uq_tender_id UNIQUE (tender_id),         -- v1.1: 18,408 distinct, 0 null
     CONSTRAINT fk_tender_release
         FOREIGN KEY (release_id) REFERENCES stg.releases(release_id),
     CONSTRAINT chk_tenderer_count_flag
@@ -352,7 +373,8 @@ COMMENT ON TABLE stg.transactions IS
 -- Grain: One row per milestone (from both contract-level and implementation-level)
 -- PK: Surrogate (SERIAL)
 -- FK: contract_id -> stg.contracts
--- DQ: Milestone date quality deferred to Phase 5 profiling
+-- DQ: DQ-08/09 date classes applied at load (v1.1)
+-- Volumes (v1.1): 14,894 CONTRACT + 27,960 IMPLEMENTATION = 42,854
 -- Design note: Milestones can come from two source locations:
 --   (a) contracts[].milestones[] (contract-level)
 --   (b) contracts[].implementation.milestones[] (implementation-level)
@@ -369,8 +391,8 @@ CREATE TABLE stg.milestones (
     due_date                DATE,                       -- Source: milestones[].dueDate
     date_met                DATE,                       -- Source: milestones[].dateMet
     status                  VARCHAR(32),                -- Observed: 'met'
-    due_date_flag           VARCHAR(16),                -- Deferred: date quality TBD in Phase 5
-    date_met_flag           VARCHAR(16),                -- Deferred: date quality TBD in Phase 5
+    due_date_flag           VARCHAR(16),                -- DQ-08/09: VALID|PLACEHOLDER|FUTURE|IMPOSSIBLE
+    date_met_flag           VARCHAR(16),                -- DQ-08/09: same
 
     CONSTRAINT pk_milestones PRIMARY KEY (milestone_pk),
     CONSTRAINT fk_milestones_contract
@@ -389,7 +411,9 @@ COMMENT ON TABLE stg.milestones IS
     'Milestones from both contract-level and implementation-level sources. '
     'milestone_source discriminates origin: CONTRACT = contracts[].milestones[], '
     'IMPLEMENTATION = contracts[].implementation.milestones[]. '
-    'Date quality assessment for dueDate/dateMet deferred to Phase 5 profiling.';
+    'v1.1: CONTRACT milestones carry no dates. IMPLEMENTATION milestones: 10,857 VALID, '
+    '38 PLACEHOLDER, 17,065 undated. dateMet equals dueDate in every record, so '
+    'milestone slippage is not measurable from this source.';
 
 
 -- ------------------------------------------------------------
@@ -517,14 +541,17 @@ COMMENT ON TABLE core.dim_supplier IS
 
 
 -- ============================================================
--- INDEXES (proposed — to be created during Phase 5)
+-- INDEXES (proposed — to be created during Phases 5-6)
 -- ============================================================
 -- These indexes support the analytical queries defined in
 -- Phase 3 metric eligibility. They are listed here for
 -- design documentation but NOT created in this draft.
 --
--- -- Process-snapshot rule: group releases by OCID
--- CREATE INDEX idx_releases_ocid ON stg.releases (ocid);
+-- -- Section-level snapshot: latest release per OCID (v1.1)
+-- CREATE INDEX idx_releases_ocid_seq ON stg.releases (ocid, release_seq);
+--
+-- -- Budget-line grain for M-P01 (v1.1)
+-- CREATE INDEX idx_planning_project ON stg.planning (budget_project_id);
 --
 -- -- Budget analysis: filter by flag
 -- CREATE INDEX idx_planning_budget_flag ON stg.planning (budget_amount_flag);
@@ -553,20 +580,31 @@ COMMENT ON TABLE core.dim_supplier IS
 
 
 -- ============================================================
--- ANALYTICAL VIEWS (Phase 5 — specification only)
+-- ANALYTICAL VIEWS (Phase 7 — specification only)
 -- ============================================================
--- The following views will be created during Phase 5/7:
+-- Section-level process-snapshot rule (Phase 4 v1.1, section 6.2).
+-- "Latest" always = MAX(release_seq); never text order of release_id.
 --
 -- analytics.vw_process_snapshot
---     One row per OCID. Selects the release with the most
---     lifecycle tags per the process-snapshot rule.
---     If tied, prefers the highest release_id.
---     Grain: 98,866 rows (one per procurement process).
+--     One row per OCID (98,866). Per lifecycle section:
+--       tender_release_id  = latest release containing a tender
+--       award_release_id   = latest release containing an award;
+--                            contract/implementation/suppliers are
+--                            taken from this SAME release (0 cross-
+--                            release contract->award links observed)
+--       buyer from latest release overall
+--       budget_line_count, multi_project_flag ('MULTI_PROJECT' when
+--       >1 budget_project_id; 192 OCIDs)
+--
+-- analytics.vw_budget_lines
+--     One row per (ocid, budget_project_id) (97,749): latest
+--     release with a budget for that line. Input to M-P01.
 --
 -- analytics.vw_budget_eligible
 --     Eligible records for M-P01 (planned budget by entity).
+--     Source: vw_budget_lines.
 --     Filters: budget_amount_flag IS NULL, monetary_flag IS NULL,
---              party_flag IS NULL, process-snapshot applied.
+--              party_flag IS NULL.
 --
 -- analytics.vw_competition_eligible
 --     Eligible records for M-C01/M-C02.
@@ -595,6 +633,6 @@ COMMENT ON TABLE core.dim_supplier IS
 -- END OF DRAFT DDL
 -- ============================================================
 -- STATUS: DRAFT — NOT EXECUTED
--- This file will be reviewed during Phase 4 human approval.
+-- This file will be reviewed during Phase 4 human approval (v1.1).
 -- Phase 5 implementation will execute a finalized version.
 -- ============================================================
