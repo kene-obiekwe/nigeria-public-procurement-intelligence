@@ -1,0 +1,5 @@
+# Python 3.12 — supporting tooling only (ingestion, profiling, loading).
+# Core analytics live in PostgreSQL. Profiling scripts use the standard library.
+pandas==3.0.6
+psycopg[binary]==3.3.6
+SQLAlchemy==2.1.3
