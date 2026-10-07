@@ -13,8 +13,8 @@
 ## Purpose
 
 Phase 3 documentation was frozen on 2026-08-18. Changes are allowed only
-through an explicitly approved correction pass. This log records one
-correction. It arose from the Phase 4.1 validation of the process-snapshot
+through an explicitly approved correction pass. This log records the corrections
+made in the Phase 3.2 pass (C-06 to C-09). It arose from the Phase 4.1 validation of the process-snapshot
 rule against the raw data.
 
 ---
@@ -37,6 +37,51 @@ rule against the raw data.
 
 ---
 
+## Correction C-07 — DQ-04 ELEVATED Tenderer Count
+
+| Attribute | Detail |
+|-----------|--------|
+| **Correction ID** | C-07 |
+| **Document** | `docs/phase3_data_quality/phase3_data_quality_decision_log.md` — DQ-04 (Observed problem) |
+| **Issue** | DQ-04 stated "79 records report 101-1,000 tenderers". The `ELEVATED` band (101–1,000) actually contains **14** records. 79 is the count of *all* records above 100 tenderers (14 ELEVATED + 65 ANOMALOUS). |
+| **Evidence** | Phase 5: SQL-generated `tenderer_count_flag` and an independent Python re-count both give ELEVATED = 14 and ANOMALOUS = 65 (`docs/phase5_staging/phase5_staging_results.md`). Phase 6 check MD-10 (`sql/03_data_quality/05_monetary_and_date_validity.sql`). |
+| **Previous wording** | `79 records report 101-1,000 tenderers.` |
+| **Corrected wording** | `14 records report 101-1,000 tenderers.` (with a note on the previous figure) |
+| **Did the underlying Phase 3 decision change?** | No. The DQ-04 treatment (RETAIN + FLAG `ELEVATED`) and the thresholds are unchanged. Only the reported count was wrong. |
+| **Impact on metrics** | None. M-C01/M-C02 exclude ANOMALOUS (65) and keep ELEVATED (14), as specified. The sensitivity population (1–1,000) is 14 records larger than the primary population (1–100), not 79. |
+| **Approved by** | Project owner, 2026-10-07 |
+| **Status** | Applied ✓ |
+
+---
+
+## Correction C-08 — Tender / Contract Value Semantics (Observation O-1)
+
+| Attribute | Detail |
+|-----------|--------|
+| **Correction ID** | C-08 |
+| **Document** | `docs/phase3_data_quality/phase3_data_dictionary.md` — §4.1 `tender_value_amount` (quality issues, analytical role, notes); §5.2 `award_value_amount` (notes) |
+| **Issue** | The dictionary said tender value "often" equals award value and listed it as an input to Pillar 4. Measurement shows it equals award value in **every** case. |
+| **Evidence** | Tender value = award value in 17,417 / 17,417 tender–award pairs. Contract value = award value in 17,043 / 17,043 contracts. Tender value = 0 in 991 / 991 tenders without an award. Phase 6 checks OB-01 to OB-03 (`sql/03_data_quality/08_observations.sql`). |
+| **Corrected wording** | Tender value is not an independent estimate and must not be used for tender-vs-award variance. Award value is the single published value per process. Pillar 4 / business question 3 compare **budget vs. award only**. |
+| **Did the underlying Phase 3 decision change?** | No metric changes. M-P01 (budget) and M-V01 (award) are unaffected. This narrows the *permissible comparisons* in Pillar 4, as the Data-Quality Plan §10 requires ("do not compare … until their meaning is sufficiently compatible"). |
+| **Approved by** | Project owner, 2026-10-07 (O-1 acknowledged) |
+| **Status** | Applied ✓ |
+
+---
+
+## Correction C-09 — Field-Name Artefact Repair (completes C-05)
+
+| Attribute | Detail |
+|-----------|--------|
+| **Correction ID** | C-09 |
+| **Document** | `docs/phase3_data_quality/phase3_data_quality_decision_log.md` — 9 "Data field / entity" table cells |
+| **Issue** | C-05 (Phase 3.1) reported 0 remaining escape artefacts. 9 instances of `\releases[]` had been rendered as a line break followed by `eleases[]`. This split those table rows and showed the field name without its leading "r". |
+| **Corrected wording** | `releases[]...` restored on the same table row (e.g. `| **Data field / entity** | releases[].ocid |`). |
+| **Did the underlying Phase 3 decision change?** | No. This is a rendering repair only. |
+| **Status** | Applied ✓ (0 remaining `eleases[` line starts in Phase 3 documents) |
+
+---
+
 ## Not Changed in This Pass
 
 `phase3_metric_eligibility.md` §1.3 says "deduplicate at award ID level within
@@ -50,9 +95,10 @@ metric's result.
 
 ## Phase 3 Freeze Status
 
-> Phase 3 documentation is re-frozen as of 2026-10-07 at
-> `phase3_metric_eligibility.md` v1.2.
+> Phase 3 documentation is re-frozen as of 2026-10-07 at:
+> `phase3_metric_eligibility.md` v1.2 (C-06), `phase3_data_quality_decision_log.md` v1.2
+> (C-07, C-09), `phase3_data_dictionary.md` v1.2 (C-08).
 
 ---
 
-*Correction log version: 1.0 — 2026-10-07*
+*Correction log version: 1.1 — 2026-10-07 (C-07 to C-09 added during Phase 6)*

@@ -31,7 +31,7 @@ Source acquisition (Phase 1) is documented in [`../data/README.md`](../data/READ
 | [`phase3_metric_eligibility.md`](phase3_data_quality/phase3_metric_eligibility.md) | Analytical grains and per-metric eligibility rules (v1.2) |
 | [`phase3_data_dictionary.md`](phase3_data_quality/phase3_data_dictionary.md) | Source field → business meaning → target column |
 | [`phase3_1_correction_log.md`](phase3_data_quality/phase3_1_correction_log.md) | Corrections C-01 to C-05 |
-| [`phase3_2_correction_log.md`](phase3_data_quality/phase3_2_correction_log.md) | Correction C-06 (M-P01 budget-line grain) |
+| [`phase3_2_correction_log.md`](phase3_data_quality/phase3_2_correction_log.md) | Corrections C-06 to C-09 (budget-line grain, DQ-04 count, value semantics, artefact repair) |
 
 ## Phase 4 — Relational Data Model
 
@@ -50,6 +50,13 @@ The ERD is in [`../diagrams/erd/`](../diagrams/erd/nocopo_erd.md) and the DDL is
 | [`phase5_staging_reconciliation.md`](phase5_staging/phase5_staging_reconciliation.md) | Staging load, DDL v1.2 changes, reconciliation summary, observations for Phase 6 |
 | [`phase5_staging_results.md`](phase5_staging/phase5_staging_results.md) | Generated check-by-check reconciliation results (64 checks) |
 
+## Phase 6 — Core Model & Gate B Validation
+
+| Document | Purpose |
+|---|---|
+| [`phase6_core_model.md`](phase6_core_model/phase6_core_model.md) | Core dimensions, process snapshot, design decisions, Gate B summary, findings for Phase 7 |
+| [`phase6_validation_results.md`](phase6_core_model/phase6_validation_results.md) | Generated Gate B results: 102 GATE checks and 17 INFO measurements |
+
 ## Generated Reports
 
 The following files are written by scripts. Regenerate them by running the
@@ -61,6 +68,7 @@ script rather than editing them by hand.
 | `phase2_profiling/targeted_validation_report.md` | `python/profiling/02_targeted_validation.py` |
 | `phase4_data_model/phase4_1_snapshot_validation_report.md` | `python/validation/03_snapshot_rule_validation.py` |
 | `phase5_staging/phase5_staging_results.md` | `python/ingest/02_reconcile_staging.py` |
+| `phase6_core_model/phase6_validation_results.md` | `python/validation/04_run_validation_suite.py` |
 
 ⚠ `data_profiling_report.md` contains a manual correction note in §13. Re-running
 its script would overwrite that note.

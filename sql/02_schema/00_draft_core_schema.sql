@@ -3,7 +3,7 @@
 -- Phase 4: Draft Core Schema (PostgreSQL)
 -- ============================================================
 --
--- STATUS: v1.2 — EXECUTED IN PHASE 5 (staging load)
+-- STATUS: v1.3 — EXECUTED (Phase 5 staging; Phase 6 core dimensions)
 -- Approved design: Phase 4 v1.1. Phase 5 load-readiness changes (v1.2)
 -- are listed below and in docs/phase5_staging/phase5_staging_reconciliation.md.
 --
@@ -33,6 +33,16 @@
 --     replaces UNIQUE (award_id, supplier_id). 6 awards list the same
 --     supplier 5 times; staging keeps all 17,441 rows as published.
 --   * Standardized name columns are generated from *_raw (whitespace only).
+-- v1.3 (2026-10-07, Phase 6 core build):
+--   * core.dim_buyer: buyer_id_flag (bare 'NG-BPP-' on 26 releases),
+--     release_count; buyer_name generated from buyer_name_raw.
+--   * core.dim_supplier: built from supplier-role parties UNION award
+--     suppliers (29 award supplier IDs never appear as a supplier party);
+--     name_variant_count, in_supplier_parties, in_award_suppliers;
+--     supplier_name / supplier_id_flag generated.
+--   * Process snapshot is built in Phase 6 as core.vw_process_snapshot and
+--     core.vw_budget_lines (sql/04_transformations/), per the
+--     Implementation Plan; analytics.* eligibility views remain Phase 7.
 -- ============================================================
 
 -- ============================================================
@@ -530,27 +540,39 @@ COMMENT ON COLUMN stg.parties.supplier_id_flag IS
 
 -- ------------------------------------------------------------
 -- core.dim_buyer
--- Grain: One row per unique buyer_id (~666 expected)
+-- Grain: One row per unique releases[].buyer.id (667: 666 complete + bare 'NG-BPP-')
 -- PK: buyer_id (natural key from source)
+-- Populated by: sql/04_transformations/01_build_dim_buyer.sql
 -- Metrics: M-P01 (budget by entity), entity benchmarking
 -- ------------------------------------------------------------
 CREATE TABLE core.dim_buyer (
     buyer_id                VARCHAR(64)     NOT NULL,
-    buyer_name              VARCHAR(512),               -- Standardized display name
-    buyer_name_raw          VARCHAR(512),               -- Original source name preserved
+    buyer_name              VARCHAR(512)    GENERATED ALWAYS AS (
+                                btrim(regexp_replace(buyer_name_raw, '\s+', ' ', 'g'))
+                            ) STORED,                   -- Standardized display name (whitespace only)
+    buyer_name_raw          VARCHAR(512),               -- releases[].buyer.name as published
+    release_count           INTEGER         NOT NULL,   -- Releases naming this buyer
+    buyer_id_flag           VARCHAR(16)     GENERATED ALWAYS AS (
+                                CASE WHEN buyer_id = 'NG-BPP-' THEN 'INCOMPLETE' END
+                            ) STORED,                   -- v1.3: bare scheme prefix, no entity code
 
-    CONSTRAINT pk_dim_buyer PRIMARY KEY (buyer_id)
+    CONSTRAINT pk_dim_buyer PRIMARY KEY (buyer_id),
+    CONSTRAINT chk_dim_buyer_id_flag
+        CHECK (buyer_id_flag IS NULL OR buyer_id_flag IN ('INCOMPLETE'))
 );
 
 COMMENT ON TABLE core.dim_buyer IS
     'Distinct procuring entities (buyers). Source: releases[].buyer. '
-    '666 unique buyer IDs observed. buyer_name_raw preserves original source '
-    'name before whitespace/casing standardization.';
+    '667 buyer IDs: 666 complete NG-BPP-BPP-NOC-<code> IDs plus the bare prefix '
+    'NG-BPP- (26 releases, no name, no recoverable buyer party) flagged INCOMPLETE. '
+    'Release-level buyer names are consistent per ID (0 IDs with >1 name).';
 
 
 -- ------------------------------------------------------------
 -- core.dim_supplier
--- Grain: One row per unique supplier_id (~10,296 expected)
+-- Grain: One row per unique supplier_id (10,325: 10,296 supplier-role party
+--        IDs + 29 IDs seen only in awards[].suppliers[])
+-- Populated by: sql/04_transformations/02_build_dim_supplier.sql
 -- PK: supplier_id (natural key from source)
 -- DQ: supplier_id_flag (DQ-14)
 -- Metrics: M-S01 (supplier concentration)
@@ -561,9 +583,16 @@ COMMENT ON TABLE core.dim_buyer IS
 -- ------------------------------------------------------------
 CREATE TABLE core.dim_supplier (
     supplier_id             VARCHAR(64)     NOT NULL,
-    supplier_name           VARCHAR(512),               -- Most common standardized name
-    supplier_name_raw       VARCHAR(512),               -- Original source name (first observed)
-    supplier_id_flag        VARCHAR(16),                -- DQ-14: NULL | 'INCOMPLETE'
+    supplier_name           VARCHAR(512)    GENERATED ALWAYS AS (
+                                btrim(regexp_replace(supplier_name_raw, '\s+', ' ', 'g'))
+                            ) STORED,                   -- Standardized display name (whitespace only)
+    supplier_name_raw       VARCHAR(512),               -- Most frequent published name; ties -> latest release
+    name_variant_count      INTEGER         NOT NULL,   -- Distinct trimmed names observed (DQ-13 evidence)
+    in_supplier_parties     BOOLEAN         NOT NULL,   -- Seen as a supplier-role party
+    in_award_suppliers      BOOLEAN         NOT NULL,   -- Seen in awards[].suppliers[]
+    supplier_id_flag        VARCHAR(16)     GENERATED ALWAYS AS (
+                                CASE WHEN supplier_id = 'NG-BPP-' THEN 'INCOMPLETE' END
+                            ) STORED,                   -- DQ-14: NULL | 'INCOMPLETE'
 
     CONSTRAINT pk_dim_supplier PRIMARY KEY (supplier_id),
     CONSTRAINT chk_dim_supplier_id_flag
@@ -571,7 +600,9 @@ CREATE TABLE core.dim_supplier (
 );
 
 COMMENT ON TABLE core.dim_supplier IS
-    'Distinct suppliers by source supplier_id. 10,296 unique IDs observed. '
+    'Distinct suppliers by source supplier_id (10,325). Built from supplier-role '
+    'parties UNION awards[].suppliers[]: 1,137 awards have no supplier party in their '
+    'release, and 29 of their supplier IDs never appear as a supplier party. '
     'DQ-13: 1,483 IDs map to multiple name variations (casing, abbreviations). '
     'DQ-14: Incomplete NG-BPP- identifiers flagged. '
     'DQ-15: Raw source supplier attributes preserved; canonical mapping table deferred '
@@ -644,12 +675,16 @@ COMMENT ON TABLE core.dim_supplier IS
 
 
 -- ============================================================
--- ANALYTICAL VIEWS (Phase 7 — specification only)
+-- PROCESS SNAPSHOT (built in Phase 6) AND ANALYTICAL VIEWS (Phase 7)
 -- ============================================================
 -- Section-level process-snapshot rule (Phase 4 v1.1, section 6.2).
 -- "Latest" always = MAX(release_seq); never text order of release_id.
+-- v1.3: the snapshot and budget-line views are implemented in Phase 6
+-- as core.vw_process_snapshot / core.vw_budget_lines in
+-- sql/04_transformations/03_process_snapshot.sql. Only the metric
+-- eligibility views below (analytics.vw_*_eligible) remain Phase 7.
 --
--- analytics.vw_process_snapshot
+-- core.vw_process_snapshot   (spec retained below for reference)
 --     One row per OCID (98,866). Per lifecycle section:
 --       tender_release_id  = latest release containing a tender
 --       award_release_id   = latest release containing an award;
@@ -660,7 +695,7 @@ COMMENT ON TABLE core.dim_supplier IS
 --       budget_line_count, multi_project_flag ('MULTI_PROJECT' when
 --       >1 budget_project_id; 192 OCIDs)
 --
--- analytics.vw_budget_lines
+-- core.vw_budget_lines
 --     One row per (ocid, budget_project_id) (97,749): latest
 --     release with a budget for that line. Input to M-P01.
 --
@@ -696,5 +731,5 @@ COMMENT ON TABLE core.dim_supplier IS
 -- ============================================================
 -- END OF DRAFT DDL
 -- ============================================================
--- STATUS: v1.2 — executed in Phase 5 against nocopo_db.
+-- STATUS: v1.3 — executed against nocopo_db (Phases 5-6).
 -- ============================================================

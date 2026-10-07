@@ -47,8 +47,7 @@ RETAIN + FLAG + EXCLUDE_FROM_METRIC for a given metric.
 | Attribute | Detail |
 |-----------|--------|
 | **Issue ID** | DQ-01 |
-| **Data field / entity** | 
-eleases[].ocid |
+| **Data field / entity** | releases[].ocid |
 | **Observed problem** | 6,280 OCIDs appear in more than one release (maximum 74 releases per OCID; 9,411 excess releases total). The dataset contains 108,277 releases and 98,866 unique OCIDs (procurement processes). Release IDs are unique across the entire dataset; OCIDs are repeated across lifecycle stages of the same process. 108,277 releases ≠ 108,277 unique procurement processes. |
 | **Evidence** | docs/phase2_profiling/targeted_validation_report.md Section 1; docs/phase2_profiling/data_profiling_report.md Section 2 |
 | **Severity** | Critical - affects monetary aggregation, process counting, and all OCID-level analytics |
@@ -67,8 +66,7 @@ eleases[].ocid |
 | Attribute | Detail |
 |-----------|--------|
 | **Issue ID** | DQ-02 |
-| **Data field / entity** | 
-eleases[].tag |
+| **Data field / entity** | releases[].tag |
 | **Observed problem** | 89,869 releases (83.0%) carry only the planning tag; they contain no tender, wards, or contracts sub-sections. |
 | **Evidence** | docs/phase2_profiling/data_profiling_report.md Section 3 |
 | **Severity** | High - defines the eligible population for most analytical pillars |
@@ -87,8 +85,7 @@ eleases[].tag |
 | Attribute | Detail |
 |-----------|--------|
 | **Issue ID** | DQ-03 |
-| **Data field / entity** | 
-eleases[].tender.numberOfTenderers |
+| **Data field / entity** | releases[].tender.numberOfTenderers |
 | **Observed problem** | N/A - documents the approved classification of the normal-range population |
 | **Evidence** | docs/phase2_profiling/targeted_validation_report.md Section 2 |
 | **Severity** | N/A |
@@ -107,9 +104,8 @@ eleases[].tender.numberOfTenderers |
 | Attribute | Detail |
 |-----------|--------|
 | **Issue ID** | DQ-04 |
-| **Data field / entity** | 
-eleases[].tender.numberOfTenderers |
-| **Observed problem** | 79 records report 101-1,000 tenderers. Above the 99th percentile (24). |
+| **Data field / entity** | releases[].tender.numberOfTenderers |
+| **Observed problem** | 14 records report 101-1,000 tenderers. Above the 99th percentile (24). *(Corrected by C-07: previously stated as 79, which counted every record above 100 tenderers, i.e. 14 ELEVATED + 65 ANOMALOUS.)* |
 | **Evidence** | docs/phase2_profiling/targeted_validation_report.md Section 2 |
 | **Severity** | Medium |
 | **Treatment** | RETAIN + FLAG |
@@ -127,8 +123,7 @@ eleases[].tender.numberOfTenderers |
 | Attribute | Detail |
 |-----------|--------|
 | **Issue ID** | DQ-05 |
-| **Data field / entity** | 
-eleases[].tender.numberOfTenderers |
+| **Data field / entity** | releases[].tender.numberOfTenderers |
 | **Observed problem** | 65 records report > 1,000 tenderers. Maximum = 90,865. All 65 originate from Federal Ministry of Works and Housing (buyer ID: NG-BPP-BPP-NOC-231001001). The value 6,759 appears repeatedly across unrelated procurement types. |
 | **Evidence** | docs/phase2_profiling/targeted_validation_report.md Section 2.3 |
 | **Severity** | Critical |
@@ -147,8 +142,7 @@ eleases[].tender.numberOfTenderers |
 | Attribute | Detail |
 |-----------|--------|
 | **Issue ID** | DQ-06 |
-| **Data field / entity** | 
-eleases[].planning.budget.amount |
+| **Data field / entity** | releases[].planning.budget.amount |
 | **Observed problem** | 32 records have budget amounts >= NGN 1 trillion. All are planning-only releases. Three sub-patterns: (a) NPHCDA Hajj vaccine records (~20 records at NGN 3.02T each), (b) Federal Ministry of Works large infrastructure (NGN 5T, NGN 1.97T), (c) FCT Administration (NGN 2.08T). |
 | **Evidence** | docs/phase2_profiling/targeted_validation_report.md Section 3 |
 | **Severity** | Critical |
@@ -168,8 +162,7 @@ eleases[].planning.budget.amount |
 | Attribute | Detail |
 |-----------|--------|
 | **Issue ID** | DQ-07 |
-| **Data field / entity** | 
-eleases[].awards[].value.amount |
+| **Data field / entity** | releases[].awards[].value.amount |
 | **Observed problem** | One record (OCID: ocds-gyl66f-2-004675) carries an award and tender value of NGN 1,004,166,666,735.23. Buyer: FCTA. Supplier: M/S Turaki Trading Company Ltd. Description: warehouse construction. Active award. Award date: 2022-08-09. Tender and award values match exactly. |
 | **Evidence** | docs/phase2_profiling/targeted_validation_report.md Section 4.2 |
 | **Severity** | High |
@@ -226,8 +219,7 @@ eleases[].awards[].value.amount |
 | Attribute | Detail |
 |-----------|--------|
 | **Issue ID** | DQ-10 |
-| **Data field / entity** | 
-eleases[].date |
+| **Data field / entity** | releases[].date |
 | **Observed problem** | All 108,277 releases carry date = 2021-05-03T22:44:00Z - the OCDS package publication date, not the individual procurement event date. |
 | **Evidence** | docs/phase2_profiling/data_profiling_report.md Section 4; docs/phase2_profiling/targeted_validation_report.md Section 5 |
 | **Severity** | High - affects any time-series or trend analysis |
@@ -379,8 +371,7 @@ eleases[].date |
 | Attribute | Detail |
 |-----------|--------|
 | **Issue ID** | DQ-18 |
-| **Data field / entity** | 
-eleases[].parties |
+| **Data field / entity** | releases[].parties |
 | **Observed problem** | 20 releases have no parties array or an empty array. These records cannot be linked to buyer/supplier entities through the standard OCDS party mechanism. |
 | **Evidence** | docs/phase2_profiling/data_profiling_report.md Section 7 |
 | **Severity** | Low (0.02% of the dataset) |
@@ -436,7 +427,8 @@ columns are not yet created.
 
 ---
 
-*Document version: 1.1 - 2026-08-18. Phase 3.1 correction pass applied.*
+*Document version: 1.2 - 2026-10-07. Phase 3.2 corrections C-07 (DQ-04 count) and C-09 (field-name artefact repair) applied.*
+*Version 1.1 - 2026-08-18. Phase 3.1 correction pass applied.*
 *Version 1.0 approved by project owner on 2026-08-16.*
 *No data has been modified. No schema has been designed.*
 *Next reference: docs/phase3_data_quality/phase3_metric_eligibility.md, docs/phase3_data_quality/phase3_data_dictionary.md*

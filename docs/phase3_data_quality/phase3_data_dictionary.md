@@ -208,10 +208,10 @@ eventual table structure (that is a Phase 4 concern).
 | **Data type** | Numeric (float) |
 | **Expected values / range** | 0 to NGN ~1.004 trillion. Median: ~NGN 27 million. |
 | **Missingness** | Null in 81,869 releases with no tender section; within tender releases, profile in Phase 4 |
-| **Quality issues** | DQ-16 (1,259 zeros); tender value often equals award value (possible field misuse) |
-| **Analytical role** | Input for Pillar 4 (budget-to-award comparison). Secondary to award value. |
+| **Quality issues** | DQ-16 (1,259 zeros). **O-1 (C-08):** tender value equals the award value in **all** 17,417 tender–award pairs, and is 0 in all 991 tenders without an award. |
+| **Analytical role** | **Not an independent estimate (C-08).** Must not be used for tender-vs-award variance. Pillar 4 / business question 3 compare **budget vs. award** only. |
 | **Transformation required** | Parse from tender.value object. Cast to NUMERIC(30,2). |
-| **Notes** | In OCDS, tender value is an estimate; many records show it equals the award value exactly, suggesting possible retroactive population. Treat with caution in value comparisons. |
+| **Notes** | In OCDS, tender value is an estimate. In this source it is populated from the award (measured in Phase 5/6: `sql/03_data_quality/08_observations.sql`, OB-01/OB-03). |
 
 ---
 
@@ -349,7 +349,7 @@ eventual table structure (that is a Phase 4 concern).
 | **Quality issues** | DQ-07 (1 extreme record: NGN 1.004T, FCTA warehouse); DQ-16 (268 zero-value records) |
 | **Analytical role** | Primary field for Pillars 3 and 4. Excluded from primary distribution when EXTREME or ZERO_VALUE. |
 | **Transformation required** | Parse from `awards[].value` object. Cast to NUMERIC(30,2). Derive `award_value_flag`. |
-| **Notes** | The FCTA NGN 1.004T record is retained but excluded from distribution benchmarks. Report separately in high-value analysis. |
+| **Notes** | The FCTA NGN 1.004T record is retained but excluded from distribution benchmarks. Report separately in high-value analysis. **C-08:** contract value equals award value in all 17,043 contracts, and tender value equals award value in all 17,417 tender–award pairs, so award value is the single published value per process. |
 
 ---
 
@@ -617,7 +617,8 @@ eventual table structure (that is a Phase 4 concern).
 
 ---
 
-*Document version: 1.1 — 2026-08-18. Phase 3.1 correction pass applied.*
+*Document version: 1.2 — 2026-10-07. Phase 3.2 correction C-08 (O-1 value semantics) applied.*
+*Version 1.1 — 2026-08-18. Phase 3.1 correction pass applied.*
 *Version 1.0 approved by project owner on 2026-08-16.*
 *No substantive corrections required in this document during Phase 3.1.*
 *No relational tables have been designed. No SQL has been written.*

@@ -394,6 +394,13 @@ These views are specified here. They are built in **Phase 7** (analytical
 layer), after the Phase 6 core validation gate (Gate B). The Phase 5 staging
 load must reconcile to 108,277 releases.
 
+> **Phase 6 note (2026-10-07):** following the Implementation Plan, which puts
+> release-collapse logic in Phase 6, these two views were built in Phase 6 as
+> `core.vw_process_snapshot` and `core.vw_budget_lines`
+> (`sql/04_transformations/03_process_snapshot.sql`). The project owner approved
+> this. Phase 7 builds only the metric-eligibility views in `analytics.*`. See
+> `docs/phase6_core_model/phase6_core_model.md` D-1.
+
 **Rationale for VIEW over physical table:** A materialized view or physical
 table would require re-computation on data changes and creates a duplication
 risk. A VIEW is always consistent with the staging data and clearly
@@ -686,6 +693,7 @@ Before Phase 5 implementation can begin:
 | 1.0 | 2026-08-20 | Initial relational model, ERD and draft DDL |
 | 1.1 | 2026-10-07 | Snapshot rule tested against raw data. Integer `release_seq` ordering. Section-level selection restored per Phase 3 §1.2. Budget-line grain `(ocid, budget_project_id)` with `multi_project_flag` (approved by project owner). Corrected the "identical content" claim (§3.2). `tender_id` UNIQUE. Milestone counts and date quality measured. Open issues dispositioned. Analytical views re-attributed to Phase 7, per the Implementation Plan. |
 | 1.1 (review closure) | 2026-10-07 | Overseer review closure. Explicit 836 budget-divergence figure (§3.2). Latest-not-max-not-earliest budget choice stated, plus why `release_date` cannot order releases (§6.2). M-P01 grain recorded as Phase 3 correction C-06. Decisions recorded for tender_id (global UNIQUE kept), milestones (excluded from timing metrics) and dim_supplier_canonical (no earlier than Phase 7). Indexing aligned to Phases 7–8. |
+| 1.1 (Phase 6 note) | 2026-10-07 | Snapshot views built in Phase 6 in `core` (D-1); `dim_supplier` sourced from parties ∪ award suppliers (D-2). See `docs/phase6_core_model/phase6_core_model.md`. |
 
 ---
 

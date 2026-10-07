@@ -3,9 +3,9 @@
 **Turning Nigeria's open contracting data into an audited PostgreSQL analytics
 database: one where every number can be traced to a validated SQL rule.**
 
-> **Status: in progress.** Data audit, relational design and the PostgreSQL
-> staging load are complete; staging reconciles exactly to the source.
-> The validated core model (Phase 6) is next.
+> **Status: in progress.** Data audit, relational design, the PostgreSQL
+> staging load and the validated core model are complete. **Gate B passed:**
+> 102/102 core validation checks. Analytical views (Phase 7) are next.
 > See [Project status](#project-status).
 
 ---
@@ -94,7 +94,8 @@ All figures below are measured. Each is documented in `docs/`.
 │   ├── phase2_profiling/     Profiling and targeted validation reports
 │   ├── phase3_data_quality/  DQ decision log, metric eligibility, data dictionary, corrections
 │   ├── phase4_data_model/    Relational model and snapshot-rule evidence
-│   └── phase5_staging/       Staging load and reconciliation
+│   ├── phase5_staging/       Staging load and reconciliation
+│   └── phase6_core_model/    Core build, Gate B validation results
 ├── python/
 │   ├── profiling/            Phase 2 profiling and targeted validation scripts
 │   ├── validation/           Design-validation scripts (e.g. snapshot rule)
@@ -103,8 +104,8 @@ All figures below are measured. Each is documented in `docs/`.
 ├── sql/
 │   ├── 01_staging/           Staging DDL and load checks (Phase 5)
 │   ├── 02_schema/            Staging + core schema DDL (v1.2, executed)
-│   ├── 03_data_quality/      Validation suite (Phase 6)
-│   ├── 04_transformations/   Controlled transformations (Phase 6)
+│   ├── 03_data_quality/      Gate B validation suite, 8 check files (Phase 6)
+│   ├── 04_transformations/   Core dimensions + process snapshot (Phase 6)
 │   ├── 05_views/             Analytical views per pillar (Phase 7)
 │   └── 06_analysis/          Business-question queries (Phase 8)
 ├── diagrams/erd/             Entity-relationship diagram (Mermaid)
@@ -127,6 +128,8 @@ All figures below are measured. Each is documented in `docs/`.
 | [`docs/phase4_data_model/phase4_relational_model.md`](docs/phase4_data_model/phase4_relational_model.md) | Relational design, release strategy, flag placement (v1.1) |
 | [`docs/phase4_data_model/phase4_1_snapshot_validation_report.md`](docs/phase4_data_model/phase4_1_snapshot_validation_report.md) | Evidence behind the v1.1 snapshot rule |
 | [`docs/phase5_staging/phase5_staging_reconciliation.md`](docs/phase5_staging/phase5_staging_reconciliation.md) | Staging load, schema v1.2 changes, reconciliation and findings |
+| [`docs/phase6_core_model/phase6_core_model.md`](docs/phase6_core_model/phase6_core_model.md) | Core build, design decisions, Gate B summary |
+| [`docs/phase6_core_model/phase6_validation_results.md`](docs/phase6_core_model/phase6_validation_results.md) | Check-by-check Gate B results (119 checks) |
 | [`diagrams/erd/nocopo_erd.md`](diagrams/erd/nocopo_erd.md) | Entity-relationship diagram |
 | [`sql/02_schema/00_draft_core_schema.sql`](sql/02_schema/00_draft_core_schema.sql) | Draft DDL with constraints tied to DQ issues |
 
@@ -183,7 +186,17 @@ psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/02_
 .venv/Scripts/python python/ingest/02_reconcile_staging.py
 ```
 
-Core and analytical build steps will be added as Phases 6–7 are implemented.
+**Build the core model and run the Gate B validation suite:**
+
+```bash
+psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/04_transformations/01_build_dim_buyer.sql -f sql/04_transformations/02_build_dim_supplier.sql -f sql/04_transformations/03_process_snapshot.sql
+```
+
+```bash
+.venv/Scripts/python python/validation/04_run_validation_suite.py
+```
+
+Analytical build steps will be added as Phase 7 is implemented.
 
 ---
 
@@ -196,8 +209,8 @@ Core and analytical build steps will be added as Phases 6–7 are implemented.
 | 3 | Data-quality decision log, metric eligibility, data dictionary | Complete (frozen) |
 | 4 | Relational model, ERD, draft DDL | Complete (v1.1 approved) |
 | 5 | PostgreSQL staging load and reconciliation | Complete (64/64 checks) |
-| 6 | Core model and validation suite | Next |
-| 7–8 | Analytical views and business-question SQL | Planned |
+| 6 | Core model and validation suite | Complete (Gate B: 102/102) |
+| 7–8 | Analytical views and business-question SQL | Next |
 | 9–10 | Power BI dashboard and executive findings | Planned |
 | 11–12 | Packaging and final QA | Planned |
 
