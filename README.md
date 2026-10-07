@@ -3,8 +3,9 @@
 **Turning Nigeria's open contracting data into an audited PostgreSQL analytics
 database: one where every number can be traced to a validated SQL rule.**
 
-> **Status: in progress.** Data audit and relational design are complete.
-> Database implementation (staging → core → analytical views) is next.
+> **Status: in progress.** Data audit, relational design and the PostgreSQL
+> staging load are complete; staging reconciles exactly to the source.
+> The validated core model (Phase 6) is next.
 > See [Project status](#project-status).
 
 ---
@@ -92,11 +93,11 @@ All figures below are measured. Each is documented in `docs/`.
 ├── python/
 │   ├── profiling/            Phase 2 profiling and targeted validation scripts
 │   ├── validation/           Design-validation scripts (e.g. snapshot rule)
-│   ├── ingest/               Staging loaders (Phase 5)
+│   ├── ingest/               Staging loader and reconciliation (Phase 5)
 │   └── utils/
 ├── sql/
 │   ├── 01_staging/           Staging DDL and load checks (Phase 5)
-│   ├── 02_schema/            Core schema DDL (draft v1.1)
+│   ├── 02_schema/            Staging + core schema DDL (v1.2, executed)
 │   ├── 03_data_quality/      Validation suite (Phase 6)
 │   ├── 04_transformations/   Controlled transformations (Phase 6)
 │   ├── 05_views/             Analytical views per pillar (Phase 7)
@@ -120,6 +121,7 @@ All figures below are measured. Each is documented in `docs/`.
 | [`docs/phase3_2_correction_log.md`](docs/phase3_2_correction_log.md) | C-06: budget metric aggregated per budget line |
 | [`docs/phase4_relational_model.md`](docs/phase4_relational_model.md) | Relational design, release strategy, flag placement (v1.1) |
 | [`docs/phase4_1_snapshot_validation_report.md`](docs/phase4_1_snapshot_validation_report.md) | Evidence behind the v1.1 snapshot rule |
+| [`docs/phase5_staging_reconciliation.md`](docs/phase5_staging_reconciliation.md) | Staging load, schema v1.2 changes, reconciliation and findings |
 | [`diagrams/erd/nocopo_erd.md`](diagrams/erd/nocopo_erd.md) | Entity-relationship diagram |
 | [`sql/02_schema/00_draft_core_schema.sql`](sql/02_schema/00_draft_core_schema.sql) | Draft DDL with constraints tied to DQ issues |
 
@@ -156,7 +158,27 @@ read-only and writes a Markdown report to `docs/`:
 .venv/Scripts/python python/validation/03_snapshot_rule_validation.py
 ```
 
-Database build steps will be added as Phases 5–7 are implemented.
+**Build the staging database** (PostgreSQL 15+; password via `pgpass.conf`;
+connection defaults `localhost:5433`, user `postgres`, overridable with the
+standard `PGHOST` / `PGPORT` / `PGUSER` / `PGDATABASE` variables):
+
+```bash
+psql -h localhost -p 5433 -U postgres -c "CREATE DATABASE nocopo_db WITH TEMPLATE template0 ENCODING 'UTF8'"
+```
+
+```bash
+psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/02_schema/00_draft_core_schema.sql
+```
+
+```bash
+.venv/Scripts/python python/ingest/01_load_staging.py
+```
+
+```bash
+.venv/Scripts/python python/ingest/02_reconcile_staging.py
+```
+
+Core and analytical build steps will be added as Phases 6–7 are implemented.
 
 ---
 
@@ -167,9 +189,9 @@ Database build steps will be added as Phases 5–7 are implemented.
 | 0–1 | Environment, repository, source inventory | Complete |
 | 2 | Data profiling and audit | Complete |
 | 3 | Data-quality decision log, metric eligibility, data dictionary | Complete (frozen) |
-| 4 | Relational model, ERD, draft DDL | v1.1 in review |
-| 5 | PostgreSQL staging load and reconciliation | Next |
-| 6 | Core model and validation suite | Planned |
+| 4 | Relational model, ERD, draft DDL | Complete (v1.1 approved) |
+| 5 | PostgreSQL staging load and reconciliation | Complete (64/64 checks) |
+| 6 | Core model and validation suite | Next |
 | 7–8 | Analytical views and business-question SQL | Planned |
 | 9–10 | Power BI dashboard and executive findings | Planned |
 | 11–12 | Packaging and final QA | Planned |

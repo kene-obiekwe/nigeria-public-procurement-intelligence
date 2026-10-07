@@ -3,9 +3,9 @@
 -- Phase 4: Draft Core Schema (PostgreSQL)
 -- ============================================================
 --
--- STATUS: DRAFT — NOT EXECUTED
--- This DDL has not been run against any PostgreSQL instance.
--- It will be reviewed before Phase 5 implementation.
+-- STATUS: v1.2 — EXECUTED IN PHASE 5 (staging load)
+-- Approved design: Phase 4 v1.1. Phase 5 load-readiness changes (v1.2)
+-- are listed below and in docs/phase5_staging_reconciliation.md.
 --
 -- Design basis:
 --   docs/phase3_data_quality_decision_log.md (v1.1)
@@ -23,6 +23,16 @@
 -- Version: 1.1 (2026-10-07). v1.0 issued 2026-08-20.
 -- v1.1: release_seq ordering key, budget-line keys on planning,
 --       UNIQUE tender_id, milestone date notes, revised snapshot spec.
+-- v1.2 (2026-10-07, Phase 5 load readiness):
+--   * Monetary columns NUMERIC(30,2) -> NUMERIC(30,4). The source carries
+--     4 decimal places; one budget (22566000.0061) would otherwise round.
+--   * DQ flags are GENERATED ALWAYS ... STORED from their source column, so
+--     each classification rule lives in SQL and cannot drift from the data.
+--     Date classes come from one function, stg.fn_date_quality_flag().
+--   * award_suppliers: supplier_seq added; UNIQUE (award_id, supplier_seq)
+--     replaces UNIQUE (award_id, supplier_id). 6 awards list the same
+--     supplier 5 times; staging keeps all 17,441 rows as published.
+--   * Standardized name columns are generated from *_raw (whitespace only).
 -- ============================================================
 
 -- ============================================================
@@ -32,6 +42,28 @@
 CREATE SCHEMA IF NOT EXISTS stg;
 CREATE SCHEMA IF NOT EXISTS core;
 CREATE SCHEMA IF NOT EXISTS analytics;
+
+-- ============================================================
+-- DATE QUALITY CLASSIFICATION (DQ-08 / DQ-09)
+-- ============================================================
+-- Single source of truth for the date classes used by every date flag.
+-- Thresholds are fixed by the Phase 3 decision log, not by today's date.
+CREATE OR REPLACE FUNCTION stg.fn_date_quality_flag(d DATE)
+RETURNS VARCHAR(16)
+LANGUAGE sql IMMUTABLE PARALLEL SAFE
+AS $$
+    SELECT CASE
+        WHEN d IS NULL                 THEN NULL
+        WHEN d = DATE '2001-01-01'     THEN 'PLACEHOLDER'   -- DQ-08
+        WHEN d >= DATE '2051-01-01'    THEN 'IMPOSSIBLE'    -- DQ-09: year > 2050
+        WHEN d >= DATE '2026-01-01'    THEN 'FUTURE'        -- DQ-09: year 2026-2050
+        ELSE 'VALID'
+    END
+$$;
+
+COMMENT ON FUNCTION stg.fn_date_quality_flag(DATE) IS
+    'DQ-08/09 date classes: PLACEHOLDER (2001-01-01), IMPOSSIBLE (year > 2050), '
+    'FUTURE (year 2026-2050), VALID otherwise; NULL for a NULL date.';
 
 -- ============================================================
 -- STAGING LAYER: stg.*
@@ -98,12 +130,16 @@ CREATE TABLE stg.planning (
     budget_id               VARCHAR(64),                -- Source: planning.budget.id (release-local)
     budget_project_id       VARCHAR(64),                -- Source: planning.budget.projectID
                                                         -- v1.1: budget-line key; 97,749 distinct, never spans >1 OCID
-    budget_amount           NUMERIC(30,2),              -- NULL = not reported; 0 = reported as zero
+    budget_amount           NUMERIC(30,4),              -- NULL = not reported; 0 = reported as zero
     budget_currency         VARCHAR(3),                 -- Uniformly 'NGN' observed
     budget_description      TEXT,
     budget_project          TEXT,                        -- planning.budget.project (if present)
-    budget_amount_flag      VARCHAR(16),                -- DQ-06: NULL | 'EXTREME'
-    budget_monetary_flag    VARCHAR(16),                -- DQ-16: NULL | 'ZERO_VALUE'
+    budget_amount_flag      VARCHAR(16)     GENERATED ALWAYS AS (
+                                CASE WHEN budget_amount >= 1000000000000 THEN 'EXTREME' END
+                            ) STORED,                   -- DQ-06: NULL | 'EXTREME' (>= NGN 1T)
+    budget_monetary_flag    VARCHAR(16)     GENERATED ALWAYS AS (
+                                CASE WHEN budget_amount = 0 THEN 'ZERO_VALUE' END
+                            ) STORED,                   -- DQ-16: NULL | 'ZERO_VALUE'
 
     CONSTRAINT pk_planning PRIMARY KEY (release_id),
     CONSTRAINT fk_planning_release
@@ -145,7 +181,7 @@ CREATE TABLE stg.tender (
     procurement_method_details  VARCHAR(128),               -- e.g. 'National Competitive Bidding'
     procurement_method_rationale TEXT,
     number_of_tenderers         INTEGER,                    -- Source: tender.numberOfTenderers (0% null)
-    tender_value_amount         NUMERIC(30,2),              -- Source: tender.value.amount
+    tender_value_amount         NUMERIC(30,4),              -- Source: tender.value.amount
     tender_value_currency       VARCHAR(3),
     tender_start_date           DATE,                       -- Source: tender.tenderPeriod.startDate (47.7% null)
     tender_end_date             DATE,                       -- Source: tender.tenderPeriod.endDate (47.7% null)
@@ -155,10 +191,18 @@ CREATE TABLE stg.tender (
     submission_method           TEXT[],
     submission_method_details   TEXT,
     -- Data-quality flags
-    tenderer_count_flag         VARCHAR(16)     NOT NULL,   -- DQ-03/04/05: NORMAL|ELEVATED|ANOMALOUS
-    tender_value_monetary_flag  VARCHAR(16),                -- DQ-16: NULL|ZERO_VALUE
-    tender_start_date_flag      VARCHAR(16),                -- DQ-08/09: VALID|PLACEHOLDER|FUTURE|IMPOSSIBLE
-    tender_end_date_flag        VARCHAR(16),                -- DQ-08/09: same
+    tenderer_count_flag         VARCHAR(16)     NOT NULL GENERATED ALWAYS AS (
+                                    CASE
+                                        WHEN number_of_tenderers > 1000 THEN 'ANOMALOUS'
+                                        WHEN number_of_tenderers > 100  THEN 'ELEVATED'
+                                        WHEN number_of_tenderers >= 1   THEN 'NORMAL'
+                                    END                 -- NULL/0 -> NOT NULL violation: fail loudly
+                                ) STORED,               -- DQ-03/04/05: NORMAL|ELEVATED|ANOMALOUS
+    tender_value_monetary_flag  VARCHAR(16)     GENERATED ALWAYS AS (
+                                    CASE WHEN tender_value_amount = 0 THEN 'ZERO_VALUE' END
+                                ) STORED,               -- DQ-16: NULL|ZERO_VALUE
+    tender_start_date_flag      VARCHAR(16)     GENERATED ALWAYS AS (stg.fn_date_quality_flag(tender_start_date)) STORED,
+    tender_end_date_flag        VARCHAR(16)     GENERATED ALWAYS AS (stg.fn_date_quality_flag(tender_end_date)) STORED,
 
     CONSTRAINT pk_tender PRIMARY KEY (release_id),
     CONSTRAINT uq_tender_id UNIQUE (tender_id),         -- v1.1: 18,408 distinct, 0 null
@@ -209,12 +253,16 @@ CREATE TABLE stg.awards (
     description             TEXT,
     status                  VARCHAR(32),                -- active|cancelled|pending|unsuccessful
     award_date              DATE,                       -- Source: awards[].date (15.1% null)
-    award_value_amount      NUMERIC(30,2),              -- Source: awards[].value.amount (0% null, 268 zeros)
+    award_value_amount      NUMERIC(30,4),              -- Source: awards[].value.amount (0% null, 268 zeros)
     award_value_currency    VARCHAR(3),                 -- Uniformly 'NGN'
     -- Data-quality flags
-    award_value_flag        VARCHAR(16),                -- DQ-07: NULL | 'EXTREME'
-    award_monetary_flag     VARCHAR(16),                -- DQ-16: NULL | 'ZERO_VALUE'
-    award_date_flag         VARCHAR(16),                -- DQ-08/09: VALID|PLACEHOLDER|FUTURE|IMPOSSIBLE
+    award_value_flag        VARCHAR(16)     GENERATED ALWAYS AS (
+                                CASE WHEN award_value_amount >= 1000000000000 THEN 'EXTREME' END
+                            ) STORED,                   -- DQ-07: NULL | 'EXTREME' (>= NGN 1T)
+    award_monetary_flag     VARCHAR(16)     GENERATED ALWAYS AS (
+                                CASE WHEN award_value_amount = 0 THEN 'ZERO_VALUE' END
+                            ) STORED,                   -- DQ-16: NULL | 'ZERO_VALUE'
+    award_date_flag         VARCHAR(16)     GENERATED ALWAYS AS (stg.fn_date_quality_flag(award_date)) STORED,
 
     CONSTRAINT pk_awards PRIMARY KEY (award_id),
     CONSTRAINT fk_awards_release
@@ -254,20 +302,25 @@ COMMENT ON COLUMN stg.awards.award_value_flag IS
 CREATE TABLE stg.award_suppliers (
     award_supplier_pk       SERIAL          NOT NULL,
     award_id                VARCHAR(64)     NOT NULL,
+    supplier_seq            SMALLINT        NOT NULL,   -- v1.2: 1-based position in awards[].suppliers[]
     supplier_id             VARCHAR(64),                -- Source: awards[].suppliers[].id
-    supplier_name           VARCHAR(512),               -- Source: awards[].suppliers[].name
-    supplier_name_raw       VARCHAR(512),               -- Original unmodified name for traceability
+    supplier_name           VARCHAR(512)    GENERATED ALWAYS AS (
+                                btrim(regexp_replace(supplier_name_raw, '\s+', ' ', 'g'))
+                            ) STORED,                   -- Whitespace-standardized display name
+    supplier_name_raw       VARCHAR(512),               -- Source: awards[].suppliers[].name (unmodified)
 
     CONSTRAINT pk_award_suppliers PRIMARY KEY (award_supplier_pk),
     CONSTRAINT fk_award_suppliers_award
         FOREIGN KEY (award_id) REFERENCES stg.awards(award_id),
-    CONSTRAINT uq_award_supplier
-        UNIQUE (award_id, supplier_id)
+    CONSTRAINT uq_award_supplier_seq
+        UNIQUE (award_id, supplier_seq)                 -- v1.2: was (award_id, supplier_id)
 );
 
 COMMENT ON TABLE stg.award_suppliers IS
-    'Junction table linking awards to suppliers. Most awards have 1 supplier; '
-    '6 awards have 5 suppliers. Source: awards[].suppliers[]. '
+    'Junction table linking awards to suppliers, one row per suppliers[] entry. '
+    'v1.2: every award has exactly 1 distinct supplier; 6 awards repeat the same '
+    'supplier 5 times (24 repeated entries), retained as published. '
+    'Source: awards[].suppliers[]. '
     'supplier_name_raw preserves the original source name before any standardization.';
 
 
@@ -287,17 +340,19 @@ CREATE TABLE stg.contracts (
     title                       TEXT,
     description                 TEXT,
     status                      VARCHAR(32),                -- active|cancelled|pending|terminated
-    contract_value_amount       NUMERIC(30,2),              -- Source: contracts[].value.amount
+    contract_value_amount       NUMERIC(30,4),              -- Source: contracts[].value.amount
     contract_value_currency     VARCHAR(3),
     date_signed                 DATE,                       -- Source: contracts[].dateSigned (15.6% null)
     period_start_date           DATE,                       -- Source: contracts[].period.startDate (57.9% null)
     period_end_date             DATE,                       -- Source: contracts[].period.endDate (57.9% null)
     has_implementation          BOOLEAN         NOT NULL DEFAULT FALSE, -- Derived: TRUE if implementation section exists
     -- Data-quality flags
-    contract_monetary_flag      VARCHAR(16),                -- DQ-16: NULL | 'ZERO_VALUE'
-    date_signed_flag            VARCHAR(16),                -- DQ-08/09: VALID|PLACEHOLDER|FUTURE|IMPOSSIBLE
-    period_start_date_flag      VARCHAR(16),                -- DQ-08/09: same
-    period_end_date_flag        VARCHAR(16),                -- DQ-08/09: same
+    contract_monetary_flag      VARCHAR(16)     GENERATED ALWAYS AS (
+                                    CASE WHEN contract_value_amount = 0 THEN 'ZERO_VALUE' END
+                                ) STORED,               -- DQ-16: NULL | 'ZERO_VALUE'
+    date_signed_flag            VARCHAR(16)     GENERATED ALWAYS AS (stg.fn_date_quality_flag(date_signed)) STORED,
+    period_start_date_flag      VARCHAR(16)     GENERATED ALWAYS AS (stg.fn_date_quality_flag(period_start_date)) STORED,
+    period_end_date_flag        VARCHAR(16)     GENERATED ALWAYS AS (stg.fn_date_quality_flag(period_end_date)) STORED,
 
     CONSTRAINT pk_contracts PRIMARY KEY (contract_id),
     CONSTRAINT fk_contracts_release
@@ -341,13 +396,15 @@ CREATE TABLE stg.transactions (
     transaction_pk          SERIAL          NOT NULL,
     contract_id             VARCHAR(64)     NOT NULL,
     transaction_id          VARCHAR(64),                -- Source: transactions[].id (locality unclear)
-    transaction_value       NUMERIC(30,2),              -- Source: transactions[].value.amount (0% null in source)
+    transaction_value       NUMERIC(30,4),              -- Source: transactions[].value.amount (0% null in source)
     transaction_currency    VARCHAR(3),                 -- Source: transactions[].value.currency
     payer_id                VARCHAR(64),                -- Source: transactions[].payer.id
     payer_name              VARCHAR(512),               -- Source: transactions[].payer.name (if present)
     payee_id                VARCHAR(64),                -- Source: transactions[].payee.id
     payee_name              VARCHAR(512),               -- Source: transactions[].payee.name (if present)
-    transaction_monetary_flag VARCHAR(16),              -- DQ-16: NULL | 'ZERO_VALUE'
+    transaction_monetary_flag VARCHAR(16)   GENERATED ALWAYS AS (
+                                CASE WHEN transaction_value = 0 THEN 'ZERO_VALUE' END
+                            ) STORED,                   -- DQ-16: NULL | 'ZERO_VALUE'
     -- NOTE: No transaction_date column. DQ-11 confirms this field
     --       is universally absent from the source dataset.
     -- NOTE: DQ-12 UNRESOLVED — do not aggregate transaction values
@@ -391,8 +448,8 @@ CREATE TABLE stg.milestones (
     due_date                DATE,                       -- Source: milestones[].dueDate
     date_met                DATE,                       -- Source: milestones[].dateMet
     status                  VARCHAR(32),                -- Observed: 'met'
-    due_date_flag           VARCHAR(16),                -- DQ-08/09: VALID|PLACEHOLDER|FUTURE|IMPOSSIBLE
-    date_met_flag           VARCHAR(16),                -- DQ-08/09: same
+    due_date_flag           VARCHAR(16)     GENERATED ALWAYS AS (stg.fn_date_quality_flag(due_date)) STORED,
+    date_met_flag           VARCHAR(16)     GENERATED ALWAYS AS (stg.fn_date_quality_flag(date_met)) STORED,
 
     CONSTRAINT pk_milestones PRIMARY KEY (milestone_pk),
     CONSTRAINT fk_milestones_contract
@@ -430,12 +487,17 @@ CREATE TABLE stg.parties (
     party_pk                SERIAL          NOT NULL,
     release_id              VARCHAR(64)     NOT NULL,
     party_id                VARCHAR(64),                -- Source: parties[].id (e.g. NG-BPP-BPP-NOC-NNNNNN)
-    party_name              VARCHAR(512),               -- Source: parties[].name (standardized)
-    party_name_raw          VARCHAR(512),               -- Original unmodified name
+    party_name              VARCHAR(512)    GENERATED ALWAYS AS (
+                                btrim(regexp_replace(party_name_raw, '\s+', ' ', 'g'))
+                            ) STORED,                   -- Whitespace-standardized display name
+    party_name_raw          VARCHAR(512),               -- Source: parties[].name (unmodified)
     identifier_scheme       VARCHAR(32),                -- Source: parties[].identifier.scheme (e.g. 'NG-BPP')
     identifier_id           VARCHAR(64),                -- Source: parties[].identifier.id
     roles                   TEXT[]          NOT NULL,    -- Source: parties[].roles (e.g. {buyer,payer,procuringEntity})
-    supplier_id_flag        VARCHAR(16),                -- DQ-14: NULL | 'INCOMPLETE' (for supplier-role parties only)
+    supplier_id_flag        VARCHAR(16)     GENERATED ALWAYS AS (
+                                CASE WHEN 'supplier' = ANY (roles) AND party_id = 'NG-BPP-'
+                                     THEN 'INCOMPLETE' END
+                            ) STORED,                   -- DQ-14: bare 'NG-BPP-' on supplier-role parties
 
     CONSTRAINT pk_parties PRIMARY KEY (party_pk),
     CONSTRAINT fk_parties_release
@@ -634,7 +696,5 @@ COMMENT ON TABLE core.dim_supplier IS
 -- ============================================================
 -- END OF DRAFT DDL
 -- ============================================================
--- STATUS: DRAFT — NOT EXECUTED
--- This file will be reviewed during Phase 4 human approval (v1.1).
--- Phase 5 implementation will execute a finalized version.
+-- STATUS: v1.2 — executed in Phase 5 against nocopo_db.
 -- ============================================================

@@ -159,7 +159,7 @@ must be **ordered as an integer**. Ordering it as text selects a different
 | Transaction | (contract_id, txn_id) | ~13,617 | Contract | Unclear | Yes (SERIAL) | M-I01 (presence) |
 | Milestone | (contract_id, ms_id) | 42,854 | Contract | Unclear | Yes (SERIAL) | Deferred |
 | Budget line | (ocid, budget_project_id) | 97,749 | Process | Yes | No | M-P01 |
-| Party/release | (release_id, party_id) | ~216,514 | Release | Yes | Yes (SERIAL) | Supplier extraction |
+| Party/release | (release_id, party_id) | 124,530 (Phase 5 measured; v1.1 estimate ~216,514) | Release | Yes | Yes (SERIAL) | Supplier extraction |
 | Buyer (dim) | buyer_id | 666 | — | Yes | No | M-P01, benchmarking |
 | Supplier (dim) | supplier_id | 10,296 | — | Yes | No | M-S01 |
 
@@ -229,7 +229,7 @@ must be **ordered as an integer**. Ordering it as text selects a different
 | PK | `award_supplier_pk` (SERIAL) |
 | FK | `award_id` → stg.awards |
 | Natural key | (award_id, supplier_id) — UNIQUE constraint |
-| Expected rows | ~17,441 |
+| Expected rows | 17,441 (Phase 5: every award has 1 distinct supplier; 6 awards repeat it 5×) |
 | Source | `releases[].awards[].suppliers[]` |
 | Metrics | M-S01 |
 
@@ -281,7 +281,7 @@ must be **ordered as an integer**. Ordering it as text selects a different
 | PK | `party_pk` (SERIAL) |
 | FK | `release_id` → stg.releases |
 | Natural key | (release_id, party_id) — UNIQUE constraint |
-| Expected rows | ~216,514 |
+| Expected rows | 124,530 (Phase 5 measured; the v1.1 estimate of ~216,514 was wrong — see `docs/phase5_staging_reconciliation.md` §6.1) |
 | Source | `releases[].parties[]` |
 | DQ | supplier_id_flag (DQ-14) |
 
@@ -667,9 +667,9 @@ Before Phase 5 implementation can begin:
 2. ✅ Schema-design gate questions answered (Section 3)
 3. ✅ ERD created and documented (v1.1 update)
 4. ✅ Draft DDL created and annotated (v1.1 update)
-5. ⬜ Human review and approval of this design document (v1.1)
-6. ⬜ Human review and approval of the ERD (v1.1)
-7. ⬜ Human review and approval of the draft DDL (v1.1)
+5. ✅ Human review and approval of this design document (v1.1), project owner, 2026-10-07 (Gate A)
+6. ✅ Human review and approval of the ERD (v1.1), project owner, 2026-10-07
+7. ✅ Human review and approval of the draft DDL (v1.1), project owner, 2026-10-07. Phase 5 executed it as v1.2 with load-readiness changes (`docs/phase5_staging_reconciliation.md` §5).
 8. ✅ PostgreSQL local instances accessible (2026-10-07): PostgreSQL 15.1 on
    localhost:5432 and a second instance on localhost:5433 (password
    authentication; the PostgreSQL 17 install). The draft DDL v1.1 compiled

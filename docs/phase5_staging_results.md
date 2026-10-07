@@ -1,0 +1,114 @@
+# Phase 5 — Staging Reconciliation Results
+
+> **Script:** `python/ingest/02_reconcile_staging.py`  
+> **Run date:** 2026-10-07 17:37:25  
+> **Database:** `nocopo_db` on localhost:5433 (PostgreSQL 17.4)  
+> **Result:** ALL CHECKS PASSED (64 checks)
+
+Source values come from an independent traversal of the raw JSON. Staging values come
+from SQL against `stg.*`. Context and interpretation are in
+`docs/phase5_staging_reconciliation.md`.
+
+
+## Row counts
+
+| Table | Phase 4 expectation | Source | Staging | Status |
+|---|---|---|---|---|
+| `stg.releases` | 108,277 | 108,277 | 108,277 | ✓ |
+| `stg.planning` | 108,277 | 108,277 | 108,277 | ✓ |
+| `stg.tender` | 18,408 | 18,408 | 18,408 | ✓ |
+| `stg.awards` | 17,417 | 17,417 | 17,417 | ✓ |
+| `stg.award_suppliers` | ~17,441 | 17,441 | 17,441 | ✓ |
+| `stg.contracts` | 17,043 | 17,043 | 17,043 | ✓ |
+| `stg.transactions` | ~13,617 | 13,617 | 13,617 | ✓ |
+| `stg.milestones` | 42,854 | 42,854 | 42,854 | ✓ |
+| `stg.parties` | ~216,514 | 124,530 | 124,530 | ✓ |
+
+## Identity
+
+| Check | Source | Staging | Status |
+|---|---|---|---|
+| `distinct OCIDs` | 98,866 | 98,866 | ✓ |
+| `distinct release_seq` | 108,277 | 108,277 | ✓ |
+| `contracts with has_implementation` | 14,884 | 14,884 | ✓ |
+
+## Monetary totals (NGN)
+
+| Check | Source | Staging | Status |
+|---|---|---|---|
+| `budget` | 206,066,299,972,578.4661 | 206,066,299,972,578.4661 | ✓ |
+| `tender_value` | 4,719,623,321,230.6000 | 4,719,623,321,230.6000 | ✓ |
+| `award` | 4,719,623,321,230.6000 | 4,719,623,321,230.6000 | ✓ |
+| `contract` | 4,144,750,010,326.9800 | 4,144,750,010,326.9800 | ✓ |
+| `transaction` | 1,902,287,934,792.7900 | 1,902,287,934,792.7900 | ✓ |
+
+## Non-null dates
+
+| Check | Source | Staging | Status |
+|---|---|---|---|
+| `stg.tender.tender_start_date` | 9,622 | 9,622 | ✓ |
+| `stg.tender.tender_end_date` | 9,622 | 9,622 | ✓ |
+| `stg.awards.award_date` | 14,787 | 14,787 | ✓ |
+| `stg.contracts.date_signed` | 14,386 | 14,386 | ✓ |
+| `stg.contracts.period_start_date` | 7,171 | 7,171 | ✓ |
+| `stg.contracts.period_end_date` | 7,171 | 7,171 | ✓ |
+| `stg.milestones.due_date` | 10,895 | 10,895 | ✓ |
+| `stg.milestones.date_met` | 10,895 | 10,895 | ✓ |
+
+## DQ flags (SQL generated vs Python rule)
+
+| Check | Source | Staging | Status |
+|---|---|---|---|
+| `stg.releases.party_flag = NO_PARTIES` | 20 | 20 | ✓ |
+| `stg.planning.budget_amount_flag = EXTREME` | 32 | 32 | ✓ |
+| `stg.planning.budget_monetary_flag = ZERO_VALUE` | 561 | 561 | ✓ |
+| `stg.tender.tenderer_count_flag = ANOMALOUS` | 65 | 65 | ✓ |
+| `stg.tender.tenderer_count_flag = ELEVATED` | 14 | 14 | ✓ |
+| `stg.tender.tenderer_count_flag = NORMAL` | 18,329 | 18,329 | ✓ |
+| `stg.tender.tender_value_monetary_flag = ZERO_VALUE` | 1,259 | 1,259 | ✓ |
+| `stg.tender.tender_start_date_flag = FUTURE` | 5 | 5 | ✓ |
+| `stg.tender.tender_start_date_flag = PLACEHOLDER` | 24 | 24 | ✓ |
+| `stg.tender.tender_start_date_flag = VALID` | 9,593 | 9,593 | ✓ |
+| `stg.tender.tender_end_date_flag = FUTURE` | 6 | 6 | ✓ |
+| `stg.tender.tender_end_date_flag = VALID` | 9,616 | 9,616 | ✓ |
+| `stg.awards.award_value_flag = EXTREME` | 1 | 1 | ✓ |
+| `stg.awards.award_monetary_flag = ZERO_VALUE` | 268 | 268 | ✓ |
+| `stg.awards.award_date_flag = FUTURE` | 9 | 9 | ✓ |
+| `stg.awards.award_date_flag = IMPOSSIBLE` | 1 | 1 | ✓ |
+| `stg.awards.award_date_flag = PLACEHOLDER` | 119 | 119 | ✓ |
+| `stg.awards.award_date_flag = VALID` | 14,658 | 14,658 | ✓ |
+| `stg.contracts.contract_monetary_flag = ZERO_VALUE` | 256 | 256 | ✓ |
+| `stg.contracts.date_signed_flag = FUTURE` | 4 | 4 | ✓ |
+| `stg.contracts.date_signed_flag = PLACEHOLDER` | 77 | 77 | ✓ |
+| `stg.contracts.date_signed_flag = VALID` | 14,305 | 14,305 | ✓ |
+| `stg.contracts.period_start_date_flag = PLACEHOLDER` | 3 | 3 | ✓ |
+| `stg.contracts.period_start_date_flag = VALID` | 7,168 | 7,168 | ✓ |
+| `stg.contracts.period_end_date_flag = FUTURE` | 13 | 13 | ✓ |
+| `stg.contracts.period_end_date_flag = VALID` | 7,158 | 7,158 | ✓ |
+| `stg.milestones.due_date_flag = PLACEHOLDER` | 38 | 38 | ✓ |
+| `stg.milestones.due_date_flag = VALID` | 10,857 | 10,857 | ✓ |
+| `stg.milestones.date_met_flag = PLACEHOLDER` | 38 | 38 | ✓ |
+| `stg.milestones.date_met_flag = VALID` | 10,857 | 10,857 | ✓ |
+| `stg.parties.supplier_id_flag = INCOMPLETE` | 1,390 | 1,390 | ✓ |
+
+## Referential integrity
+
+| Check | Source | Staging | Status |
+|---|---|---|---|
+| `planning without release` | 0 | 0 | ✓ |
+| `contracts whose award is missing` | 0 | 0 | ✓ |
+| `contracts whose award is in another release` | 0 | 0 | ✓ |
+| `award_suppliers without award` | 0 | 0 | ✓ |
+| `transactions without contract` | 0 | 0 | ✓ |
+| `milestones without contract` | 0 | 0 | ✓ |
+| `parties without release` | 0 | 0 | ✓ |
+
+## Raw data protection
+
+| Check | Source | Staging | Status |
+|---|---|---|---|
+| `source SHA-256 matches pinned checksum` | `615146696f51d18f72c12c0152888280c12f280981096aae8408843e7d1bc90c` | `615146696f51d18f72c12c0152888280c12f280981096aae8408843e7d1bc90c` | ✓ |
+
+---
+
+*Generated by `python/ingest/02_reconcile_staging.py`. Raw dataset not modified.*

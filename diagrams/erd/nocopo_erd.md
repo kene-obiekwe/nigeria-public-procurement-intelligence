@@ -68,6 +68,7 @@ erDiagram
     award_suppliers {
         SERIAL award_supplier_pk PK
         VARCHAR award_id FK
+        SMALLINT supplier_seq
         VARCHAR supplier_id FK
         VARCHAR supplier_name
     }
