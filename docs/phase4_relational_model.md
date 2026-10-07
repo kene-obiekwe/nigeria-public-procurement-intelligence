@@ -82,6 +82,7 @@ the content is identical in all cases. Measurement shows it is not:
 
 | Pattern (multi-release OCIDs) | OCIDs |
 |---|---|
+| Budget object differs across releases | **836** (611 with ≥2 distinct non-null amounts; 225 only because some releases lack a budget) |
 | Budget identical across releases | 5,666 |
 | Same projectID, budget amount revised across releases | 422 |
 | ≥2 distinct projectIDs (unrelated budget lines) | 192 |
@@ -305,7 +306,7 @@ must be **ordered as an integer**. Ordering it as text selects a different
 | Expected rows | ~10,296 |
 | Source | Extracted from stg.parties (distinct supplier-role party_id) |
 | DQ | supplier_id_flag (DQ-14): INCOMPLETE for bare NG-BPP- prefix |
-| Future | dim_supplier_canonical (DQ-15) deferred to controlled Phase 5+ process |
+| Future | dim_supplier_canonical (DQ-15): no earlier than Phase 7, after an approved human-supervised resolution step (§17, 17.5) |
 
 ---
 
@@ -334,7 +335,18 @@ naively join through all releases, monetary values and counts are doubled.
 > lifecycle section"). It also makes the ordering and the budget grain explicit.
 
 **Ordering.** "Latest" always means the highest `release_seq`
-(`release_id` cast to integer). Text ordering is never used.
+(`release_id` cast to integer; in SQL, `ORDER BY release_seq DESC`, which is
+equivalent to `release_id::INTEGER DESC`). Text ordering is never used.
+`release_date` is **not** part of the ordering: it carries one identical
+publication timestamp on all 108,277 releases (DQ-10), so it cannot break ties.
+
+**Which budget value.** When a budget line's amount differs across releases,
+M-P01 uses the amount from the **latest** release carrying that line. It does
+not use the maximum or the earliest. In the 422 same-project revisions, later
+releases record the revised figure. The maximum would bias totals upward, and
+the earliest would ignore published revisions. M-P01's aggregation grain is the
+budget line, recorded as Phase 3 correction **C-06**
+(`docs/phase3_2_correction_log.md`).
 
 **Selection, per OCID and per lifecycle section:**
 
@@ -432,7 +444,10 @@ deduplication logic is needed beyond the snapshot rule.
 4. **Canonical mapping deferred:** The `dim_supplier_canonical` table
    (DQ-15) requires controlled human-supervised entity resolution.
    The table structure is documented in the DDL as a commented-out
-   future extension.
+   future extension. **Decision (2026-10-07):** core tables keep the raw
+   source supplier attributes (`supplier_id`, `supplier_name_raw`). The
+   mapping table is created no earlier than Phase 7, and only after an
+   explicitly approved, human-supervised resolution step (GEMINI §27.5).
 
 5. **Name preservation:** Original source supplier names are stored in
    `supplier_name_raw` alongside any standardized version.
@@ -567,8 +582,11 @@ on the same record can have different quality statuses (e.g., a contract's
 
 ## 14. Proposed Indexing Strategy
 
-Indexes are NOT created in the draft DDL. They will be created in Phases 5–6
-where real query patterns on the loaded data justify them. High-value candidates:
+Indexes are NOT created in the draft DDL. Primary-key and unique constraints
+create their own indexes when the tables are built in Phases 5–6. The
+analytical indexes below support the Phase 7 views. Per the Implementation
+Plan (Phase 8), they are added only where query performance on the loaded data
+justifies them. High-value candidates:
 
 | Index | Table | Column(s) | Rationale |
 |-------|-------|-----------|-----------|
@@ -630,10 +648,11 @@ Each v1.0 open issue now has a recorded treatment, based on measurement
 | # | Issue | v1.1 evidence | Disposition |
 |---|---|---|---|
 | 17.1 | DQ-12 transaction value semantics | Mixed patterns (§11). Neither cumulative nor incremental is established. | **Accept current treatment.** UNRESOLVED. Raw values stored. M-I01 uses presence only. No view sums transactions. |
-| 17.2 | Milestone date quality | CONTRACT milestones are undated. IMPLEMENTATION: 10,857 VALID, 38 PLACEHOLDER. dateMet ≡ dueDate. (§12) | **Closed.** Flags classified at load. Milestone slippage declared not measurable. |
+| 17.2 | Milestone date quality | CONTRACT milestones are undated. IMPLEMENTATION: 10,857 VALID, 38 PLACEHOLDER. dateMet ≡ dueDate. (§12) | **Closed.** Retained as raw, optional columns with flags classified at load. Excluded from all core timing metrics (M-E01/M-E02). Milestone slippage declared not measurable. |
 | 17.3 | Award-ID dedup wording in Phase 3 §1.3 | Award IDs never repeat across releases. 5 OCIDs have conflicting award content. | **Closed.** The Phase 3 §1.3 rule "deduplicate at award ID level within an OCID" has no effect on this data. It is superseded by the section-level snapshot (§6.2). Phase 3 documents stay frozen; the supersession is recorded here. |
-| 17.4 | tender_id uniqueness | 18,408 distinct, 0 null, 0 repeats | **Closed.** `tender_id` becomes a UNIQUE alternate key. PK stays `release_id` (1:1). |
-| 17.5 | dim_supplier_canonical (DQ-15) | No change | **Deferred, by design.** M-S01 uses the source `supplier_id` with the DQ-13/DQ-14 caveats. Canonical mapping only after a separately approved, human-supervised resolution step. |
+| 17.4 | tender_id uniqueness | 18,408 distinct, 0 null, 0 repeats | **Closed.** `tender_id` becomes a globally UNIQUE alternate key. PK stays `release_id` (1:1). A process-scoped composite `(ocid, tender_id)` was considered and rejected (decision 2026-10-07). Global uniqueness is measured and implies the composite. Like award IDs, tender IDs are release-local, so they do not identify the process. |
+| 17.5 | dim_supplier_canonical (DQ-15) | No change | **Deferred (decision 2026-10-07).** Core tables preserve raw source supplier attributes. M-S01 uses the source `supplier_id` with the DQ-13/DQ-14 caveats. The canonical mapping table is created no earlier than Phase 7, after a separately approved, human-supervised resolution step. |
+| 17.6 | Phase alignment of views and indexing | v1.0 placed views and indexes in "Phase 5" | **Closed.** Staging is Phase 5, core and validation Phase 6, analytical views Phase 7, and analytical indexing Phases 7–8, following `NOCOPO_Implementation_Plan.docx`. |
 
 New in v1.1 (resolved in §6.2): text-ordering tie-break, budget divergence
 across releases, and multi-project OCIDs.
@@ -666,6 +685,7 @@ Before Phase 5 implementation can begin:
 |---|---|---|
 | 1.0 | 2026-08-20 | Initial relational model, ERD and draft DDL |
 | 1.1 | 2026-10-07 | Snapshot rule tested against raw data. Integer `release_seq` ordering. Section-level selection restored per Phase 3 §1.2. Budget-line grain `(ocid, budget_project_id)` with `multi_project_flag` (approved by project owner). Corrected the "identical content" claim (§3.2). `tender_id` UNIQUE. Milestone counts and date quality measured. Open issues dispositioned. Analytical views re-attributed to Phase 7, per the Implementation Plan. |
+| 1.1 (review closure) | 2026-10-07 | Overseer review closure. Explicit 836 budget-divergence figure (§3.2). Latest-not-max-not-earliest budget choice stated, plus why `release_date` cannot order releases (§6.2). M-P01 grain recorded as Phase 3 correction C-06. Decisions recorded for tender_id (global UNIQUE kept), milestones (excluded from timing metrics) and dim_supplier_canonical (no earlier than Phase 7). Indexing aligned to Phases 7–8. |
 
 ---
 

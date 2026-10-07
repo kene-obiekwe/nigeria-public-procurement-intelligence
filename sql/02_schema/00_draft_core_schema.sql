@@ -494,7 +494,7 @@ COMMENT ON TABLE core.dim_buyer IS
 -- Metrics: M-S01 (supplier concentration)
 -- Design note: This is the source-identity table.
 -- The dim_supplier_canonical mapping table (DQ-15)
--- is a future Phase 5+ addition requiring controlled
+-- is created no earlier than Phase 7, requiring controlled
 -- human-supervised entity resolution.
 -- ------------------------------------------------------------
 CREATE TABLE core.dim_supplier (
@@ -512,7 +512,8 @@ COMMENT ON TABLE core.dim_supplier IS
     'Distinct suppliers by source supplier_id. 10,296 unique IDs observed. '
     'DQ-13: 1,483 IDs map to multiple name variations (casing, abbreviations). '
     'DQ-14: Incomplete NG-BPP- identifiers flagged. '
-    'DQ-15: Canonical mapping table deferred to controlled Phase 5+ process. '
+    'DQ-15: Raw source supplier attributes preserved; canonical mapping table deferred '
+    'to Phase 7 or later, after approved human-supervised resolution. '
     'No fuzzy-name merging applied.';
 
 
@@ -541,7 +542,8 @@ COMMENT ON TABLE core.dim_supplier IS
 
 
 -- ============================================================
--- INDEXES (proposed — to be created during Phases 5-6)
+-- INDEXES (proposed — analytical indexes for Phase 7 views; created in
+-- Phases 7-8 only where query performance justifies them)
 -- ============================================================
 -- These indexes support the analytical queries defined in
 -- Phase 3 metric eligibility. They are listed here for
