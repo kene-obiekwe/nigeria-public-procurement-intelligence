@@ -28,3 +28,5 @@ NOCOPO dataset/
 # Local database artifacts
 *.dump
 *.backup
+# Personal career-planning context — LOCAL ONLY
+docs/Portfolio_Career_Plan_Context.docx
