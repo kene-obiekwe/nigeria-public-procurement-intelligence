@@ -966,7 +966,7 @@ A("| 8 | Zero monetary value treatment (561 budget zeros, 268 award zeros) | Not
 A("")
 A("### 8.1 Decisions Requiring Human Approval (per project rules)")
 A("")
-A("Per the project implementation plan and GEMINI.md, the following require your explicit decision:")
+A("Per the project implementation plan, the following require your explicit decision:")
 A("")
 A("1. **Release/version modelling strategy** — this is the most consequential single decision.")
 A("   Options include: (a) latest-release snapshot per OCID, (b) union of lifecycle stages,")

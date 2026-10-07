@@ -1379,7 +1379,7 @@ The following decisions are required before Phase 3 can be completed and schema 
 
 ### 8.1 Decisions Requiring Human Approval (per project rules)
 
-Per the project implementation plan and GEMINI.md, the following require your explicit decision:
+Per the project implementation plan, the following require your explicit decision:
 
 1. **Release/version modelling strategy** — this is the most consequential single decision.
    Options include: (a) latest-release snapshot per OCID, (b) union of lifecycle stages,

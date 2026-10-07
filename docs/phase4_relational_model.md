@@ -447,7 +447,7 @@ deduplication logic is needed beyond the snapshot rule.
    future extension. **Decision (2026-10-07):** core tables keep the raw
    source supplier attributes (`supplier_id`, `supplier_name_raw`). The
    mapping table is created no earlier than Phase 7, and only after an
-   explicitly approved, human-supervised resolution step (GEMINI §27.5).
+   explicitly approved, human-supervised resolution step (a required human approval point).
 
 5. **Name preservation:** Original source supplier names are stored in
    `supplier_name_raw` alongside any standardized version.
