@@ -20,14 +20,19 @@ formats the results.
 
 Usage
 -----
-    python python/validation/04_run_validation_suite.py
+    Gate B (Phase 6, default):
+        python python/validation/04_run_validation_suite.py
+    Phase 7 analytical views:
+        python python/validation/04_run_validation_suite.py --phase 7
 
 Output
 ------
-    docs/phase6_core_model/phase6_validation_results.md
+    Phase 6: docs/phase6_core_model/phase6_validation_results.md
+    Phase 7: docs/phase7_analytics/phase7_view_validation_results.md
     Exit code 1 if any GATE check fails.
 """
 
+import argparse
 import glob
 import os
 import subprocess
@@ -39,14 +44,30 @@ import psycopg
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SUITE_DIR = os.path.join(ROOT, "sql", "03_data_quality")
 STAGE1 = os.path.join(ROOT, "python", "ingest", "02_reconcile_staging.py")
-OUTPUT = os.path.join(ROOT, "docs", "phase6_core_model", "phase6_validation_results.md")
+SUITES = {
+    # phase: (sql file pattern, output report, title, interpretation doc, runs stage 1)
+    "6": ("0[1-8]_*.sql",
+          os.path.join("docs", "phase6_core_model", "phase6_validation_results.md"),
+          "Phase 6 — Gate B Validation Results", "docs/phase6_core_model/phase6_core_model.md", True),
+    "7": ("09_*.sql",
+          os.path.join("docs", "phase7_analytics", "phase7_view_validation_results.md"),
+          "Phase 7 — Analytical View Validation Results", "docs/phase7_analytics/phase7_analytical_views.md", False),
+}
 
 
 def main():
-    # Stage 1 — raw -> staging (independent of SQL)
-    stage1 = subprocess.run([sys.executable, STAGE1], capture_output=True, text=True)
-    stage1_summary = (stage1.stdout.strip().splitlines() or ["(no output)"])[-1].split(" Report:")[0]
-    stage1_ok = stage1.returncode == 0
+    parser = argparse.ArgumentParser(description="Run a NOCOPO validation suite.")
+    parser.add_argument("--phase", choices=sorted(SUITES), default="6")
+    args = parser.parse_args()
+    pattern, output_rel, title, notes_doc, run_stage1 = SUITES[args.phase]
+    output = os.path.join(ROOT, output_rel)
+
+    # Stage 1 — raw -> staging (independent of SQL); Gate B suite only
+    stage1_ok, stage1_summary = True, None
+    if run_stage1:
+        stage1 = subprocess.run([sys.executable, STAGE1], capture_output=True, text=True)
+        stage1_summary = (stage1.stdout.strip().splitlines() or ["(no output)"])[-1].split(" Report:")[0]
+        stage1_ok = stage1.returncode == 0
 
     # Stage 2 — SQL suite
     conninfo = dict(
@@ -55,7 +76,7 @@ def main():
         user=os.environ.get("PGUSER", "postgres"),
         dbname=os.environ.get("PGDATABASE", "nocopo_db"),
     )
-    files = sorted(glob.glob(os.path.join(SUITE_DIR, "*.sql")))
+    files = sorted(glob.glob(os.path.join(SUITE_DIR, pattern)))
     results = []
     with psycopg.connect(**conninfo) as conn, conn.cursor() as cur:
         server = cur.execute("SHOW server_version").fetchone()[0]
@@ -71,25 +92,28 @@ def main():
     passed = stage1_ok and not gate_failed
 
     fmt = lambda v: "" if v is None else (f"{int(v):,}" if v.lstrip("-").isdigit() else v)
+    gate_label = "Gate B result" if args.phase == "6" else "Phase 7 exit-gate result"
     out = [
-        "# Phase 6 — Gate B Validation Results",
+        f"# {title}",
         "",
-        "> **Runner:** `python/validation/04_run_validation_suite.py`  ",
+        f"> **Runner:** `python/validation/04_run_validation_suite.py --phase {args.phase}`  ",
         f"> **Run date:** {datetime.now():%Y-%m-%d %H:%M:%S}  ",
         f"> **Database:** `{conninfo['dbname']}` on {conninfo['host']}:{conninfo['port']} (PostgreSQL {server})  ",
-        f"> **Gate B result:** {'**PASSED**' if passed else '**FAILED**'}. "
-        f"Stage 1 {'passed' if stage1_ok else 'FAILED'}; "
-        f"{len(gate) - len(gate_failed)} / {len(gate)} GATE checks passed; {len(info)} INFO measurements.",
+        f"> **{gate_label}:** {'**PASSED**' if passed else '**FAILED**'}. "
+        + (f"Stage 1 {'passed' if stage1_ok else 'FAILED'}; " if run_stage1 else "")
+        + f"{len(gate) - len(gate_failed)} / {len(gate)} GATE checks passed; {len(info)} INFO measurements.",
         "",
-        "Interpretation and decisions: `docs/phase6_core_model/phase6_core_model.md`.",
-        "",
-        "## Stage 1 — Raw → staging (independent JSON traversal)",
-        "",
-        f"`python/ingest/02_reconcile_staging.py`: {stage1_summary} "
-        f"({'✓' if stage1_ok else '✗ FAIL'}). Detail: `docs/phase5_staging/phase5_staging_results.md`.",
-        "",
-        "## Stage 2 — SQL validation suite (`sql/03_data_quality/`)",
+        f"Interpretation and decisions: `{notes_doc}`.",
     ]
+    if run_stage1:
+        out += [
+            "",
+            "## Stage 1 — Raw → staging (independent JSON traversal)",
+            "",
+            f"`python/ingest/02_reconcile_staging.py`: {stage1_summary} "
+            f"({'✓' if stage1_ok else '✗ FAIL'}). Detail: `docs/phase5_staging/phase5_staging_results.md`.",
+        ]
+    out += ["", f"## {'Stage 2 — ' if run_stage1 else ''}SQL validation suite (`sql/03_data_quality/{pattern}`)"]
     group = None
     for f, cid, grp, name, sev, exp, act, ok in results:
         if grp != group:
@@ -100,11 +124,13 @@ def main():
         out.append(f"| {cid} | {name} | {sev} | {fmt(exp)} | {fmt(act)} | {status} |")
     out += ["", "---", "", "*Generated by `python/validation/04_run_validation_suite.py`. Raw dataset not modified.*", ""]
 
-    os.makedirs(os.path.dirname(OUTPUT), exist_ok=True)
-    with open(OUTPUT, "w", encoding="utf-8") as fh:
+    os.makedirs(os.path.dirname(output), exist_ok=True)
+    with open(output, "w", encoding="utf-8") as fh:
         fh.write("\n".join(out))
-    print(f"Stage 1: {stage1_summary}")
-    print(f"Stage 2: {len(gate) - len(gate_failed)}/{len(gate)} GATE passed, {len(info)} INFO. Report: {OUTPUT}")
+    if run_stage1:
+        print(f"Stage 1: {stage1_summary}")
+    print(f"SQL suite: {len(gate) - len(gate_failed)}/{len(gate)} GATE passed, {len(info)} INFO. "
+          f"Report: {output_rel}")
     for r in gate_failed:
         print(f"  FAILED {r[1]} {r[3]}: expected {r[5]}, actual {r[6]}")
     sys.exit(0 if passed else 1)

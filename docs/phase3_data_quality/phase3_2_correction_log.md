@@ -14,7 +14,7 @@
 
 Phase 3 documentation was frozen on 2026-08-18. Changes are allowed only
 through an explicitly approved correction pass. This log records the corrections
-made in the Phase 3.2 pass (C-06 to C-09). It arose from the Phase 4.1 validation of the process-snapshot
+made in the Phase 3.2 pass (C-06 to C-10). It arose from the Phase 4.1 validation of the process-snapshot
 rule against the raw data.
 
 ---
@@ -82,6 +82,21 @@ rule against the raw data.
 
 ---
 
+## Correction C-10 — New Issue DQ-19 (Incomplete Buyer Identifier)
+
+| Attribute | Detail |
+|-----------|--------|
+| **Correction ID** | C-10 |
+| **Document** | `docs/phase3_data_quality/phase3_data_quality_decision_log.md`: new issue DQ-19, summary-matrix row, flag specification row |
+| **Issue** | Phase 3 had no buyer-side counterpart to DQ-14. Phase 6 found 26 releases whose buyer ID is the bare prefix `NG-BPP-` (Gate B check EN-03). |
+| **Change** | DQ-19 added: RETAIN + FLAG (`buyer_id_flag = INCOMPLETE`) + EXCLUDE_FROM_METRIC for entity-level comparisons; retained in overall process counts. |
+| **Did an existing Phase 3 decision change?** | No. This is a new issue, handled the same way as the approved DQ-14 treatment. |
+| **Implemented in** | `core.dim_buyer.buyer_id_flag` (DDL v1.3); `analytics.vw_budget_eligible` and `analytics.vw_entity_benchmark` exclude it (Phase 7 checks SP-05, AV-15) |
+| **Approved by** | Project owner, 2026-10-07 |
+| **Status** | Applied ✓ |
+
+---
+
 ## Not Changed in This Pass
 
 `phase3_metric_eligibility.md` §1.3 says "deduplicate at award ID level within
@@ -96,9 +111,9 @@ metric's result.
 ## Phase 3 Freeze Status
 
 > Phase 3 documentation is re-frozen as of 2026-10-07 at:
-> `phase3_metric_eligibility.md` v1.2 (C-06), `phase3_data_quality_decision_log.md` v1.2
-> (C-07, C-09), `phase3_data_dictionary.md` v1.2 (C-08).
+> `phase3_metric_eligibility.md` v1.2 (C-06), `phase3_data_quality_decision_log.md` v1.3
+> (C-07, C-09, C-10), `phase3_data_dictionary.md` v1.2 (C-08).
 
 ---
 
-*Correction log version: 1.1 — 2026-10-07 (C-07 to C-09 added during Phase 6)*
+*Correction log version: 1.2 — 2026-10-07 (C-07 to C-09 added in Phase 6; C-10 in Phase 7)*

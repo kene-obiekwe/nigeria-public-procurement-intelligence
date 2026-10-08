@@ -1,7 +1,7 @@
 # Phase 6 — Gate B Validation Results
 
-> **Runner:** `python/validation/04_run_validation_suite.py`  
-> **Run date:** 2026-10-07 18:02:37  
+> **Runner:** `python/validation/04_run_validation_suite.py --phase 6`  
+> **Run date:** 2026-10-08 16:11:31  
 > **Database:** `nocopo_db` on localhost:5433 (PostgreSQL 17.4)  
 > **Gate B result:** **PASSED**. Stage 1 passed; 102 / 102 GATE checks passed; 17 INFO measurements.
 
@@ -11,7 +11,7 @@ Interpretation and decisions: `docs/phase6_core_model/phase6_core_model.md`.
 
 `python/ingest/02_reconcile_staging.py`: 64 checks, 0 failed. (✓). Detail: `docs/phase5_staging/phase5_staging_results.md`.
 
-## Stage 2 — SQL validation suite (`sql/03_data_quality/`)
+## Stage 2 — SQL validation suite (`sql/03_data_quality/0[1-8]_*.sql`)
 
 ### Key uniqueness — `01_key_uniqueness.sql`
 

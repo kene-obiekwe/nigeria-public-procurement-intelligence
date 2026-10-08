@@ -27,11 +27,11 @@ Source acquisition (Phase 1) is documented in [`../data/README.md`](../data/READ
 
 | Document | Purpose |
 |---|---|
-| [`phase3_data_quality_decision_log.md`](phase3_data_quality/phase3_data_quality_decision_log.md) | Issues DQ-01 to DQ-18 and their treatment decisions |
+| [`phase3_data_quality_decision_log.md`](phase3_data_quality/phase3_data_quality_decision_log.md) | Issues DQ-01 to DQ-19 and their treatment decisions |
 | [`phase3_metric_eligibility.md`](phase3_data_quality/phase3_metric_eligibility.md) | Analytical grains and per-metric eligibility rules (v1.2) |
 | [`phase3_data_dictionary.md`](phase3_data_quality/phase3_data_dictionary.md) | Source field → business meaning → target column |
 | [`phase3_1_correction_log.md`](phase3_data_quality/phase3_1_correction_log.md) | Corrections C-01 to C-05 |
-| [`phase3_2_correction_log.md`](phase3_data_quality/phase3_2_correction_log.md) | Corrections C-06 to C-09 (budget-line grain, DQ-04 count, value semantics, artefact repair) |
+| [`phase3_2_correction_log.md`](phase3_data_quality/phase3_2_correction_log.md) | Corrections C-06 to C-10 (budget-line grain, DQ-04 count, value semantics, artefact repair, DQ-19) |
 
 ## Phase 4 — Relational Data Model
 
@@ -57,6 +57,13 @@ The ERD is in [`../diagrams/erd/`](../diagrams/erd/nocopo_erd.md) and the DDL is
 | [`phase6_core_model.md`](phase6_core_model/phase6_core_model.md) | Core dimensions, process snapshot, design decisions, Gate B summary, findings for Phase 7 |
 | [`phase6_validation_results.md`](phase6_core_model/phase6_validation_results.md) | Generated Gate B results: 102 GATE checks and 17 INFO measurements |
 
+## Phase 7 — Analytical Layer
+
+| Document | Purpose |
+|---|---|
+| [`phase7_analytical_views.md`](phase7_analytics/phase7_analytical_views.md) | View catalogue, eligibility rules as implemented, eligible populations, exclusion waterfalls, interpretations to confirm |
+| [`phase7_view_validation_results.md`](phase7_analytics/phase7_view_validation_results.md) | Generated Phase 7 exit-gate results (24 GATE + 12 INFO) |
+
 ## Generated Reports
 
 The following files are written by scripts. Regenerate them by running the
@@ -69,6 +76,7 @@ script rather than editing them by hand.
 | `phase4_data_model/phase4_1_snapshot_validation_report.md` | `python/validation/03_snapshot_rule_validation.py` |
 | `phase5_staging/phase5_staging_results.md` | `python/ingest/02_reconcile_staging.py` |
 | `phase6_core_model/phase6_validation_results.md` | `python/validation/04_run_validation_suite.py` |
+| `phase7_analytics/phase7_view_validation_results.md` | `python/validation/04_run_validation_suite.py --phase 7` |
 
 ⚠ `data_profiling_report.md` contains a manual correction note in §13. Re-running
 its script would overwrite that note.

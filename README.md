@@ -4,8 +4,9 @@
 database: one where every number can be traced to a validated SQL rule.**
 
 > **Status: in progress.** Data audit, relational design, the PostgreSQL
-> staging load and the validated core model are complete. **Gate B passed:**
-> 102/102 core validation checks. Analytical views (Phase 7) are next.
+> staging load, the validated core model and the analytical layer are complete.
+> **Gate B passed** (102/102); **Phase 7 views validated** (24/24). Business-question
+> SQL (Phase 8) is next.
 > See [Project status](#project-status).
 
 ---
@@ -95,7 +96,8 @@ All figures below are measured. Each is documented in `docs/`.
 │   ├── phase3_data_quality/  DQ decision log, metric eligibility, data dictionary, corrections
 │   ├── phase4_data_model/    Relational model and snapshot-rule evidence
 │   ├── phase5_staging/       Staging load and reconciliation
-│   └── phase6_core_model/    Core build, Gate B validation results
+│   ├── phase6_core_model/    Core build, Gate B validation results
+│   └── phase7_analytics/     Analytical views, eligible populations, validation
 ├── python/
 │   ├── profiling/            Phase 2 profiling and targeted validation scripts
 │   ├── validation/           Design-validation scripts (e.g. snapshot rule)
@@ -106,7 +108,7 @@ All figures below are measured. Each is documented in `docs/`.
 │   ├── 02_schema/            Staging + core schema DDL (v1.2, executed)
 │   ├── 03_data_quality/      Gate B validation suite, 8 check files (Phase 6)
 │   ├── 04_transformations/   Core dimensions + process snapshot (Phase 6)
-│   ├── 05_views/             Analytical views per pillar (Phase 7)
+│   ├── 05_views/             Metric-eligibility views per pillar (Phase 7)
 │   └── 06_analysis/          Business-question queries (Phase 8)
 ├── diagrams/erd/             Entity-relationship diagram (Mermaid)
 ├── database/seed_and_setup/  Database setup scripts
@@ -130,6 +132,7 @@ All figures below are measured. Each is documented in `docs/`.
 | [`docs/phase5_staging/phase5_staging_reconciliation.md`](docs/phase5_staging/phase5_staging_reconciliation.md) | Staging load, schema v1.2 changes, reconciliation and findings |
 | [`docs/phase6_core_model/phase6_core_model.md`](docs/phase6_core_model/phase6_core_model.md) | Core build, design decisions, Gate B summary |
 | [`docs/phase6_core_model/phase6_validation_results.md`](docs/phase6_core_model/phase6_validation_results.md) | Check-by-check Gate B results (119 checks) |
+| [`docs/phase7_analytics/phase7_analytical_views.md`](docs/phase7_analytics/phase7_analytical_views.md) | Analytical views, eligibility rules, populations and disclosures |
 | [`diagrams/erd/nocopo_erd.md`](diagrams/erd/nocopo_erd.md) | Entity-relationship diagram |
 | [`sql/02_schema/00_draft_core_schema.sql`](sql/02_schema/00_draft_core_schema.sql) | Draft DDL with constraints tied to DQ issues |
 
@@ -196,7 +199,15 @@ psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/04_
 .venv/Scripts/python python/validation/04_run_validation_suite.py
 ```
 
-Analytical build steps will be added as Phase 7 is implemented.
+**Build the analytical views and validate them:**
+
+```bash
+psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/05_views/01_budget_eligible.sql -f sql/05_views/02_competition_eligible.sql -f sql/05_views/03_award_and_supplier_eligible.sql -f sql/05_views/04_budget_award_comparison.sql -f sql/05_views/05_timing_eligible.sql -f sql/05_views/06_lifecycle_and_implementation.sql -f sql/05_views/07_entity_benchmark.sql -f sql/05_views/08_metric_population.sql
+```
+
+```bash
+.venv/Scripts/python python/validation/04_run_validation_suite.py --phase 7
+```
 
 ---
 
@@ -210,7 +221,8 @@ Analytical build steps will be added as Phase 7 is implemented.
 | 4 | Relational model, ERD, draft DDL | Complete (v1.1 approved) |
 | 5 | PostgreSQL staging load and reconciliation | Complete (64/64 checks) |
 | 6 | Core model and validation suite | Complete (Gate B: 102/102) |
-| 7–8 | Analytical views and business-question SQL | Next |
+| 7 | Analytical views (metric eligibility) | Complete (24/24 checks) |
+| 8 | Business-question SQL | Next |
 | 9–10 | Power BI dashboard and executive findings | Planned |
 | 11–12 | Packaging and final QA | Planned |
 

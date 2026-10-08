@@ -1,7 +1,7 @@
 # Phase 5 — Staging Reconciliation Results
 
 > **Script:** `python/ingest/02_reconcile_staging.py`  
-> **Run date:** 2026-10-07 18:01:51  
+> **Run date:** 2026-10-08 16:11:00  
 > **Database:** `nocopo_db` on localhost:5433 (PostgreSQL 17.4)  
 > **Result:** ALL CHECKS PASSED (64 checks)
 

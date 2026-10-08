@@ -385,6 +385,25 @@ RETAIN + FLAG + EXCLUDE_FROM_METRIC for a given metric.
 
 ---
 
+## Issue DQ-19 - Incomplete Buyer Identifier: Bare 'NG-BPP-' (26 Releases)
+
+| Attribute | Detail |
+|-----------|--------|
+| **Issue ID** | DQ-19 |
+| **Data field / entity** | releases[].buyer.id |
+| **Observed problem** | 26 releases carry the bare scheme prefix `NG-BPP-` as the buyer ID, with no entity code and no buyer name. 19 of them also have no parties array (DQ-18), so the buyer cannot be recovered from a buyer-role party. This is the buyer-side equivalent of DQ-14. |
+| **Evidence** | Added in Phase 6/7 (correction C-10). Gate B check EN-03 (`sql/03_data_quality/06_entity_consistency.sql`); `docs/phase6_core_model/phase6_core_model.md` F-1 |
+| **Severity** | Low (0.02% of releases) |
+| **Treatment** | RETAIN + FLAG + EXCLUDE_FROM_METRIC (entity-level comparisons) |
+| **Retained?** | Yes. It is kept as its own row in `core.dim_buyer`, never re-assigned to another buyer. |
+| **Flagged?** | Yes - `buyer_id_flag = INCOMPLETE` (core.dim_buyer, generated) |
+| **Excluded from which metrics?** | Exclude from per-entity comparisons: M-P01 by buyer and the procuring-entity benchmark. Retain in overall process counts (M-E03) and in process-level metrics, where the buyer is not the unit of analysis. |
+| **Reason** | No identifier or name exists to attribute these releases to a procuring entity. Grouping them as one "entity" would create a false buyer. |
+| **Known limitation** | The true buyers of these 26 releases are unknown. |
+| **Approved by** | Project owner, 2026-10-07 |
+
+---
+
 ## Summary Matrix
 
 | Issue ID | Entity | Severity | RETAIN | FLAG | EXCLUDE_FROM_METRIC | DEFER | UNRESOLVED |
@@ -407,6 +426,7 @@ RETAIN + FLAG + EXCLUDE_FROM_METRIC for a given metric.
 | DQ-16 | Zero monetary values | Medium | Yes | Yes | Yes (avg metrics) | - | - |
 | DQ-17 | Identifier scheme uniformity | Low | N/A | N/A | N/A | Yes | - |
 | DQ-18 | No parties array (20 records) | Low | Yes | Yes | Yes | - | - |
+| DQ-19 | Bare NG-BPP- buyer ID (26 releases) | Low | Yes | Yes | Yes (entity-level) | - | - |
 
 ---
 
@@ -424,10 +444,12 @@ columns are not yet created.
 | supplier_id_flag | supplier party records | NULL (normal) / INCOMPLETE | Supplier identifier completeness |
 | monetary_flag | monetary fields | NULL (normal) / ZERO_VALUE | Zero monetary value indicator |
 | party_flag | release level | NULL (normal) / NO_PARTIES | Absence of parties array |
+| buyer_id_flag | core.dim_buyer (added via C-10) | NULL (normal) / INCOMPLETE | Bare NG-BPP- buyer ID (DQ-19) |
 
 ---
 
-*Document version: 1.2 - 2026-10-07. Phase 3.2 corrections C-07 (DQ-04 count) and C-09 (field-name artefact repair) applied.*
+*Document version: 1.3 - 2026-10-07. DQ-19 added (C-10).*
+*Version 1.2 - 2026-10-07. Phase 3.2 corrections C-07 (DQ-04 count) and C-09 (field-name artefact repair) applied.*
 *Version 1.1 - 2026-08-18. Phase 3.1 correction pass applied.*
 *Version 1.0 approved by project owner on 2026-08-16.*
 *No data has been modified. No schema has been designed.*
