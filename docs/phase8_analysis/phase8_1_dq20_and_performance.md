@@ -177,7 +177,8 @@ psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/05_
 psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/02_schema/01_migration_v1_4.sql -f sql/02_schema/02_performance_indexes.sql -f sql/02_schema/03_migration_v1_4_materialise_snapshot.sql -f sql/04_transformations/03_process_snapshot.sql
 ```
 
-then the `sql/05_views` command above. The migration drops the old plain snapshot views
+then the `sql/05_views` command above (Phase 9 adds `sql/05_views/10_dim_views.sql` and the BI role script
+`database/seed_and_setup/01_create_bi_role.sql`; see `docs/phase9_dashboard/phase9_dashboard.md`). The migration drops the old plain snapshot views
 and, with them, every `analytics.*` view (`DROP VIEW ... CASCADE`); all thirteen are recreated by
 the `05_views` files, and the suites confirm it.
 

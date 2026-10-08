@@ -7,7 +7,8 @@ database: one where every number can be traced to a validated SQL rule.**
 > staging load, the validated core model and the analytical layer are complete.
 > **Gate B passed** (107/107); **Phase 7 views validated** (27/27); **Phase 8
 > business-question SQL validated** (31/31); **Phase 8.1** removed a portal test entity
-> (DQ-20) and made the analytical layer fast. The Power BI dashboard (Phase 9) is next.
+> (DQ-20) and made the analytical layer fast; **Phase 9** delivered the Power BI blueprint,
+> a read-only database role and a reconciliation pack (16/16). The `.pbix` is built from the blueprint.
 > See [Project status](#project-status).
 
 ---
@@ -99,7 +100,8 @@ All figures below are measured. Each is documented in `docs/`.
 │   ├── phase5_staging/       Staging load and reconciliation
 │   ├── phase6_core_model/    Core build, Gate B validation results
 │   ├── phase7_analytics/     Analytical views, eligible populations, validation
-│   └── phase8_analysis/      Business-question analysis, results and validation
+│   ├── phase8_analysis/      Business-question analysis, results and validation
+│   └── phase9_dashboard/     Power BI layer: role, dimensions, validation
 ├── python/
 │   ├── profiling/            Phase 2 profiling and targeted validation scripts
 │   ├── validation/           Design-validation scripts (e.g. snapshot rule)
@@ -114,7 +116,7 @@ All figures below are measured. Each is documented in `docs/`.
 │   └── 06_analysis/          One script per business question (Phase 8)
 ├── diagrams/erd/             Entity-relationship diagram (Mermaid)
 ├── database/seed_and_setup/  Database setup scripts
-└── dashboard/                Power BI dashboard and screenshots (Phase 9)
+└── dashboard/                Power BI blueprint, reconciliation pack, screenshots (Phase 9)
 ```
 
 ---
@@ -137,6 +139,8 @@ All figures below are measured. Each is documented in `docs/`.
 | [`docs/phase7_analytics/phase7_analytical_views.md`](docs/phase7_analytics/phase7_analytical_views.md) | Analytical views, eligibility rules, populations and disclosures |
 | [`docs/phase8_analysis/phase8_business_question_analysis.md`](docs/phase8_analysis/phase8_business_question_analysis.md) | Script catalogue, findings by question, limitations, decisions |
 | [`docs/phase8_analysis/phase8_1_dq20_and_performance.md`](docs/phase8_analysis/phase8_1_dq20_and_performance.md) | DQ-20 test-entity exclusion, indexes and materialised snapshot, before/after populations and timings, build and refresh sequence |
+| [`dashboard/README.md`](dashboard/README.md) | Power BI build guide: connection, data model, DAX measures, pages, caveats, reconciliation |
+| [`docs/phase9_dashboard/phase9_dashboard.md`](docs/phase9_dashboard/phase9_dashboard.md) | Phase 9 write-up: read-only role, dimensions, design decisions, validation |
 | [`docs/phase8_analysis/phase8_analysis_results.md`](docs/phase8_analysis/phase8_analysis_results.md) | Every result set produced by the seven analysis scripts |
 | [`diagrams/erd/nocopo_erd.md`](diagrams/erd/nocopo_erd.md) | Entity-relationship diagram |
 | [`sql/02_schema/00_draft_core_schema.sql`](sql/02_schema/00_draft_core_schema.sql) | Draft DDL with constraints tied to DQ issues |
@@ -224,6 +228,18 @@ psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/05_
 .venv/Scripts/python python/validation/04_run_validation_suite.py --phase 7
 ```
 
+**Create the Power BI presentation dimensions and the read-only role, then validate them:**
+
+```bash
+psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/05_views/10_dim_views.sql -f database/seed_and_setup/01_create_bi_role.sql
+```
+
+Set the role's password yourself with `\password nocopo_bi` in psql; no password is stored in the repository.
+
+```bash
+.venv/Scripts/python python/validation/04_run_validation_suite.py --phase 9
+```
+
 **Build the data-quality impact view, run the seven business-question scripts and validate them:**
 
 ```bash
@@ -253,7 +269,8 @@ psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/05_
 | 7 | Analytical views (metric eligibility) | Complete (27/27 checks) |
 | 8 | Business-question SQL | Complete (31/31 checks) |
 | 8.1 | Test-entity exclusion (DQ-20), performance, re-validation | Complete |
-| 9–10 | Power BI dashboard and executive findings | Next |
+| 9 | Power BI data model, DAX blueprint, read-only role, reconciliation pack | Blueprint complete (16/16 checks); report build and sign-off pending |
+| 10 | Executive findings | Next |
 | 11–12 | Packaging and final QA | Planned |
 
 ---

@@ -73,6 +73,15 @@ The ERD is in [`../diagrams/erd/`](../diagrams/erd/nocopo_erd.md) and the DDL is
 | [`phase8_analysis_results.md`](phase8_analysis/phase8_analysis_results.md) | Every result set from the seven `sql/06_analysis` scripts |
 | [`phase8_validation_results.md`](phase8_analysis/phase8_validation_results.md) | Generated Phase 8 results: independent recounts and DQ-impact reconciliation (31 GATE + 2 INFO) |
 
+## Phase 9 — Power BI Layer
+
+| Document | Purpose |
+|---|---|
+| [`phase9_dashboard.md`](phase9_dashboard/phase9_dashboard.md) | Read-only BI role, presentation dimensions, design decisions, findings to carry forward |
+| [`phase9_validation_results.md`](phase9_dashboard/phase9_validation_results.md) | Generated Phase 9 results: role privileges and dimension checks (16 GATE + 1 INFO) |
+| [`../dashboard/README.md`](../dashboard/README.md) | Power BI build guide: connection, model, DAX, pages, caveats, reconciliation |
+| [`../dashboard/reconciliation_log.md`](../dashboard/reconciliation_log.md) | Dashboard-to-SQL reconciliation log (177 figures) |
+
 ## Generated Reports
 
 The following files are written by scripts. Regenerate them by running the
@@ -88,6 +97,8 @@ script rather than editing them by hand.
 | `phase7_analytics/phase7_view_validation_results.md` | `python/validation/04_run_validation_suite.py --phase 7` |
 | `phase8_analysis/phase8_analysis_results.md` | `python/validation/05_run_analysis_scripts.py` |
 | `phase8_analysis/phase8_validation_results.md` | `python/validation/04_run_validation_suite.py --phase 8` |
+| `phase9_dashboard/phase9_validation_results.md` | `python/validation/04_run_validation_suite.py --phase 9` |
+| `../dashboard/reconciliation_log.md` | `python/validation/06_generate_reconciliation_log.py` (not overwritten once signed) |
 
 ⚠ `data_profiling_report.md` contains a manual correction note in §13. Re-running
 its script would overwrite that note.

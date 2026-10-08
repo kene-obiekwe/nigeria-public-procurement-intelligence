@@ -26,12 +26,15 @@ Usage
         python python/validation/04_run_validation_suite.py --phase 7
     Phase 8 business-question outputs and DQ-impact view:
         python python/validation/04_run_validation_suite.py --phase 8
+    Phase 9 Power BI layer (read-only role and presentation dimensions):
+        python python/validation/04_run_validation_suite.py --phase 9
 
 Output
 ------
     Phase 6: docs/phase6_core_model/phase6_validation_results.md
     Phase 7: docs/phase7_analytics/phase7_view_validation_results.md
     Phase 8: docs/phase8_analysis/phase8_validation_results.md
+    Phase 9: docs/phase9_dashboard/phase9_validation_results.md
     Exit code 1 if any GATE check fails.
 """
 
@@ -59,8 +62,13 @@ SUITES = {
           os.path.join("docs", "phase8_analysis", "phase8_validation_results.md"),
           "Phase 8 — Business-Question Validation Results",
           "docs/phase8_analysis/phase8_business_question_analysis.md", False),
+    "9": ("11_*.sql",
+          os.path.join("docs", "phase9_dashboard", "phase9_validation_results.md"),
+          "Phase 9 — Power BI Layer Validation Results",
+          "docs/phase9_dashboard/phase9_dashboard.md", False),
 }
-GATE_LABELS = {"6": "Gate B result", "7": "Phase 7 exit-gate result", "8": "Phase 8 validation result"}
+GATE_LABELS = {"6": "Gate B result", "7": "Phase 7 exit-gate result", "8": "Phase 8 validation result",
+                "9": "Phase 9 validation result"}
 
 
 def main():
