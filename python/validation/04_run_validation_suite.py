@@ -24,11 +24,14 @@ Usage
         python python/validation/04_run_validation_suite.py
     Phase 7 analytical views:
         python python/validation/04_run_validation_suite.py --phase 7
+    Phase 8 business-question outputs and DQ-impact view:
+        python python/validation/04_run_validation_suite.py --phase 8
 
 Output
 ------
     Phase 6: docs/phase6_core_model/phase6_validation_results.md
     Phase 7: docs/phase7_analytics/phase7_view_validation_results.md
+    Phase 8: docs/phase8_analysis/phase8_validation_results.md
     Exit code 1 if any GATE check fails.
 """
 
@@ -52,7 +55,12 @@ SUITES = {
     "7": ("09_*.sql",
           os.path.join("docs", "phase7_analytics", "phase7_view_validation_results.md"),
           "Phase 7 — Analytical View Validation Results", "docs/phase7_analytics/phase7_analytical_views.md", False),
+    "8": ("10_*.sql",
+          os.path.join("docs", "phase8_analysis", "phase8_validation_results.md"),
+          "Phase 8 — Business-Question Validation Results",
+          "docs/phase8_analysis/phase8_business_question_analysis.md", False),
 }
+GATE_LABELS = {"6": "Gate B result", "7": "Phase 7 exit-gate result", "8": "Phase 8 validation result"}
 
 
 def main():
@@ -92,7 +100,7 @@ def main():
     passed = stage1_ok and not gate_failed
 
     fmt = lambda v: "" if v is None else (f"{int(v):,}" if v.lstrip("-").isdigit() else v)
-    gate_label = "Gate B result" if args.phase == "6" else "Phase 7 exit-gate result"
+    gate_label = GATE_LABELS[args.phase]
     out = [
         f"# {title}",
         "",

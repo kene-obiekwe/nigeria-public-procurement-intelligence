@@ -64,6 +64,14 @@ The ERD is in [`../diagrams/erd/`](../diagrams/erd/nocopo_erd.md) and the DDL is
 | [`phase7_analytical_views.md`](phase7_analytics/phase7_analytical_views.md) | View catalogue, eligibility rules as implemented, eligible populations, exclusion waterfalls, interpretations to confirm |
 | [`phase7_view_validation_results.md`](phase7_analytics/phase7_view_validation_results.md) | Generated Phase 7 exit-gate results (24 GATE + 12 INFO) |
 
+## Phase 8 — Business-Question Analysis
+
+| Document | Purpose |
+|---|---|
+| [`phase8_business_question_analysis.md`](phase8_analysis/phase8_business_question_analysis.md) | Script catalogue, `vw_dq_impact`, findings by question, limitations, decisions for review |
+| [`phase8_analysis_results.md`](phase8_analysis/phase8_analysis_results.md) | Every result set from the seven `sql/06_analysis` scripts |
+| [`phase8_validation_results.md`](phase8_analysis/phase8_validation_results.md) | Generated Phase 8 results: independent recounts and DQ-impact reconciliation (27 GATE + 2 INFO) |
+
 ## Generated Reports
 
 The following files are written by scripts. Regenerate them by running the
@@ -77,6 +85,8 @@ script rather than editing them by hand.
 | `phase5_staging/phase5_staging_results.md` | `python/ingest/02_reconcile_staging.py` |
 | `phase6_core_model/phase6_validation_results.md` | `python/validation/04_run_validation_suite.py` |
 | `phase7_analytics/phase7_view_validation_results.md` | `python/validation/04_run_validation_suite.py --phase 7` |
+| `phase8_analysis/phase8_analysis_results.md` | `python/validation/05_run_analysis_scripts.py` |
+| `phase8_analysis/phase8_validation_results.md` | `python/validation/04_run_validation_suite.py --phase 8` |
 
 ⚠ `data_profiling_report.md` contains a manual correction note in §13. Re-running
 its script would overwrite that note.
