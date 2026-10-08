@@ -5,8 +5,9 @@ database: one where every number can be traced to a validated SQL rule.**
 
 > **Status: in progress.** Data audit, relational design, the PostgreSQL
 > staging load, the validated core model and the analytical layer are complete.
-> **Gate B passed** (102/102); **Phase 7 views validated** (24/24); **Phase 8
-> business-question SQL validated** (27/27). The Power BI dashboard (Phase 9) is next.
+> **Gate B passed** (107/107); **Phase 7 views validated** (27/27); **Phase 8
+> business-question SQL validated** (31/31); **Phase 8.1** removed a portal test entity
+> (DQ-20) and made the analytical layer fast. The Power BI dashboard (Phase 9) is next.
 > See [Project status](#project-status).
 
 ---
@@ -124,7 +125,7 @@ All figures below are measured. Each is documented in `docs/`.
 |---|---|
 | [`docs/phase2_profiling/data_profiling_report.md`](docs/phase2_profiling/data_profiling_report.md) | Structural and data-quality profile of the raw file |
 | [`docs/phase2_profiling/targeted_validation_report.md`](docs/phase2_profiling/targeted_validation_report.md) | Follow-up checks on profiling anomalies |
-| [`docs/phase3_data_quality/phase3_data_quality_decision_log.md`](docs/phase3_data_quality/phase3_data_quality_decision_log.md) | Issues DQ-01 to DQ-18 with treatment decisions |
+| [`docs/phase3_data_quality/phase3_data_quality_decision_log.md`](docs/phase3_data_quality/phase3_data_quality_decision_log.md) | Issues DQ-01 to DQ-20 with treatment decisions |
 | [`docs/phase3_data_quality/phase3_metric_eligibility.md`](docs/phase3_data_quality/phase3_metric_eligibility.md) | Analytical grain and per-metric eligibility rules |
 | [`docs/phase3_data_quality/phase3_data_dictionary.md`](docs/phase3_data_quality/phase3_data_dictionary.md) | Source field → meaning → target column |
 | [`docs/phase3_data_quality/phase3_2_correction_log.md`](docs/phase3_data_quality/phase3_2_correction_log.md) | C-06: budget metric aggregated per budget line |
@@ -135,6 +136,7 @@ All figures below are measured. Each is documented in `docs/`.
 | [`docs/phase6_core_model/phase6_validation_results.md`](docs/phase6_core_model/phase6_validation_results.md) | Check-by-check Gate B results (119 checks) |
 | [`docs/phase7_analytics/phase7_analytical_views.md`](docs/phase7_analytics/phase7_analytical_views.md) | Analytical views, eligibility rules, populations and disclosures |
 | [`docs/phase8_analysis/phase8_business_question_analysis.md`](docs/phase8_analysis/phase8_business_question_analysis.md) | Script catalogue, findings by question, limitations, decisions |
+| [`docs/phase8_analysis/phase8_1_dq20_and_performance.md`](docs/phase8_analysis/phase8_1_dq20_and_performance.md) | DQ-20 test-entity exclusion, indexes and materialised snapshot, before/after populations and timings, build and refresh sequence |
 | [`docs/phase8_analysis/phase8_analysis_results.md`](docs/phase8_analysis/phase8_analysis_results.md) | Every result set produced by the seven analysis scripts |
 | [`diagrams/erd/nocopo_erd.md`](diagrams/erd/nocopo_erd.md) | Entity-relationship diagram |
 | [`sql/02_schema/00_draft_core_schema.sql`](sql/02_schema/00_draft_core_schema.sql) | Draft DDL with constraints tied to DQ issues |
@@ -195,8 +197,18 @@ psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/02_
 **Build the core model and run the Gate B validation suite:**
 
 ```bash
-psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/04_transformations/01_build_dim_buyer.sql -f sql/04_transformations/02_build_dim_supplier.sql -f sql/04_transformations/03_process_snapshot.sql
+psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/02_schema/02_performance_indexes.sql -f sql/04_transformations/01_build_dim_buyer.sql -f sql/04_transformations/02_build_dim_supplier.sql -f sql/04_transformations/03_process_snapshot.sql
 ```
+
+The process snapshot is a materialised view. After any later change to `stg.*` or
+`core.dim_buyer`, refresh it before using the analytics views:
+
+```bash
+psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/04_transformations/04_refresh_snapshot.sql
+```
+
+A database built before Phase 8.1 needs the one-off migrations first; see
+[`docs/phase8_analysis/phase8_1_dq20_and_performance.md`](docs/phase8_analysis/phase8_1_dq20_and_performance.md) §6.
 
 ```bash
 .venv/Scripts/python python/validation/04_run_validation_suite.py
@@ -237,9 +249,10 @@ psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/05_
 | 3 | Data-quality decision log, metric eligibility, data dictionary | Complete (frozen) |
 | 4 | Relational model, ERD, draft DDL | Complete (v1.1 approved) |
 | 5 | PostgreSQL staging load and reconciliation | Complete (64/64 checks) |
-| 6 | Core model and validation suite | Complete (Gate B: 102/102) |
-| 7 | Analytical views (metric eligibility) | Complete (24/24 checks) |
-| 8 | Business-question SQL | Complete (27/27 checks) |
+| 6 | Core model and validation suite | Complete (Gate B: 107/107 after DQ-20) |
+| 7 | Analytical views (metric eligibility) | Complete (27/27 checks) |
+| 8 | Business-question SQL | Complete (31/31 checks) |
+| 8.1 | Test-entity exclusion (DQ-20), performance, re-validation | Complete |
 | 9–10 | Power BI dashboard and executive findings | Next |
 | 11–12 | Packaging and final QA | Planned |
 

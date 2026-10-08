@@ -27,11 +27,11 @@ Source acquisition (Phase 1) is documented in [`../data/README.md`](../data/READ
 
 | Document | Purpose |
 |---|---|
-| [`phase3_data_quality_decision_log.md`](phase3_data_quality/phase3_data_quality_decision_log.md) | Issues DQ-01 to DQ-19 and their treatment decisions |
+| [`phase3_data_quality_decision_log.md`](phase3_data_quality/phase3_data_quality_decision_log.md) | Issues DQ-01 to DQ-20 and their treatment decisions |
 | [`phase3_metric_eligibility.md`](phase3_data_quality/phase3_metric_eligibility.md) | Analytical grains and per-metric eligibility rules (v1.2) |
 | [`phase3_data_dictionary.md`](phase3_data_quality/phase3_data_dictionary.md) | Source field → business meaning → target column |
 | [`phase3_1_correction_log.md`](phase3_data_quality/phase3_1_correction_log.md) | Corrections C-01 to C-05 |
-| [`phase3_2_correction_log.md`](phase3_data_quality/phase3_2_correction_log.md) | Corrections C-06 to C-10 (budget-line grain, DQ-04 count, value semantics, artefact repair, DQ-19) |
+| [`phase3_2_correction_log.md`](phase3_data_quality/phase3_2_correction_log.md) | Corrections C-06 to C-11 (budget-line grain, DQ-04 count, value semantics, artefact repair, DQ-19, DQ-20 test entity) |
 
 ## Phase 4 — Relational Data Model
 
@@ -55,22 +55,23 @@ The ERD is in [`../diagrams/erd/`](../diagrams/erd/nocopo_erd.md) and the DDL is
 | Document | Purpose |
 |---|---|
 | [`phase6_core_model.md`](phase6_core_model/phase6_core_model.md) | Core dimensions, process snapshot, design decisions, Gate B summary, findings for Phase 7 |
-| [`phase6_validation_results.md`](phase6_core_model/phase6_validation_results.md) | Generated Gate B results: 102 GATE checks and 17 INFO measurements |
+| [`phase6_validation_results.md`](phase6_core_model/phase6_validation_results.md) | Generated Gate B results: 107 GATE checks and 17 INFO measurements |
 
 ## Phase 7 — Analytical Layer
 
 | Document | Purpose |
 |---|---|
 | [`phase7_analytical_views.md`](phase7_analytics/phase7_analytical_views.md) | View catalogue, eligibility rules as implemented, eligible populations, exclusion waterfalls, interpretations to confirm |
-| [`phase7_view_validation_results.md`](phase7_analytics/phase7_view_validation_results.md) | Generated Phase 7 exit-gate results (24 GATE + 12 INFO) |
+| [`phase7_view_validation_results.md`](phase7_analytics/phase7_view_validation_results.md) | Generated Phase 7 exit-gate results (27 GATE + 13 INFO) |
 
 ## Phase 8 — Business-Question Analysis
 
 | Document | Purpose |
 |---|---|
 | [`phase8_business_question_analysis.md`](phase8_analysis/phase8_business_question_analysis.md) | Script catalogue, `vw_dq_impact`, findings by question, limitations, decisions for review |
+| [`phase8_1_dq20_and_performance.md`](phase8_analysis/phase8_1_dq20_and_performance.md) | Phase 8.1: DQ-20 test-entity exclusion, performance work, before/after populations and timings, build and refresh sequence |
 | [`phase8_analysis_results.md`](phase8_analysis/phase8_analysis_results.md) | Every result set from the seven `sql/06_analysis` scripts |
-| [`phase8_validation_results.md`](phase8_analysis/phase8_validation_results.md) | Generated Phase 8 results: independent recounts and DQ-impact reconciliation (27 GATE + 2 INFO) |
+| [`phase8_validation_results.md`](phase8_analysis/phase8_validation_results.md) | Generated Phase 8 results: independent recounts and DQ-impact reconciliation (31 GATE + 2 INFO) |
 
 ## Generated Reports
 

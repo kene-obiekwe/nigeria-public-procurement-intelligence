@@ -15,7 +15,7 @@
 Phase 3 documentation was frozen on 2026-08-18. Changes are allowed only
 through an explicitly approved correction pass. This log records the corrections
 made in the Phase 3.2 pass (C-06 to C-10). It arose from the Phase 4.1 validation of the process-snapshot
-rule against the raw data.
+rule against the raw data. C-11 was added on 2026-10-08 after the Phase 8 review.
 
 ---
 
@@ -97,6 +97,21 @@ rule against the raw data.
 
 ---
 
+## Correction C-11 — New Issue DQ-20 (Portal Test Entity)
+
+| Attribute | Detail |
+|-----------|--------|
+| **Correction ID** | C-11 |
+| **Document** | `docs/phase3_data_quality/phase3_data_quality_decision_log.md`: new issue DQ-20, summary-matrix row, flag specification row |
+| **Issue** | The Phase 8 review found that `TEST MINISTRY - NOCOPO` (`NG-BPP-BPP-NOC-90`; 427 releases, 412 OCIDs, 183 active valid awards worth NGN 72.0bn) was included in every analytical metric and in the entity rankings. It is a portal test artefact. |
+| **Change** | DQ-20 added: RETAIN in `stg`/`core` + FLAG (`core.dim_buyer.test_entity_flag = TEST_ENTITY`) + EXCLUDE_FROM_METRIC for all analytical metrics, including M-E03 lifecycle counts, the entity benchmark and the `vw_dq_impact` populations. No staging row is deleted. A scan for other test or dummy entities (whole-word match on test, demo, dummy, sample, trial, nocopo in buyer and supplier IDs and names) found none. |
+| **Did an existing Phase 3 decision change?** | Yes, in effect: the metric populations in `phase3_metric_eligibility.md` v1.2 now also exclude this buyer. The metric definitions are unchanged; only the eligible and candidate populations shrink (see the before/after table in `docs/phase8_analysis/phase8_1_dq20_and_performance.md`). |
+| **Implemented in** | `core.dim_buyer.test_entity_flag` (DDL v1.4; migration `sql/02_schema/01_migration_v1_4.sql`); `test_entity_flag IS NULL` in every `sql/05_views` view; checks EN-15 to EN-19 (Gate B), AV-19 to AV-21 (Phase 7), DQI-16 to DQI-19 (Phase 8) |
+| **Approved by** | Project owner, 2026-10-08 |
+| **Status** | Applied ✓ |
+
+---
+
 ## Not Changed in This Pass
 
 `phase3_metric_eligibility.md` §1.3 says "deduplicate at award ID level within
@@ -113,7 +128,9 @@ metric's result.
 > Phase 3 documentation is re-frozen as of 2026-10-07 at:
 > `phase3_metric_eligibility.md` v1.2 (C-06), `phase3_data_quality_decision_log.md` v1.3
 > (C-07, C-09, C-10), `phase3_data_dictionary.md` v1.2 (C-08).
+> Re-frozen on 2026-10-08 after C-11: `phase3_data_quality_decision_log.md` v1.4 (DQ-20).
 
 ---
 
-*Correction log version: 1.2 — 2026-10-07 (C-07 to C-09 added in Phase 6; C-10 in Phase 7)*
+*Correction log version: 1.3 — 2026-10-08 (C-11 added in Phase 8.1)*
+*Version 1.2 — 2026-10-07 (C-07 to C-09 added in Phase 6; C-10 in Phase 7)*

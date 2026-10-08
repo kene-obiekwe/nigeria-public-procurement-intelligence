@@ -11,8 +11,10 @@
 -- Run:      psql -h localhost -p 5433 -U postgres -d nocopo_db -f sql/06_analysis/06_implementation_coverage.sql
 --
 -- ELIGIBLE POPULATION
---   M-I01: every snapshot contract (no exclusions by specification): 16,392.
---   M-E03: every OCID (no exclusions by specification): 98,866.
+--   M-I01: every snapshot contract (no exclusions by specification), except those
+--          of the DQ-20 portal test entity: 16,221.
+--   M-E03: every OCID (no exclusions by specification), except the 412 of the
+--          DQ-20 portal test entity: 98,454.
 --   has_implementation is true when the contract carries implementation
 --   milestones or transactions.
 --
@@ -42,7 +44,7 @@ SELECT count(*)                                                          AS elig
        count(*) FILTER (WHERE NOT has_implementation)                    AS contracts_without_implementation_data
 FROM analytics.vw_contract_implementation_coverage;
 
--- [RS1b] Register entries (analytics.vw_metric_population; about 40 s because the register evaluates every view)
+-- [RS1b] Register entries (analytics.vw_metric_population; a few seconds)
 SELECT metric_id, candidate_population, candidate_count, eligible_count, eligible_pct
 FROM analytics.vw_metric_population
 WHERE metric_id IN ('M-I01', 'M-E03')
@@ -130,8 +132,8 @@ WHERE rank_lowest_coverage <= 15
 ORDER BY rank_lowest_coverage;
 
 -- [RS6] Lifecycle funnel (M-E03): how far did processes get in what was published?
--- The implementation row counts OCIDs with an implementation-tagged release (14,313); RS1 counts
--- contracts carrying implementation data (14,304). Both are reporting measures; do not mix them.
+-- The implementation row counts OCIDs with an implementation-tagged release (14,149); RS1 counts
+-- contracts carrying implementation data (14,140). Both are reporting measures; do not mix them.
 WITH stage_counts AS (
     SELECT highest_stage_rank, highest_stage, count(*) AS ocids_ending_here
     FROM analytics.vw_lifecycle_stage

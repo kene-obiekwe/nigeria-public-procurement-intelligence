@@ -7,6 +7,8 @@
 -- Metrics:  M-C01 median number of tenderers; M-C02 single-bidder rate
 -- Source:   analytics.vw_competition_eligible (one tender per OCID)
 -- Run:      psql -h localhost -p 5433 -U postgres -d nocopo_db -f sql/06_analysis/02_competition.sql
+-- DQ-20 (Phase 8.1): the portal test entity NG-BPP-BPP-NOC-90 is excluded by every
+--           analytics view used here, so it appears in no population or ranking.
 --
 -- ELIGIBLE POPULATION
 --   PRIMARY    tender status not null and 1-100 tenderers (flag NORMAL; DQ-03).
@@ -50,7 +52,7 @@ SELECT 'sensitivity (NORMAL + ELEVATED)',
 FROM analytics.vw_competition_eligible
 ORDER BY population;
 
--- [RS1b] Register entry (analytics.vw_metric_population; about 40 s because the register evaluates every view)
+-- [RS1b] Register entry (analytics.vw_metric_population; a few seconds)
 SELECT metric_id, candidate_population, candidate_count, eligible_count, eligible_pct
 FROM analytics.vw_metric_population
 WHERE metric_id IN ('M-C01 / M-C02', 'M-C01 (sensitivity)')

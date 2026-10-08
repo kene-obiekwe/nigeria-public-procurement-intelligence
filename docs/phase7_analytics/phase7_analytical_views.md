@@ -3,8 +3,13 @@
 
 > **Phase:** 7 — Analytical Layer & Reusable Views
 > **Date:** 2026-10-07
-> **Status:** Views built. **Phase 7 exit gate passed: 24 / 24 GATE checks**, 12 INFO measurements.
-> Gate B re-confirmed: 102 / 102.
+> **Status:** Views built. **Phase 7 exit gate passed: 27 / 27 GATE checks**, 13 INFO measurements
+> (re-run after Phase 8.1; it was 24 / 24 before the DQ-20 checks AV-19 to AV-21 were added).
+> Gate B re-confirmed: 107 / 107 (102 plus EN-15 to EN-19).
+> **Phase 8.1 (2026-10-08):** the portal test entity (DQ-20) is excluded from every view, and the
+> process snapshot is materialised. Populations below are the **current** ones; the Phase 7
+> original figures are kept in the "before" column of the table in
+> `docs/phase8_analysis/phase8_1_dq20_and_performance.md`.
 > **Results log:** `docs/phase7_analytics/phase7_view_validation_results.md`
 > (`python/validation/04_run_validation_suite.py --phase 7`)
 > **Eligibility source:** `docs/phase3_data_quality/phase3_metric_eligibility.md` v1.2,
@@ -27,7 +32,8 @@ documented eligibility definition, verified against a manual spot-check".
   supplier; there are no placeholder dates in timing views; the bare buyer is
   absent from the per-entity views; and repeated supplier entries are counted
   once.
-- No stg.* or core.* object was modified.
+- No stg.* row was modified. (Phase 8.1 added the `core.dim_buyer.test_entity_flag` column,
+  indexes, and materialised the two snapshot views; no row of `stg.*` changed.)
 
 ---
 
@@ -39,21 +45,24 @@ live in `analytics.vw_metric_population`.
 
 | View | Metric(s) | Grain | Candidate population | Candidate | Eligible | % |
 |---|---|---|---|---|---|---|
-| `vw_budget_eligible` | M-P01 | budget line | Budget lines (C-06) | 97,749 | 97,196 | 99.4 |
-| `vw_competition_eligible` (primary) | M-C01, M-C02 | OCID | Snapshot tenders | 17,623 | 17,469 | 99.1 |
-| `vw_competition_eligible` (all rows) | M-C01 sensitivity | OCID | Snapshot tenders | 17,623 | 17,482 | 99.2 |
-| `vw_award_value_eligible` | M-V01 | OCID (1 award) | Snapshot awards | 16,715 | 15,946 | 95.4 |
-| `vw_supplier_award_eligible` | M-S01 | award × supplier | M-V01 eligible awards | 15,946 | 13,694 | 85.9 |
-| `vw_budget_award_comparison` | Pillar 4 / BQ3 | OCID | M-V01 eligible awards | 15,946 | 15,753 | 98.8 |
-| `vw_tender_duration_eligible` | M-E01 | OCID | Snapshot tenders | 17,623 | 9,180 | 52.1 |
-| `vw_award_lag_eligible` | M-E02 | OCID | Snapshot OCIDs with tender + award | 16,715 | 7,569 | 45.3 |
-| `vw_signature_lag_eligible` | Pillar 5 signature lag | contract | Snapshot contracts | 16,392 | 12,138 | 74.0 |
-| `vw_lifecycle_stage` | M-E03 | OCID | All OCIDs | 98,866 | 98,866 | 100.0 |
-| `vw_contract_implementation_coverage` | M-I01 | contract | Snapshot contracts | 16,392 | 16,392 | 100.0 |
-| `vw_entity_benchmark` | Entity benchmarking | buyer | Buyer IDs | 667 | 666 | 99.9 |
+| `vw_budget_eligible` | M-P01 | budget line | Budget lines (C-06) | 97,353 | 96,802 | 99.4 |
+| `vw_competition_eligible` (primary) | M-C01, M-C02 | OCID | Snapshot tenders | 17,405 | 17,253 | 99.1 |
+| `vw_competition_eligible` (all rows) | M-C01 sensitivity | OCID | Snapshot tenders | 17,405 | 17,266 | 99.2 |
+| `vw_award_value_eligible` | M-V01 | OCID (1 award) | Snapshot awards | 16,527 | 15,763 | 95.4 |
+| `vw_supplier_award_eligible` | M-S01 | award × supplier | M-V01 eligible awards | 15,763 | 13,537 | 85.9 |
+| `vw_budget_award_comparison` | Pillar 4 / BQ3 | OCID | M-V01 eligible awards | 15,763 | 15,574 | 98.8 |
+| `vw_tender_duration_eligible` | M-E01 | OCID | Snapshot tenders | 17,405 | 9,040 | 51.9 |
+| `vw_award_lag_eligible` | M-E02 | OCID | Snapshot OCIDs with tender + award | 16,527 | 7,462 | 45.2 |
+| `vw_signature_lag_eligible` | Pillar 5 signature lag | contract | Snapshot contracts | 16,221 | 12,006 | 74.0 |
+| `vw_lifecycle_stage` | M-E03 | OCID | All OCIDs (DQ-20 excluded) | 98,454 | 98,454 | 100.0 |
+| `vw_contract_implementation_coverage` | M-I01 | contract | Snapshot contracts | 16,221 | 16,221 | 100.0 |
+| `vw_entity_benchmark` | Entity benchmarking | buyer | Buyer IDs (DQ-20 excluded) | 666 | 665 | 99.8 |
 | `vw_metric_population` | — | metric | Register of the rows above | — | — | — |
 
 ### Eligibility rules as implemented
+
+Every rule below also requires that the buyer is not the DQ-20 portal test entity
+(`core.dim_buyer.test_entity_flag IS NULL`). Candidate populations exclude it too.
 
 | View | Conditions (all must hold) | Phase 3 source |
 |---|---|---|
@@ -75,21 +84,22 @@ live in `analytics.vw_metric_population`.
 
 | Ref | Measure | Value | Use |
 |---|---|---|---|
-| WF-01 | Snapshot awards not `active` (cancelled 367, pending 131, unsuccessful 25, null 2) | 525 | M-V01 excluded |
-| WF-02 | Active awards that are EXTREME or ZERO_VALUE | 244 | M-V01 excluded |
-| WF-03 / 04 / 05 | **M-S01: eligible awards whose only supplier ID is the bare `NG-BPP-`** | **2,252 awards; ₦675.8bn; 20.1% of M-V01 award value** | **Must be disclosed with every M-S01 figure** |
-| WF-06a | Eligible awards with no planning budget line | 131 | Budget-to-award excluded |
+| WF-01 | Snapshot awards not `active` (cancelled 367, pending 128, unsuccessful 25, null 2) | 522 | M-V01 excluded |
+| WF-02 | Active awards that are EXTREME or ZERO_VALUE | 242 | M-V01 excluded |
+| WF-03 / 04 / 05 | **M-S01: eligible awards whose only supplier ID is the bare `NG-BPP-`** | **2,226 awards; ₦670.4bn; 20.4% of M-V01 award value** | **Must be disclosed with every M-S01 figure** |
+| WF-06a | Eligible awards with no planning budget line | 128 | Budget-to-award excluded |
 | WF-06b | Eligible awards in MULTI_PROJECT OCIDs | 3 | Budget-to-award excluded |
-| WF-06c | Single budget line but zero or EXTREME budget | 59 | Budget-to-award excluded |
-| WF-07 | VALID dates but award before tender start (process level) | 141 | M-E02 excluded |
-| WF-08 | VALID dates but contract signed before award (process level) | 756 | Signature lag excluded |
+| WF-06c | Single budget line but zero or EXTREME budget | 58 | Budget-to-award excluded |
+| WF-07 | VALID dates but award before tender start (process level) | 135 | M-E02 excluded |
+| WF-08 | VALID dates but contract signed before award (process level) | 734 | Signature lag excluded |
 | WF-09 | M-C01 primary median tenderers | 2 | Matches the Phase 3 caveat |
-| WF-10 | Tender releases with a VALID start / eligible M-E01 OCIDs | 9,593 / 9,180 | Confirms the Phase 3 note (C-04) |
+| WF-10 | Tender releases with a VALID start / eligible M-E01 OCIDs | 9,593 / 9,040 | Confirms the Phase 3 note (C-04) |
 
 **Date conflicts: release vs. process level.** Phase 6 measured 149 and 792
 across *all* releases (checks MD-18 and MD-19). The analytical views work on
 the process snapshot, so the conflicts that actually reach the metrics are
-141 (award before tender) and 756 (signed before award). All are excluded, as
+135 (award before tender) and 734 (signed before award); before the DQ-20 exclusion they were
+141 and 756. All are excluded, as
 Kene decided. Of the approved metrics, the award-before-tender conflict
 affects only M-E02. The signed-before-award conflict affects only the Pillar 5
 signature lag.
@@ -115,19 +125,20 @@ and visibly. Items marked **confirm** should be reviewed.
 
 ## 5. Performance Note
 
-Each analytical view returns in 1–2 seconds. `vw_metric_population` takes
-about 45 seconds because it evaluates every view. The Implementation Plan
-(Phase 8) allows indexing only where real query performance justifies it. The
-candidates are `stg.releases (ocid, release_seq)` and materialising the
-snapshot views; decide on these in Phase 8 or 9, based on the Power BI refresh
-pattern.
+Phase 7 originally left every view reading the process snapshot as a plain view (a sort of
+108,277 releases per use). Single views took 1–5 s, and `vw_metric_population` about 40 s.
+Phase 8.1 added the index `stg.releases (ocid, release_seq DESC)` and materialised
+`core.vw_budget_lines` and `core.vw_process_snapshot` (same names, with indexes). Every view
+now returns in under 1 s and the register in about 3 s. Before/after timings:
+`docs/phase8_analysis/phase8_1_dq20_and_performance.md`. After any change to `stg.*` or
+`core.dim_buyer`, run `sql/04_transformations/04_refresh_snapshot.sql`.
 
 ---
 
 ## 6. Reproduce
 
 ```bash
-psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/05_views/01_budget_eligible.sql -f sql/05_views/02_competition_eligible.sql -f sql/05_views/03_award_and_supplier_eligible.sql -f sql/05_views/04_budget_award_comparison.sql -f sql/05_views/05_timing_eligible.sql -f sql/05_views/06_lifecycle_and_implementation.sql -f sql/05_views/07_entity_benchmark.sql -f sql/05_views/08_metric_population.sql
+psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/04_transformations/03_process_snapshot.sql -f sql/05_views/01_budget_eligible.sql -f sql/05_views/02_competition_eligible.sql -f sql/05_views/03_award_and_supplier_eligible.sql -f sql/05_views/04_budget_award_comparison.sql -f sql/05_views/05_timing_eligible.sql -f sql/05_views/06_lifecycle_and_implementation.sql -f sql/05_views/07_entity_benchmark.sql -f sql/05_views/08_metric_population.sql -f sql/05_views/09_dq_impact.sql
 ```
 
 ```bash
@@ -136,4 +147,4 @@ psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/05_
 
 ---
 
-*Phase 7 log version 1.0 — 2026-10-07. Raw dataset not modified; stg.* and core.* unchanged.*
+*Phase 7 log version 1.1 — 2026-10-08 (DQ-20 populations and performance, Phase 8.1). Raw dataset not modified; no stg.* row changed.*

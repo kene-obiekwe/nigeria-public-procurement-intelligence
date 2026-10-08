@@ -1,9 +1,9 @@
 # Phase 8 — Business-Question Validation Results
 
 > **Runner:** `python/validation/04_run_validation_suite.py --phase 8`  
-> **Run date:** 2026-10-08 17:27:37  
+> **Run date:** 2026-10-08 18:55:46  
 > **Database:** `nocopo_db` on localhost:5433 (PostgreSQL 17.4)  
-> **Phase 8 validation result:** **PASSED**. 27 / 27 GATE checks passed; 2 INFO measurements.
+> **Phase 8 validation result:** **PASSED**. 31 / 31 GATE checks passed; 2 INFO measurements.
 
 Interpretation and decisions: `docs/phase8_analysis/phase8_business_question_analysis.md`.
 
@@ -14,19 +14,19 @@ Interpretation and decisions: `docs/phase8_analysis/phase8_business_question_ana
 | ID | Check | Severity | Expected | Actual | Result |
 |---|---|---|---|---|---|
 | BQ-01 | BQ1 top supplier award value (M-S01), NGN | GATE | 210293731092.5000 | 210293731092.5000 | ✓ |
-| BQ-02 | BQ1 distinct suppliers in scope (M-S01) | GATE | 9,941 | 9,941 | ✓ |
-| BQ-03 | BQ1 value held by the ten largest suppliers (M-S01), NGN | GATE | 766933553768.5300 | 766933553768.5300 | ✓ |
+| BQ-02 | BQ1 distinct suppliers in scope (M-S01) | GATE | 9,800 | 9,800 | ✓ |
+| BQ-03 | BQ1 value held by the ten largest suppliers (M-S01), NGN | GATE | 759979609058.4600 | 759979609058.4600 | ✓ |
 | BQ-04 | BQ2 median tenderers, primary population (M-C01) | GATE | 2 | 2 | ✓ |
-| BQ-05 | BQ2 single-bidder tenders, primary population (M-C02 numerator) | GATE | 7,681 | 7,681 | ✓ |
-| BQ-06 | BQ3 total budget of comparable OCIDs, NGN | GATE | 12583655087254.5700 | 12583655087254.5700 | ✓ |
-| BQ-07 | BQ3 total award value of comparable OCIDs, NGN | GATE | 3163145755683.2400 | 3163145755683.2400 | ✓ |
-| BQ-08 | BQ3 median award-to-budget ratio | GATE | 0.9304 | 0.9304 | ✓ |
+| BQ-05 | BQ2 single-bidder tenders, primary population (M-C02 numerator) | GATE | 7,599 | 7,599 | ✓ |
+| BQ-06 | BQ3 total budget of comparable OCIDs, NGN | GATE | 12434523083233.5700 | 12434523083233.5700 | ✓ |
+| BQ-07 | BQ3 total award value of comparable OCIDs, NGN | GATE | 3091515320327.6700 | 3091515320327.6700 | ✓ |
+| BQ-08 | BQ3 median award-to-budget ratio | GATE | 0.92975 | 0.92975 | ✓ |
 | BQ-09 | BQ4 median tender open duration, days (M-E01) | GATE | 28 | 28 | ✓ |
-| BQ-10 | BQ4 median award lag, days (M-E02) | GATE | 94 | 94 | ✓ |
+| BQ-10 | BQ4 median award lag, days (M-E02) | GATE | 97 | 97 | ✓ |
 | BQ-11 | BQ4 median signature lag, days | GATE | 5 | 5 | ✓ |
-| BQ-12 | BQ6 contracts with implementation data (M-I01 numerator) | GATE | 14,304 | 14,304 | ✓ |
-| BQ-13 | BQ6 OCIDs with an implementation-tagged release (M-E03 stage 5) | GATE | 14,313 | 14,313 | ✓ |
-| BQ-14 | BQ6 OCIDs reaching contract stage or beyond (M-E03) | GATE | 16,392 | 16,392 | ✓ |
+| BQ-12 | BQ6 contracts with implementation data (M-I01 numerator) | GATE | 14,140 | 14,140 | ✓ |
+| BQ-13 | BQ6 OCIDs with an implementation-tagged release (M-E03 stage 5) | GATE | 14,149 | 14,149 | ✓ |
+| BQ-14 | BQ6 OCIDs reaching contract stage or beyond (M-E03) | GATE | 16,221 | 16,221 | ✓ |
 | DQI-01 | DQ impact: metrics where excluded records <> candidate - eligible | GATE | 0 | 0 | ✓ |
 | DQI-02 | DQ impact: metrics whose candidate or eligible count differs from vw_metric_population | GATE | 0 | 0 | ✓ |
 | DQI-03 | DQ impact: metrics in the view that are absent from vw_metric_population | GATE | 0 | 0 | ✓ |
@@ -34,14 +34,18 @@ Interpretation and decisions: `docs/phase8_analysis/phase8_business_question_ana
 | DQI-05 | DQ impact: DQ-04 records (101-1,000 tenderers) = independent count | GATE | 13 | 13 | ✓ |
 | DQI-06 | DQ impact: DQ-07 records (extreme award value) = independent count | GATE | 1 | 1 | ✓ |
 | DQI-07 | DQ impact: DQ-06 budget lines (extreme budget) = independent count | GATE | 32 | 32 | ✓ |
-| DQI-08 | DQ impact: DQ-14 awards (no usable supplier ID) = independent count | GATE | 2,252 | 2,252 | ✓ |
-| DQI-09 | DQ impact: DQ-14 excluded award value, NGN = independent sum | GATE | 675824490153.5800 | 675824490153.5800 | ✓ |
-| DQI-10 | DQ impact: M-E02 DATE-ORDER records = Phase 7 award-before-tender count (WF-07) | GATE | 141 | 141 | ✓ |
-| DQI-11 | DQ impact: P5-SIG DATE-ORDER records = Phase 7 signed-before-award count (WF-08) | GATE | 756 | 756 | ✓ |
+| DQI-08 | DQ impact: DQ-14 awards (no usable supplier ID) = independent count | GATE | 2,226 | 2,226 | ✓ |
+| DQI-09 | DQ impact: DQ-14 excluded award value, NGN = independent sum | GATE | 670388233364.5800 | 670388233364.5800 | ✓ |
+| DQI-10 | DQ impact: M-E02 DATE-ORDER records = Phase 7 award-before-tender count (WF-07) | GATE | 135 | 135 | ✓ |
+| DQI-11 | DQ impact: P5-SIG DATE-ORDER records = Phase 7 signed-before-award count (WF-08) | GATE | 734 | 734 | ✓ |
 | DQI-12 | DQ impact: metrics where single-cause losses exceed excluded records | GATE | 0 | 0 | ✓ |
 | DQI-13 | DQ impact: rows where records_with_issue > candidate_records | GATE | 0 | 0 | ✓ |
-| DQI-14 | DQ impact: M-S01 excluded share of M-V01 award value, % (matches WF-05 disclosure) | INFO |  | 20.10 | info |
-| DQI-15 | DQ impact: rows in the view | INFO |  | 40 | info |
+| DQI-16 | DQ impact: DQ-20 pre-excluded snapshot awards (M-V01) = independent count | GATE | 188 | 188 | ✓ |
+| DQI-17 | DQ impact: DQ-20 pre-excluded snapshot tenders (M-C01/C02) = independent count | GATE | 218 | 218 | ✓ |
+| DQI-18 | DQ impact: DQ-20 pre-excluded budget lines (M-P01) = independent count | GATE | 396 | 396 | ✓ |
+| DQI-19 | DQ impact: DQ-20 pre-excluded buyer IDs (ENTITY) | GATE | 1 | 1 | ✓ |
+| DQI-14 | DQ impact: M-S01 excluded share of M-V01 award value, % (matches WF-05 disclosure) | INFO |  | 20.37 | info |
+| DQI-15 | DQ impact: rows in the view | INFO |  | 47 | info |
 
 ---
 

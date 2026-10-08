@@ -4,7 +4,7 @@
 -- ============================================================
 
 -- ------------------------------------------------------------
--- M-E03: one row per OCID (all 98,866 — no exclusions per spec)
+-- M-E03: one row per OCID (all OCIDs except the 412 of the DQ-20 portal test entity)
 -- Highest lifecycle stage present across ALL releases of the OCID.
 -- Stage order: planning(1) < tender(2) < award(3) < contract(4) < implementation(5)
 -- Conversion rate stage k = COUNT(highest_stage_rank >= k) / COUNT(highest_stage_rank >= k-1)
@@ -31,7 +31,8 @@ SELECT s.ocid,
            WHEN 'planning'       = ANY (s.tags_observed) THEN 'planning'
        END                                                   AS highest_stage
 FROM core.vw_process_snapshot s
-JOIN core.dim_buyer d ON d.buyer_id = s.buyer_id;
+JOIN core.dim_buyer d ON d.buyer_id = s.buyer_id
+WHERE d.test_entity_flag IS NULL;                  -- DQ-20
 
 COMMENT ON VIEW analytics.vw_lifecycle_stage IS
     'M-E03: every OCID with its highest reported lifecycle stage across all releases. '
@@ -61,7 +62,8 @@ LEFT JOIN (SELECT contract_id, count(*) AS transaction_count
            FROM stg.transactions GROUP BY contract_id) x ON x.contract_id = c.contract_id
 LEFT JOIN (SELECT contract_id, count(*) AS implementation_milestone_count
            FROM stg.milestones WHERE milestone_source = 'IMPLEMENTATION'
-           GROUP BY contract_id) m ON m.contract_id = c.contract_id;
+           GROUP BY contract_id) m ON m.contract_id = c.contract_id
+WHERE d.test_entity_flag IS NULL;                  -- DQ-20
 
 COMMENT ON VIEW analytics.vw_contract_implementation_coverage IS
     'M-I01: one row per contract (snapshot). has_implementation indicates that implementation '

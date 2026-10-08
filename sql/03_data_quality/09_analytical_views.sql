@@ -9,26 +9,35 @@
 --       DISTINCT ON core snapshot views) and must match exactly.
 -- SP-*: spot checks on named records with known expected outcomes.
 -- WF-*: INFO exclusion waterfalls and disclosures behind each population.
+-- DQ-20 (Phase 8.1): every independent recount first drops the portal test entity
+--       NG-BPP-BPP-NOC-90, identified here by its literal ID (the views use
+--       core.dim_buyer.test_entity_flag; EN-15/16 check that flag).
 -- ============================================================
 WITH
 rel AS (SELECT release_id, ocid, release_seq, buyer_id, party_flag FROM stg.releases),
+-- buyer of each process = buyer of its latest release; DQ-20 test entity removed
+ob AS (SELECT DISTINCT ON (ocid) ocid, buyer_id FROM stg.releases ORDER BY ocid, release_seq DESC),
+non_test AS (SELECT ocid, buyer_id FROM ob WHERE buyer_id <> 'NG-BPP-BPP-NOC-90'),
 -- Latest-release selection recomputed with ROW_NUMBER (the core views use
 -- DISTINCT ON), so a defect in either formulation surfaces as a mismatch.
 latest_tender AS (
     SELECT * FROM (SELECT r.ocid, t.*,
                           row_number() OVER (PARTITION BY r.ocid ORDER BY r.release_seq DESC) AS rn
-                   FROM stg.tender t JOIN rel r USING (release_id)) x
+                   FROM stg.tender t JOIN rel r USING (release_id)
+                   JOIN non_test n ON n.ocid = r.ocid) x
     WHERE rn = 1),
 latest_award AS (
     SELECT * FROM (SELECT r.ocid, a.*,
                           row_number() OVER (PARTITION BY r.ocid ORDER BY r.release_seq DESC) AS rn
-                   FROM stg.awards a JOIN rel r USING (release_id)) x
+                   FROM stg.awards a JOIN rel r USING (release_id)
+                   JOIN non_test n ON n.ocid = r.ocid) x
     WHERE rn = 1),
 latest_line AS (
     SELECT * FROM (SELECT r.ocid, r.buyer_id, r.party_flag, p.*,
                           row_number() OVER (PARTITION BY r.ocid, p.budget_project_id ORDER BY r.release_seq DESC) AS rn
                    FROM stg.planning p JOIN rel r USING (release_id)
-                   WHERE p.budget_project_id IS NOT NULL) x
+                   WHERE p.budget_project_id IS NOT NULL
+                     AND r.buyer_id <> 'NG-BPP-BPP-NOC-90') x
     WHERE rn = 1),
 award_ok AS (SELECT * FROM latest_award
              WHERE status = 'active' AND award_value_flag IS NULL AND award_monetary_flag IS NULL),
@@ -78,14 +87,16 @@ c (check_id, check_name, severity, expected, actual) AS (VALUES
     ((SELECT count(*) FROM analytics.vw_tender_duration_eligible WHERE tender_duration_days < 0)
    + (SELECT count(*) FROM analytics.vw_award_lag_eligible WHERE award_lag_days < 0)
    + (SELECT count(*) FROM analytics.vw_signature_lag_eligible WHERE signature_lag_days < 0))::text),
- ('AV-13', 'M-E03 rows = all OCIDs', 'GATE', '98866', (SELECT count(*) FROM analytics.vw_lifecycle_stage)::text),
+ ('AV-13', 'M-E03 rows = all OCIDs except the DQ-20 test entity', 'GATE',
+    (SELECT count(*) FROM non_test)::text, (SELECT count(*) FROM analytics.vw_lifecycle_stage)::text),
  ('AV-14', 'M-I01 rows = one contract per OCID with a contract', 'GATE',
-    (SELECT count(DISTINCT r.ocid) FROM stg.contracts c JOIN rel r USING (release_id))::text,
+    (SELECT count(DISTINCT r.ocid) FROM stg.contracts c JOIN rel r USING (release_id)
+       JOIN non_test n ON n.ocid = r.ocid)::text,
     (SELECT count(*) FROM analytics.vw_contract_implementation_coverage)::text),
  ('AV-15', 'Entity benchmark rows with an INCOMPLETE buyer (DQ-19)', 'GATE', '0',
     (SELECT count(*) FROM analytics.vw_entity_benchmark WHERE buyer_id = 'NG-BPP-')::text),
  ('AV-16', 'Entity benchmark: sum of process_count = OCIDs with a complete buyer', 'GATE',
-    (SELECT count(*) FROM analytics.vw_lifecycle_stage WHERE buyer_id <> 'NG-BPP-')::text,
+    (SELECT count(*) FROM non_test WHERE buyer_id <> 'NG-BPP-')::text,
     (SELECT sum(process_count) FROM analytics.vw_entity_benchmark)::text),
  ('AV-17', 'Entity benchmark: sum of planned_budget_total = M-P01 total', 'GATE',
     (SELECT sum(budget_amount) FROM analytics.vw_budget_eligible)::text,
@@ -93,6 +104,31 @@ c (check_id, check_name, severity, expected, actual) AS (VALUES
  ('AV-18', 'Entity benchmark: sum of award_value_total = M-V01 total (complete buyers)', 'GATE',
     (SELECT sum(award_value_amount) FROM analytics.vw_award_value_eligible WHERE buyer_id_flag IS NULL)::text,
     (SELECT sum(award_value_total) FROM analytics.vw_entity_benchmark)::text),
+ -- DQ-20: portal test entity absent from every analytics view, retained in core ------
+ ('AV-19', 'DQ-20: rows of NG-BPP-BPP-NOC-90 in any analytics view', 'GATE', '0',
+    ((SELECT count(*) FROM analytics.vw_budget_eligible WHERE buyer_id = 'NG-BPP-BPP-NOC-90')
+   + (SELECT count(*) FROM analytics.vw_competition_eligible WHERE buyer_id = 'NG-BPP-BPP-NOC-90')
+   + (SELECT count(*) FROM analytics.vw_award_value_eligible WHERE buyer_id = 'NG-BPP-BPP-NOC-90')
+   + (SELECT count(*) FROM analytics.vw_supplier_award_eligible WHERE buyer_id = 'NG-BPP-BPP-NOC-90')
+   + (SELECT count(*) FROM analytics.vw_budget_award_comparison WHERE buyer_id = 'NG-BPP-BPP-NOC-90')
+   + (SELECT count(*) FROM analytics.vw_tender_duration_eligible WHERE buyer_id = 'NG-BPP-BPP-NOC-90')
+   + (SELECT count(*) FROM analytics.vw_award_lag_eligible WHERE buyer_id = 'NG-BPP-BPP-NOC-90')
+   + (SELECT count(*) FROM analytics.vw_signature_lag_eligible WHERE buyer_id = 'NG-BPP-BPP-NOC-90')
+   + (SELECT count(*) FROM analytics.vw_lifecycle_stage WHERE buyer_id = 'NG-BPP-BPP-NOC-90')
+   + (SELECT count(*) FROM analytics.vw_contract_implementation_coverage WHERE buyer_id = 'NG-BPP-BPP-NOC-90')
+   + (SELECT count(*) FROM analytics.vw_entity_benchmark WHERE buyer_id = 'NG-BPP-BPP-NOC-90'))::text),
+ ('AV-20', 'DQ-20: test-entity OCIDs still present in core.vw_process_snapshot (retained)', 'GATE',
+    (SELECT count(*) FROM ob WHERE buyer_id = 'NG-BPP-BPP-NOC-90')::text,
+    (SELECT count(*) FROM core.vw_process_snapshot WHERE buyer_id = 'NG-BPP-BPP-NOC-90')::text),
+ ('AV-21', 'DQ-20: register candidate/eligible counts for M-E03 = OCIDs except the test entity', 'GATE',
+    (SELECT count(*) FROM non_test)::text || '/' || (SELECT count(*) FROM non_test)::text,
+    (SELECT candidate_count::text || '/' || eligible_count::text
+       FROM analytics.vw_metric_population WHERE metric_id = 'M-E03')),
+ ('AV-22', 'DQ-20: test-entity rows kept in staging (active award rows / tender rows, all releases)', 'INFO', NULL,
+    ((SELECT count(*) FROM stg.awards a JOIN stg.releases r USING (release_id)
+       WHERE r.buyer_id = 'NG-BPP-BPP-NOC-90' AND a.status = 'active')::text || ' / '
+     || (SELECT count(*) FROM stg.tender t JOIN stg.releases r USING (release_id)
+          WHERE r.buyer_id = 'NG-BPP-BPP-NOC-90')::text)),
  -- Spot checks on named records ---------------------------------------------
  ('SP-01', 'FCTA NGN 1.004T award (DQ-07 EXTREME) absent from M-V01 / M-S01', 'GATE', '0',
     ((SELECT count(*) FROM analytics.vw_award_value_eligible WHERE award_value_amount >= 1e12)

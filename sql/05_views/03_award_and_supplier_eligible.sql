@@ -12,6 +12,7 @@
 --   award status = 'active'
 --   award_value_flag IS NULL           (DQ-07: exclude EXTREME, FCTA NGN 1.004T)
 --   award_monetary_flag IS NULL        (DQ-16: exclude ZERO_VALUE -> value > 0)
+--   buyer test_entity_flag IS NULL     (DQ-20: exclude portal test entity)
 --   M-V01 = MEDIAN(award_value_amount)
 --
 -- vw_supplier_award_eligible (M-S01)  grain: one row per (award, distinct supplier)
@@ -43,7 +44,8 @@ JOIN core.dim_buyer d ON d.buyer_id   = s.buyer_id
 LEFT JOIN stg.tender t ON t.release_id = s.tender_release_id
 WHERE a.status = 'active'
   AND a.award_value_flag    IS NULL
-  AND a.award_monetary_flag IS NULL;
+  AND a.award_monetary_flag IS NULL
+  AND d.test_entity_flag    IS NULL;
 
 COMMENT ON VIEW analytics.vw_award_value_eligible IS
     'M-V01 eligible population: one active award per OCID (snapshot), excluding EXTREME '

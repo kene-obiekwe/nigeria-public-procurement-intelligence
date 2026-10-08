@@ -6,6 +6,7 @@
 --   both interval dates non-null and flagged VALID (DQ-08 PLACEHOLDER,
 --   DQ-09 FUTURE/IMPOSSIBLE excluded); end >= start (no negative
 --   durations); release_date is never used (DQ-10).
+-- The DQ-20 portal test entity (NG-BPP-BPP-NOC-90) is excluded from all three.
 -- Dates come from the snapshot section that carries them (tender from the
 -- snapshot tender release, award/contract from the snapshot award release).
 -- ============================================================
@@ -26,7 +27,8 @@ JOIN stg.tender     t ON t.release_id = s.tender_release_id
 JOIN core.dim_buyer d ON d.buyer_id   = s.buyer_id
 WHERE t.tender_start_date_flag = 'VALID'
   AND t.tender_end_date_flag   = 'VALID'
-  AND t.tender_end_date >= t.tender_start_date;
+  AND t.tender_end_date >= t.tender_start_date
+  AND d.test_entity_flag IS NULL;                -- DQ-20
 
 COMMENT ON VIEW analytics.vw_tender_duration_eligible IS
     'M-E01: one row per OCID with VALID tender start and end dates and end >= start. '
@@ -57,7 +59,8 @@ JOIN (SELECT release_id, count(*) AS awards_in_release
 WHERE t.tender_start_date_flag = 'VALID'
   AND a.award_date_flag        = 'VALID'
   AND a.award_date >= t.tender_start_date        -- excludes the award-before-tender conflicts
-  AND ac.awards_in_release = 1;
+  AND ac.awards_in_release = 1
+  AND d.test_entity_flag IS NULL;                -- DQ-20
 
 COMMENT ON VIEW analytics.vw_award_lag_eligible IS
     'M-E02: single-award OCIDs with VALID tender start and award dates and award >= tender '
@@ -82,7 +85,8 @@ JOIN stg.contracts  c ON c.contract_id = s.contract_id
 JOIN core.dim_buyer d ON d.buyer_id    = s.buyer_id
 WHERE a.award_date_flag  = 'VALID'
   AND c.date_signed_flag = 'VALID'
-  AND c.date_signed >= a.award_date;             -- excludes the signed-before-award conflicts
+  AND c.date_signed >= a.award_date              -- excludes the signed-before-award conflicts
+  AND d.test_entity_flag IS NULL;                -- DQ-20
 
 COMMENT ON VIEW analytics.vw_signature_lag_eligible IS
     'Pillar 5 contract signature lag: snapshot contracts with VALID award and signature '

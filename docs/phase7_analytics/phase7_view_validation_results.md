@@ -1,9 +1,9 @@
 # Phase 7 — Analytical View Validation Results
 
 > **Runner:** `python/validation/04_run_validation_suite.py --phase 7`  
-> **Run date:** 2026-10-08 16:10:46  
+> **Run date:** 2026-10-08 18:55:32  
 > **Database:** `nocopo_db` on localhost:5433 (PostgreSQL 17.4)  
-> **Phase 7 exit-gate result:** **PASSED**. 24 / 24 GATE checks passed; 12 INFO measurements.
+> **Phase 7 exit-gate result:** **PASSED**. 27 / 27 GATE checks passed; 13 INFO measurements.
 
 Interpretation and decisions: `docs/phase7_analytics/phase7_analytical_views.md`.
 
@@ -13,42 +13,46 @@ Interpretation and decisions: `docs/phase7_analytics/phase7_analytical_views.md`
 
 | ID | Check | Severity | Expected | Actual | Result |
 |---|---|---|---|---|---|
-| AV-01 | M-P01 vw_budget_eligible = independent recount | GATE | 97,196 | 97,196 | ✓ |
-| AV-02 | M-C01/C02 primary population = independent recount | GATE | 17,469 | 17,469 | ✓ |
-| AV-03 | M-C01 sensitivity population = independent recount | GATE | 17,482 | 17,482 | ✓ |
-| AV-04 | M-V01 vw_award_value_eligible = independent recount | GATE | 15,946 | 15,946 | ✓ |
-| AV-05 | M-S01 eligible awards = independent recount (complete supplier ID) | GATE | 13,694 | 13,694 | ✓ |
-| AV-06 | M-S01 one row per award (repeated suppliers[] collapsed, O-3) | GATE | 13,694 | 13,694 | ✓ |
+| AV-01 | M-P01 vw_budget_eligible = independent recount | GATE | 96,802 | 96,802 | ✓ |
+| AV-02 | M-C01/C02 primary population = independent recount | GATE | 17,253 | 17,253 | ✓ |
+| AV-03 | M-C01 sensitivity population = independent recount | GATE | 17,266 | 17,266 | ✓ |
+| AV-04 | M-V01 vw_award_value_eligible = independent recount | GATE | 15,763 | 15,763 | ✓ |
+| AV-05 | M-S01 eligible awards = independent recount (complete supplier ID) | GATE | 13,537 | 13,537 | ✓ |
+| AV-06 | M-S01 one row per award (repeated suppliers[] collapsed, O-3) | GATE | 13,537 | 13,537 | ✓ |
 | AV-07 | M-S01 max distinct suppliers per award (full-value attribution holds) | GATE | 1 | 1 | ✓ |
-| AV-08 | Budget-to-award comparison = independent recount | GATE | 15,753 | 15,753 | ✓ |
-| AV-09 | M-E01 tender duration = independent recount | GATE | 9,180 | 9,180 | ✓ |
-| AV-10 | M-E02 award lag = independent recount | GATE | 7,569 | 7,569 | ✓ |
-| AV-11 | Contract signature lag = independent recount | GATE | 12,138 | 12,138 | ✓ |
+| AV-08 | Budget-to-award comparison = independent recount | GATE | 15,574 | 15,574 | ✓ |
+| AV-09 | M-E01 tender duration = independent recount | GATE | 9,040 | 9,040 | ✓ |
+| AV-10 | M-E02 award lag = independent recount | GATE | 7,462 | 7,462 | ✓ |
+| AV-11 | Contract signature lag = independent recount | GATE | 12,006 | 12,006 | ✓ |
 | AV-12 | Negative durations in any timing view | GATE | 0 | 0 | ✓ |
-| AV-13 | M-E03 rows = all OCIDs | GATE | 98,866 | 98,866 | ✓ |
-| AV-14 | M-I01 rows = one contract per OCID with a contract | GATE | 16,392 | 16,392 | ✓ |
+| AV-13 | M-E03 rows = all OCIDs except the DQ-20 test entity | GATE | 98,454 | 98,454 | ✓ |
+| AV-14 | M-I01 rows = one contract per OCID with a contract | GATE | 16,221 | 16,221 | ✓ |
 | AV-15 | Entity benchmark rows with an INCOMPLETE buyer (DQ-19) | GATE | 0 | 0 | ✓ |
-| AV-16 | Entity benchmark: sum of process_count = OCIDs with a complete buyer | GATE | 98,840 | 98,840 | ✓ |
-| AV-17 | Entity benchmark: sum of planned_budget_total = M-P01 total | GATE | 93809174792083.2300 | 93809174792083.2300 | ✓ |
-| AV-18 | Entity benchmark: sum of award_value_total = M-V01 total (complete buyers) | GATE | 3361455035601.0600 | 3361455035601.0600 | ✓ |
+| AV-16 | Entity benchmark: sum of process_count = OCIDs with a complete buyer | GATE | 98,428 | 98,428 | ✓ |
+| AV-17 | Entity benchmark: sum of planned_budget_total = M-P01 total | GATE | 93279493391520.8900 | 93279493391520.8900 | ✓ |
+| AV-18 | Entity benchmark: sum of award_value_total = M-V01 total (complete buyers) | GATE | 3289424600245.4900 | 3289424600245.4900 | ✓ |
+| AV-19 | DQ-20: rows of NG-BPP-BPP-NOC-90 in any analytics view | GATE | 0 | 0 | ✓ |
+| AV-20 | DQ-20: test-entity OCIDs still present in core.vw_process_snapshot (retained) | GATE | 412 | 412 | ✓ |
+| AV-21 | DQ-20: register candidate/eligible counts for M-E03 = OCIDs except the test entity | GATE | 98454/98454 | 98454/98454 | ✓ |
+| AV-22 | DQ-20: test-entity rows kept in staging (active award rows / tender rows, all releases) | INFO |  | 195 / 229 | info |
 | SP-01 | FCTA NGN 1.004T award (DQ-07 EXTREME) absent from M-V01 / M-S01 | GATE | 0 | 0 | ✓ |
 | SP-02 | ocds-gyl66f-521027024-000087: M-V01 uses latest correction (109,739,262.78) | GATE | 109739262.7800 | 109739262.7800 | ✓ |
 | SP-03 | ocds-gyl66f-124004001-000772: M-S01 supplier is the named supplier, not placeholder '1' | GATE | SADAMI GLOBAL PROJECTS LTD | SADAMI GLOBAL PROJECTS LTD | ✓ |
 | SP-04 | Placeholder date 2001-01-01 in any timing view | GATE | 0 | 0 | ✓ |
 | SP-05 | Bare NG-BPP- buyer in M-P01 budget view | GATE | 0 | 0 | ✓ |
 | SP-06 | Repeated-supplier awards (O-3, NG-BPP-62660) counted once each in M-S01 | GATE | 0 | 0 | ✓ |
-| WF-01 | M-V01 excluded: snapshot award status not active | INFO |  | 525 | info |
-| WF-02 | M-V01 excluded: active but EXTREME or ZERO_VALUE | INFO |  | 244 | info |
-| WF-03 | M-S01 excluded: eligible awards with bare NG-BPP- supplier (count) | INFO |  | 2,252 | info |
-| WF-04 | M-S01 excluded award value, NGN (unresolvable supplier identity) | INFO |  | 675824490153.5800 | info |
-| WF-05 | M-S01 excluded share of M-V01 award value, % | INFO |  | 20.10 | info |
-| WF-06a | Budget-to-award excluded: eligible award OCIDs with no budget line | INFO |  | 131 | info |
+| WF-01 | M-V01 excluded: snapshot award status not active | INFO |  | 522 | info |
+| WF-02 | M-V01 excluded: active but EXTREME or ZERO_VALUE | INFO |  | 242 | info |
+| WF-03 | M-S01 excluded: eligible awards with bare NG-BPP- supplier (count) | INFO |  | 2,226 | info |
+| WF-04 | M-S01 excluded award value, NGN (unresolvable supplier identity) | INFO |  | 670388233364.5800 | info |
+| WF-05 | M-S01 excluded share of M-V01 award value, % | INFO |  | 20.37 | info |
+| WF-06a | Budget-to-award excluded: eligible award OCIDs with no budget line | INFO |  | 128 | info |
 | WF-06b | Budget-to-award excluded: eligible award OCIDs with >1 budget line (MULTI_PROJECT) | INFO |  | 3 | info |
-| WF-06c | Budget-to-award excluded: single budget line but zero or EXTREME budget | INFO |  | 59 | info |
-| WF-07 | M-E02 excluded: VALID dates but award before tender start | INFO |  | 141 | info |
-| WF-08 | Signature lag excluded: VALID dates but signed before award | INFO |  | 756 | info |
+| WF-06c | Budget-to-award excluded: single budget line but zero or EXTREME budget | INFO |  | 58 | info |
+| WF-07 | M-E02 excluded: VALID dates but award before tender start | INFO |  | 135 | info |
+| WF-08 | Signature lag excluded: VALID dates but signed before award | INFO |  | 734 | info |
 | WF-09 | M-C01 primary median tenderers (Phase 3 caveat states 2) | INFO | 2 | 2 | info |
-| WF-10 | M-E01 eligible tender releases with VALID start (Phase 3: ~9,593) vs eligible OCIDs | INFO |  | 9593 releases / 9180 OCIDs | info |
+| WF-10 | M-E01 eligible tender releases with VALID start (Phase 3: ~9,593) vs eligible OCIDs | INFO |  | 9593 releases / 9040 OCIDs | info |
 
 ---
 

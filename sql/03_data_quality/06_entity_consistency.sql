@@ -46,7 +46,20 @@ c (check_id, check_name, severity, expected, actual) AS (VALUES
  ('EN-14', 'Award supplier ID = supplier party ID in the same release (where both exist): mismatches', 'GATE', '0',
     (SELECT count(*) FROM stg.award_suppliers s JOIN stg.awards a USING (award_id)
        JOIN stg.parties p ON p.release_id = a.release_id AND 'supplier' = ANY (p.roles)
-      WHERE p.party_id <> s.supplier_id)::text)
+      WHERE p.party_id <> s.supplier_id)::text),
+ -- DQ-20 (Phase 8.1): portal test entity, retained and flagged in core --------------
+ ('EN-15', 'DQ-20: buyers flagged TEST_ENTITY', 'GATE', '1',
+    (SELECT count(*) FROM core.dim_buyer WHERE test_entity_flag = 'TEST_ENTITY')::text),
+ ('EN-16', 'DQ-20: the flagged buyer is NG-BPP-BPP-NOC-90 (TEST MINISTRY - NOCOPO)', 'GATE', 'NG-BPP-BPP-NOC-90 / TEST MINISTRY - NOCOPO',
+    (SELECT buyer_id || ' / ' || buyer_name FROM core.dim_buyer WHERE test_entity_flag = 'TEST_ENTITY')),
+ ('EN-17', 'DQ-20: staging keeps every release of the test entity (retained, not deleted)', 'GATE', '427',
+    (SELECT count(*) FROM stg.releases WHERE buyer_id = 'NG-BPP-BPP-NOC-90')::text),
+ ('EN-18', 'DQ-20: OCIDs of the test entity retained in the core snapshot', 'GATE', '412',
+    (SELECT count(*) FROM core.vw_process_snapshot WHERE buyer_id = 'NG-BPP-BPP-NOC-90')::text),
+ ('EN-19', 'DQ-20 guard: other buyers whose ID or name contains a whole word test/demo/dummy/sample/trial/nocopo', 'GATE', '0',
+    (SELECT count(*) FROM core.dim_buyer
+      WHERE test_entity_flag IS NULL
+        AND concat_ws(' ', buyer_id, buyer_name_raw) ~* '\m(test|tests|testing|demo|dummy|sample|trial|nocopo)\M')::text)
 )
 SELECT check_id, 'Entity consistency' AS check_group, check_name, severity, expected, actual,
        CASE WHEN severity = 'GATE' THEN expected = actual END AS passed

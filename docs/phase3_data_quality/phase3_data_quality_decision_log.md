@@ -404,6 +404,25 @@ RETAIN + FLAG + EXCLUDE_FROM_METRIC for a given metric.
 
 ---
 
+## Issue DQ-20 - Portal Test Entity: NG-BPP-BPP-NOC-90 (TEST MINISTRY - NOCOPO)
+
+| Attribute | Detail |
+|-----------|--------|
+| **Issue ID** | DQ-20 |
+| **Data field / entity** | releases[].buyer (id `NG-BPP-BPP-NOC-90`, name `TEST MINISTRY - NOCOPO`) |
+| **Observed problem** | One buyer is a portal test entity, not a procuring entity. It appears in 427 releases covering 412 OCIDs, with 188 snapshot awards (183 active and valid, NGN 72.0bn), 396 budget lines (NGN 529.7bn) and 171 contracts. Left in, it appears in rankings, concentration and benchmark results as if it were a real ministry. |
+| **Evidence** | Phase 8 review (entity rankings listed it); Phase 8.1 scan of `core.dim_buyer` and `core.dim_supplier` for the whole words test / demo / dummy / sample / trial / nocopo found only this buyer (no supplier). Substring-only matches (for example "INDUSTRIAL", "TESTIMONY") are ordinary words and were not treated as test data. Gate B checks EN-15 to EN-19. |
+| **Severity** | Medium (0.4% of releases; 0.2% to 1.3% of the records in the metrics it touches; see `docs/phase8_analysis/phase8_1_dq20_and_performance.md`) |
+| **Treatment** | RETAIN + FLAG + EXCLUDE_FROM_METRIC (all analytical metrics) |
+| **Retained?** | Yes. Every release stays in `stg.*`, and the buyer stays in `core.dim_buyer` and in `core.vw_process_snapshot`. Nothing is deleted. |
+| **Flagged?** | Yes - `test_entity_flag = TEST_ENTITY` (core.dim_buyer, generated from the buyer ID so the rule is explicit and auditable) |
+| **Excluded from which metrics?** | All of them: M-P01, M-C01, M-C02, M-V01, M-S01, budget-to-award, M-E01, M-E02, signature lag, M-E03 lifecycle counts, M-I01, the entity benchmark and `analytics.vw_dq_impact` candidate populations. Candidate and eligible populations are both defined without it, so eligible percentages compare like with like. |
+| **Reason** | It is a portal test artefact, not procurement. Its values are not evidence about any real procurement. |
+| **Known limitation** | The rule identifies one buyer by ID. Other test records published under a real buyer's ID, if any, cannot be detected from the data. |
+| **Approved by** | Project owner, 2026-10-08 (correction C-11) |
+
+---
+
 ## Summary Matrix
 
 | Issue ID | Entity | Severity | RETAIN | FLAG | EXCLUDE_FROM_METRIC | DEFER | UNRESOLVED |
@@ -427,6 +446,7 @@ RETAIN + FLAG + EXCLUDE_FROM_METRIC for a given metric.
 | DQ-17 | Identifier scheme uniformity | Low | N/A | N/A | N/A | Yes | - |
 | DQ-18 | No parties array (20 records) | Low | Yes | Yes | Yes | - | - |
 | DQ-19 | Bare NG-BPP- buyer ID (26 releases) | Low | Yes | Yes | Yes (entity-level) | - | - |
+| DQ-20 | Portal test entity NG-BPP-BPP-NOC-90 (427 releases) | Medium | Yes | Yes | Yes (all metrics) | - | - |
 
 ---
 
@@ -445,10 +465,12 @@ columns are not yet created.
 | monetary_flag | monetary fields | NULL (normal) / ZERO_VALUE | Zero monetary value indicator |
 | party_flag | release level | NULL (normal) / NO_PARTIES | Absence of parties array |
 | buyer_id_flag | core.dim_buyer (added via C-10) | NULL (normal) / INCOMPLETE | Bare NG-BPP- buyer ID (DQ-19) |
+| test_entity_flag | core.dim_buyer (added via C-11) | NULL (normal) / TEST_ENTITY | Portal test entity (DQ-20) |
 
 ---
 
-*Document version: 1.3 - 2026-10-07. DQ-19 added (C-10).*
+*Document version: 1.4 - 2026-10-08. DQ-20 added (C-11).*
+*Version 1.3 - 2026-10-07. DQ-19 added (C-10).*
 *Version 1.2 - 2026-10-07. Phase 3.2 corrections C-07 (DQ-04 count) and C-09 (field-name artefact repair) applied.*
 *Version 1.1 - 2026-08-18. Phase 3.1 correction pass applied.*
 *Version 1.0 approved by project owner on 2026-08-16.*

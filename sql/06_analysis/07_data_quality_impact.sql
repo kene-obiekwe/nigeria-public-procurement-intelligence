@@ -8,7 +8,11 @@
 --           issue that caused it, which the eligible-only analytics views cannot
 --           show. This script reads only that view.
 -- Run:      psql -h localhost -p 5433 -U postgres -d nocopo_db -f sql/06_analysis/07_data_quality_impact.sql
---           (each result set reads the view, which takes about 50 s)
+--           (each result set reads the view, a few seconds)
+-- DQ-20 (Phase 8.1): the portal test entity NG-BPP-BPP-NOC-90 is removed before each
+--           candidate population is defined. Its footprint is still reported, as one
+--           PRE_EXCLUDED row per metric (dq_ref DQ-20) in RS2 and RS3; it is not part
+--           of candidate minus eligible in RS1.
 --
 -- HOW TO READ THE COUNTS
 --   records_with_issue          candidate records that trip the issue. Issues

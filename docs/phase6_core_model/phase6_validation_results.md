@@ -1,9 +1,9 @@
 # Phase 6 — Gate B Validation Results
 
 > **Runner:** `python/validation/04_run_validation_suite.py --phase 6`  
-> **Run date:** 2026-10-08 16:11:31  
+> **Run date:** 2026-10-08 18:37:42  
 > **Database:** `nocopo_db` on localhost:5433 (PostgreSQL 17.4)  
-> **Gate B result:** **PASSED**. Stage 1 passed; 102 / 102 GATE checks passed; 17 INFO measurements.
+> **Gate B result:** **PASSED**. Stage 1 passed; 107 / 107 GATE checks passed; 17 INFO measurements.
 
 Interpretation and decisions: `docs/phase6_core_model/phase6_core_model.md`.
 
@@ -142,6 +142,11 @@ Interpretation and decisions: `docs/phase6_core_model/phase6_core_model.md`.
 | EN-12 | Award-supplier rows carrying bare NG-BPP- ID (excluded from M-S01) | INFO |  | 2,452 | info |
 | EN-13 | Max distinct suppliers on one award | GATE | 1 | 1 | ✓ |
 | EN-14 | Award supplier ID = supplier party ID in the same release (where both exist): mismatches | GATE | 0 | 0 | ✓ |
+| EN-15 | DQ-20: buyers flagged TEST_ENTITY | GATE | 1 | 1 | ✓ |
+| EN-16 | DQ-20: the flagged buyer is NG-BPP-BPP-NOC-90 (TEST MINISTRY - NOCOPO) | GATE | NG-BPP-BPP-NOC-90 / TEST MINISTRY - NOCOPO | NG-BPP-BPP-NOC-90 / TEST MINISTRY - NOCOPO | ✓ |
+| EN-17 | DQ-20: staging keeps every release of the test entity (retained, not deleted) | GATE | 427 | 427 | ✓ |
+| EN-18 | DQ-20: OCIDs of the test entity retained in the core snapshot | GATE | 412 | 412 | ✓ |
+| EN-19 | DQ-20 guard: other buyers whose ID or name contains a whole word test/demo/dummy/sample/trial/nocopo | GATE | 0 | 0 | ✓ |
 
 ### Layer reconciliation — `07_layer_reconciliation.sql`
 

@@ -7,6 +7,8 @@
 --
 -- DQ-19: the bare 'NG-BPP-' buyer (26 releases) is EXCLUDED here; it stays
 -- in overall process counts (analytics.vw_lifecycle_stage).
+-- DQ-20: the portal test entity NG-BPP-BPP-NOC-90 is excluded everywhere in
+-- analytics.*, including the process counts.
 -- Every measure is built from the corresponding metric view, so each one
 -- inherits that metric's eligibility rule, and its eligible n is shown next
 -- to it. A NULL rate or median means the entity has no eligible records for
@@ -96,7 +98,8 @@ LEFT JOIN competition    c USING (buyer_id)
 LEFT JOIN award          a USING (buyer_id)
 LEFT JOIN concentration  k USING (buyer_id)
 LEFT JOIN implementation i USING (buyer_id)
-WHERE d.buyer_id_flag IS NULL;
+WHERE d.buyer_id_flag IS NULL
+  AND d.test_entity_flag IS NULL;                         -- DQ-20
 
 COMMENT ON VIEW analytics.vw_entity_benchmark IS
     'One row per procuring entity (complete buyer ID; DQ-19 excluded). Measures inherit '

@@ -8,6 +8,8 @@
 -- Source:   analytics.vw_supplier_award_eligible (one row per award x distinct
 --           supplier). Window functions rank suppliers and build cumulative share.
 -- Run:      psql -h localhost -p 5433 -U postgres -d nocopo_db -f sql/06_analysis/01_supplier_concentration.sql
+-- DQ-20 (Phase 8.1): the portal test entity NG-BPP-BPP-NOC-90 is excluded by every
+--           analytics view used here, so it appears in no population or ranking.
 --
 -- ELIGIBLE POPULATION (M-S01): active awards, not EXTREME (DQ-07) and not zero
 -- (DQ-16), with a supplier ID that is not the bare 'NG-BPP-' (DQ-14). RS1 shows
@@ -55,7 +57,7 @@ SELECT 'M-S01'                                                   AS metric,
                                                                  AS excluded_pct_of_candidate_value
 FROM candidate c CROSS JOIN eligible e;
 
--- [RS1b] Register entry for M-S01 (analytics.vw_metric_population; about 40 s because the register evaluates every view)
+-- [RS1b] Register entry for M-S01 (analytics.vw_metric_population; a few seconds)
 SELECT metric_id, candidate_population, candidate_count, eligible_count, eligible_pct
 FROM analytics.vw_metric_population
 WHERE metric_id = 'M-S01';

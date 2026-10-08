@@ -12,14 +12,25 @@
 --     (contracts never reference an award in another release).
 --   * Planning budget is taken per budget line (ocid, budget_project_id).
 --
--- These are VIEWS: staging keeps every release; nothing is deleted.
--- Re-runnable (CREATE OR REPLACE).
+-- These are MATERIALIZED VIEWS (Phase 8.1, performance): staging keeps every
+-- release; nothing is deleted. Before 8.1 they were plain views that every
+-- analytics view re-evaluated (sort of 108k releases per use), which made the
+-- population register take ~40 s. The names are unchanged.
+--
+--   Fresh build:   run this file, then sql/05_views/*.sql
+--   Existing DB:   run sql/02_schema/03_migration_v1_4_materialise_snapshot.sql
+--                  first (drops the old plain views and their dependants), then
+--                  this file, then sql/05_views/*.sql
+--   After any change to stg.* or core.dim_buyer:
+--                  sql/04_transformations/04_refresh_snapshot.sql
+--
+-- Re-runnable: CREATE ... IF NOT EXISTS leaves existing data untouched.
 -- ============================================================
 
 -- ------------------------------------------------------------
 -- core.vw_budget_lines — one row per (ocid, budget_project_id)
 -- ------------------------------------------------------------
-CREATE OR REPLACE VIEW core.vw_budget_lines AS
+CREATE MATERIALIZED VIEW IF NOT EXISTS core.vw_budget_lines AS
 SELECT DISTINCT ON (r.ocid, p.budget_project_id)
        r.ocid,
        p.budget_project_id,
@@ -37,7 +48,10 @@ JOIN stg.releases r USING (release_id)
 WHERE p.budget_project_id IS NOT NULL
 ORDER BY r.ocid, p.budget_project_id, r.release_seq DESC;
 
-COMMENT ON VIEW core.vw_budget_lines IS
+CREATE UNIQUE INDEX IF NOT EXISTS ux_budget_lines_ocid_project ON core.vw_budget_lines (ocid, budget_project_id);
+CREATE INDEX IF NOT EXISTS ix_budget_lines_buyer ON core.vw_budget_lines (buyer_id);
+
+COMMENT ON MATERIALIZED VIEW core.vw_budget_lines IS
     'One row per planning budget line (ocid, budget_project_id): the latest release '
     'carrying that line. Input to M-P01 (Phase 3 correction C-06). '
     'Expected 97,749 rows.';
@@ -46,7 +60,7 @@ COMMENT ON VIEW core.vw_budget_lines IS
 -- ------------------------------------------------------------
 -- core.vw_process_snapshot — one row per OCID
 -- ------------------------------------------------------------
-CREATE OR REPLACE VIEW core.vw_process_snapshot AS
+CREATE MATERIALIZED VIEW IF NOT EXISTS core.vw_process_snapshot AS
 WITH releases_per_ocid AS (
     SELECT r.ocid,
            count(*)                                              AS release_count,
@@ -98,8 +112,19 @@ LEFT JOIN stg.contracts c   ON c.release_id = ap.award_release_id
                            AND c.award_id   = ap.award_id
 LEFT JOIN budget_lines b    USING (ocid);
 
-COMMENT ON VIEW core.vw_process_snapshot IS
+CREATE UNIQUE INDEX IF NOT EXISTS ux_process_snapshot_ocid ON core.vw_process_snapshot (ocid);
+CREATE INDEX IF NOT EXISTS ix_process_snapshot_buyer    ON core.vw_process_snapshot (buyer_id);
+CREATE INDEX IF NOT EXISTS ix_process_snapshot_tender   ON core.vw_process_snapshot (tender_release_id);
+CREATE INDEX IF NOT EXISTS ix_process_snapshot_award    ON core.vw_process_snapshot (award_id);
+CREATE INDEX IF NOT EXISTS ix_process_snapshot_contract ON core.vw_process_snapshot (contract_id);
+
+COMMENT ON MATERIALIZED VIEW core.vw_process_snapshot IS
     'One row per procurement process (OCID, 98,866). Section-level snapshot: tender '
     'and award each from the latest release (release_seq) containing them; contract '
     'from the award''s own release. multi_project_flag marks OCIDs with >1 budget line '
     '(192). Join to stg.* by tender_release_id / award_id / contract_id for detail.';
+
+-- Fresh planner statistics: without them the planner picks nested loops over the
+-- materialised data and the analytics views run several times slower.
+ANALYZE core.vw_budget_lines;
+ANALYZE core.vw_process_snapshot;

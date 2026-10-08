@@ -3,7 +3,7 @@
 -- Phase 4: Draft Core Schema (PostgreSQL)
 -- ============================================================
 --
--- STATUS: v1.3 — EXECUTED (Phase 5 staging; Phase 6 core dimensions)
+-- STATUS: v1.4 — EXECUTED (Phase 5 staging; Phase 6 core dimensions; Phase 8.1 DQ-20 flag)
 -- Approved design: Phase 4 v1.1. Phase 5 load-readiness changes (v1.2)
 -- are listed below and in docs/phase5_staging/phase5_staging_reconciliation.md.
 --
@@ -43,6 +43,15 @@
 --   * Process snapshot is built in Phase 6 as core.vw_process_snapshot and
 --     core.vw_budget_lines (sql/04_transformations/), per the
 --     Implementation Plan; analytics.* eligibility views remain Phase 7.
+-- v1.4 (2026-10-08, Phase 8.1):
+--   * core.dim_buyer: test_entity_flag (DQ-20, portal test entity
+--     NG-BPP-BPP-NOC-90 'TEST MINISTRY - NOCOPO', 427 releases). Retained and
+--     flagged; excluded from every analytics.* metric. Existing databases
+--     apply it with sql/02_schema/01_migration_v1_4.sql.
+--   * Performance indexes are in sql/02_schema/02_performance_indexes.sql;
+--     core.vw_budget_lines and core.vw_process_snapshot are materialised in
+--     sql/04_transformations/03_process_snapshot.sql (refresh:
+--     sql/04_transformations/04_refresh_snapshot.sql).
 -- ============================================================
 
 -- ============================================================
@@ -555,17 +564,24 @@ CREATE TABLE core.dim_buyer (
     buyer_id_flag           VARCHAR(16)     GENERATED ALWAYS AS (
                                 CASE WHEN buyer_id = 'NG-BPP-' THEN 'INCOMPLETE' END
                             ) STORED,                   -- v1.3: bare scheme prefix, no entity code
+    test_entity_flag        VARCHAR(16)     GENERATED ALWAYS AS (
+                                CASE WHEN buyer_id = 'NG-BPP-BPP-NOC-90' THEN 'TEST_ENTITY' END
+                            ) STORED,                   -- v1.4 DQ-20: portal test entity
 
     CONSTRAINT pk_dim_buyer PRIMARY KEY (buyer_id),
     CONSTRAINT chk_dim_buyer_id_flag
-        CHECK (buyer_id_flag IS NULL OR buyer_id_flag IN ('INCOMPLETE'))
+        CHECK (buyer_id_flag IS NULL OR buyer_id_flag IN ('INCOMPLETE')),
+    CONSTRAINT chk_dim_buyer_test_entity_flag
+        CHECK (test_entity_flag IS NULL OR test_entity_flag IN ('TEST_ENTITY'))
 );
 
 COMMENT ON TABLE core.dim_buyer IS
     'Distinct procuring entities (buyers). Source: releases[].buyer. '
     '667 buyer IDs: 666 complete NG-BPP-BPP-NOC-<code> IDs plus the bare prefix '
     'NG-BPP- (26 releases, no name, no recoverable buyer party) flagged INCOMPLETE. '
-    'Release-level buyer names are consistent per ID (0 IDs with >1 name).';
+    'Release-level buyer names are consistent per ID (0 IDs with >1 name). '
+    'DQ-20 (v1.4): NG-BPP-BPP-NOC-90 ''TEST MINISTRY - NOCOPO'' is a portal test entity, '
+    'flagged TEST_ENTITY, retained here and in staging, excluded from all analytics.* metrics.';
 
 
 -- ------------------------------------------------------------

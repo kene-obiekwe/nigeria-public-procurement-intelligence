@@ -9,6 +9,9 @@
 --          safeguard rather than a choice between conflicting values.
 --          The bare prefix 'NG-BPP-' is retained and flagged INCOMPLETE
 --          (generated column), never merged into another buyer.
+--          Phase 8.1: test_entity_flag (generated column, DQ-20) marks the portal
+--          test entity NG-BPP-BPP-NOC-90. It is loaded like any other buyer and
+--          excluded downstream, in the analytics views.
 -- Re-runnable: truncates and rebuilds. No other table references dim_buyer.
 -- ============================================================
 

@@ -26,7 +26,7 @@ Usage
     python python/validation/05_run_analysis_scripts.py              # all scripts
     python python/validation/05_run_analysis_scripts.py --only 03    # one script
     python python/validation/05_run_analysis_scripts.py --skip-register
-        skips result sets that read analytics.vw_metric_population (about 40 s each)
+        skips result sets that read analytics.vw_metric_population (a few seconds each)
 
 A partial run (--only / --skip-register) prints to the console and does not
 overwrite the results file.

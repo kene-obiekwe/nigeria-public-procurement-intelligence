@@ -10,29 +10,39 @@
 --        the scripts read.
 -- DQI-*: analytics.vw_dq_impact reconciles to the metric populations and to
 --        independently counted issue footprints.
+-- DQ-20 (Phase 8.1): every independent recount first drops the portal test entity
+--        NG-BPP-BPP-NOC-90 (literal ID; the views use core.dim_buyer.test_entity_flag).
 -- ============================================================
 WITH
 rel AS (SELECT release_id, ocid, release_seq, buyer_id, party_flag, tag FROM stg.releases),
+-- buyer of each process = buyer of its latest release
+ob AS (SELECT DISTINCT ON (ocid) ocid, buyer_id FROM stg.releases ORDER BY ocid, release_seq DESC),
+non_test  AS (SELECT ocid FROM ob WHERE buyer_id <> 'NG-BPP-BPP-NOC-90'),
+test_ocid AS (SELECT ocid FROM ob WHERE buyer_id =  'NG-BPP-BPP-NOC-90'),
 latest_tender AS (
     SELECT * FROM (SELECT r.ocid, t.*,
                           row_number() OVER (PARTITION BY r.ocid ORDER BY r.release_seq DESC) AS rn
-                   FROM stg.tender t JOIN rel r USING (release_id)) x
+                   FROM stg.tender t JOIN rel r USING (release_id)
+                   JOIN non_test n ON n.ocid = r.ocid) x
     WHERE rn = 1),
 latest_award AS (
     SELECT * FROM (SELECT r.ocid, a.*,
                           row_number() OVER (PARTITION BY r.ocid ORDER BY r.release_seq DESC) AS rn
-                   FROM stg.awards a JOIN rel r USING (release_id)) x
+                   FROM stg.awards a JOIN rel r USING (release_id)
+                   JOIN non_test n ON n.ocid = r.ocid) x
     WHERE rn = 1),
 latest_contract AS (
     SELECT * FROM (SELECT r.ocid, c.*,
                           row_number() OVER (PARTITION BY r.ocid ORDER BY r.release_seq DESC) AS rn
-                   FROM stg.contracts c JOIN rel r USING (release_id)) x
+                   FROM stg.contracts c JOIN rel r USING (release_id)
+                   JOIN non_test n ON n.ocid = r.ocid) x
     WHERE rn = 1),
 latest_line AS (
     SELECT * FROM (SELECT r.ocid, r.party_flag, p.*,
                           row_number() OVER (PARTITION BY r.ocid, p.budget_project_id ORDER BY r.release_seq DESC) AS rn
                    FROM stg.planning p JOIN rel r USING (release_id)
-                   WHERE p.budget_project_id IS NOT NULL) x
+                   WHERE p.budget_project_id IS NOT NULL
+                     AND r.buyer_id <> 'NG-BPP-BPP-NOC-90') x
     WHERE rn = 1),
 award_ok AS (SELECT * FROM latest_award
              WHERE status = 'active' AND award_value_flag IS NULL AND award_monetary_flag IS NULL),
@@ -116,10 +126,12 @@ c (check_id, check_name, severity, expected, actual) AS (VALUES
       WHERE tx.contract_id IS NOT NULL OR ms.contract_id IS NOT NULL)::text,
     (SELECT count(*) FROM analytics.vw_contract_implementation_coverage WHERE has_implementation)::text),
  ('BQ-13', 'BQ6 OCIDs with an implementation-tagged release (M-E03 stage 5)', 'GATE',
-    (SELECT count(DISTINCT ocid) FROM rel WHERE 'implementation' = ANY (tag))::text,
+    (SELECT count(DISTINCT ocid) FROM rel WHERE 'implementation' = ANY (tag)
+        AND ocid IN (SELECT ocid FROM non_test))::text,
     (SELECT count(*) FROM analytics.vw_lifecycle_stage WHERE highest_stage_rank = 5)::text),
  ('BQ-14', 'BQ6 OCIDs reaching contract stage or beyond (M-E03)', 'GATE',
-    (SELECT count(DISTINCT ocid) FROM rel WHERE tag && ARRAY['contract', 'implementation']::text[])::text,
+    (SELECT count(DISTINCT ocid) FROM rel WHERE tag && ARRAY['contract', 'implementation']::text[]
+        AND ocid IN (SELECT ocid FROM non_test))::text,
     (SELECT count(*) FROM analytics.vw_lifecycle_stage WHERE highest_stage_rank >= 4)::text),
  -- Data-quality impact view (BQ7) ------------------------------------------------
  ('DQI-01', 'DQ impact: metrics where excluded records <> candidate - eligible', 'GATE', '0',
@@ -171,6 +183,21 @@ c (check_id, check_name, severity, expected, actual) AS (VALUES
       WHERE x.excluded IS NOT NULL AND x.single_cause > x.excluded)::text),
  ('DQI-13', 'DQ impact: rows where records_with_issue > candidate_records', 'GATE', '0',
     (SELECT count(*) FROM dq WHERE records_with_issue > candidate_records)::text),
+ ('DQI-16', 'DQ impact: DQ-20 pre-excluded snapshot awards (M-V01) = independent count', 'GATE',
+    (SELECT count(DISTINCT r.ocid) FROM stg.awards a JOIN stg.releases r USING (release_id)
+       JOIN test_ocid USING (ocid))::text,
+    (SELECT records_with_issue FROM dq WHERE metric_id = 'M-V01' AND dq_ref = 'DQ-20')::text),
+ ('DQI-17', 'DQ impact: DQ-20 pre-excluded snapshot tenders (M-C01/C02) = independent count', 'GATE',
+    (SELECT count(DISTINCT r.ocid) FROM stg.tender t JOIN stg.releases r USING (release_id)
+       JOIN test_ocid USING (ocid))::text,
+    (SELECT records_with_issue FROM dq WHERE metric_id = 'M-C01 / M-C02' AND dq_ref = 'DQ-20')::text),
+ ('DQI-18', 'DQ impact: DQ-20 pre-excluded budget lines (M-P01) = independent count', 'GATE',
+    (SELECT count(*) FROM (SELECT DISTINCT r.ocid, p.budget_project_id FROM stg.planning p
+                           JOIN stg.releases r USING (release_id)
+                           WHERE p.budget_project_id IS NOT NULL AND r.buyer_id = 'NG-BPP-BPP-NOC-90') x)::text,
+    (SELECT records_with_issue FROM dq WHERE metric_id = 'M-P01' AND dq_ref = 'DQ-20')::text),
+ ('DQI-19', 'DQ impact: DQ-20 pre-excluded buyer IDs (ENTITY)', 'GATE', '1',
+    (SELECT records_with_issue FROM dq WHERE metric_id = 'ENTITY' AND dq_ref = 'DQ-20')::text),
  ('DQI-14', 'DQ impact: M-S01 excluded share of M-V01 award value, % (matches WF-05 disclosure)', 'INFO', NULL,
     (SELECT round(100 * d.affected_value_ngn / (d.eligible_value_ngn + d.affected_value_ngn), 2)
        FROM dq d WHERE d.metric_id = 'M-S01' AND d.dq_ref = 'ALL')::text),

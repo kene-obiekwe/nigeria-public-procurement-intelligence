@@ -8,6 +8,7 @@
 --   tender present in the process snapshot
 --   tender status IS NOT NULL                      (Pillar 2 minimum requirement)
 --   tenderer_count_flag IN ('NORMAL','ELEVATED')   (DQ-05: ANOMALOUS > 1,000 excluded)
+--   buyer is not the DQ-20 portal test entity (core.dim_buyer.test_entity_flag)
 -- PRIMARY population (M-C01 median, M-C02 denominator):
 --   in_primary_population = (tenderer_count_flag = 'NORMAL', 1-100 tenderers)
 --
@@ -34,7 +35,8 @@ FROM core.vw_process_snapshot s
 JOIN stg.tender     t ON t.release_id = s.tender_release_id
 JOIN core.dim_buyer d ON d.buyer_id   = s.buyer_id
 WHERE t.status IS NOT NULL
-  AND t.tenderer_count_flag IN ('NORMAL', 'ELEVATED');
+  AND t.tenderer_count_flag IN ('NORMAL', 'ELEVATED')
+  AND d.test_entity_flag IS NULL;
 
 COMMENT ON VIEW analytics.vw_competition_eligible IS
     'M-C01/M-C02: one tender per OCID (snapshot). Rows = sensitivity population (NORMAL + '

@@ -6,6 +6,8 @@
 --           budget-to-award variance?  (Scope s.6, Pillar 4)
 -- Source:   analytics.vw_budget_award_comparison (one row per OCID)
 -- Run:      psql -h localhost -p 5433 -U postgres -d nocopo_db -f sql/06_analysis/03_budget_to_award.sql
+-- DQ-20 (Phase 8.1): the portal test entity NG-BPP-BPP-NOC-90 is excluded by every
+--           analytics view used here, so it appears in no population or ranking.
 --
 -- ELIGIBLE POPULATION
 --   An OCID with an award that is active, not EXTREME (DQ-07) and not zero
@@ -64,7 +66,7 @@ SELECT c.candidate_awards,
 FROM candidate c
 CROSS JOIN comparable v;
 
--- [RS1b] Register entry (analytics.vw_metric_population; about 40 s because the register evaluates every view)
+-- [RS1b] Register entry (analytics.vw_metric_population; a few seconds)
 SELECT metric_id, candidate_population, candidate_count, eligible_count, eligible_pct
 FROM analytics.vw_metric_population
 WHERE metric_id = 'P4-BvA';
@@ -192,3 +194,46 @@ SELECT count(*)                                                    AS budget_pro
             THEN 'no budget line is repeated across OCIDs: totals are not inflated by sharing'
             ELSE 'some budget lines are repeated across OCIDs: totals overstate budget' END AS reading
 FROM per_project;
+
+-- [RS8] Placeholder-like budgets: how many comparable OCIDs record a budget under NGN 100,000, and what ratios result
+-- (a known limitation, not an exclusion; the extreme end of the ratio comes from these entries)
+WITH tiny AS MATERIALIZED (
+    SELECT * FROM analytics.vw_budget_award_comparison WHERE budget_amount < 100000
+)
+SELECT (SELECT count(*) FROM analytics.vw_budget_award_comparison)                      AS comparable_ocids,
+       count(*)                                                                         AS ocids_with_budget_under_100k,
+       min(budget_amount)                                                               AS smallest_budget_ngn,
+       max(award_to_budget_ratio)                                                       AS largest_ratio_among_them,
+       count(*) FILTER (WHERE award_to_budget_ratio >= 1000000)                         AS of_which_ratio_1m_or_more,
+       (SELECT count(*) FROM analytics.vw_budget_award_comparison
+         WHERE award_to_budget_ratio >= 1000000)                                        AS all_ocids_with_ratio_1m_or_more,
+       (SELECT count(*) FROM analytics.vw_budget_award_comparison
+         WHERE award_to_budget_ratio >= 1000000 AND budget_amount >= 100000)            AS ratio_1m_or_more_with_budget_100k_plus
+FROM tiny;
+
+-- [RS9] The above-10x band by entity: where the band's value sits (pattern only; no cause is attributed)
+WITH band AS MATERIALIZED (
+    SELECT * FROM analytics.vw_budget_award_comparison WHERE award_to_budget_ratio > 10
+)
+SELECT rank() OVER (ORDER BY sum(award_value_amount) DESC)                              AS rank_in_band,
+       buyer_id, max(buyer_name)                                                        AS buyer_name,
+       count(*)                                                                         AS ocids_above_10x,
+       round(sum(award_value_amount) / 1e9, 1)                                          AS award_ngn_bn,
+       round(100.0 * sum(award_value_amount) / sum(sum(award_value_amount)) OVER (), 1) AS pct_of_band_value,
+       round((percentile_cont(0.5) WITHIN GROUP (ORDER BY award_to_budget_ratio))::numeric, 1) AS median_ratio,
+       sum(count(*)) OVER ()                                                            AS band_ocids,
+       round(sum(sum(award_value_amount)) OVER () / 1e9, 1)                             AS band_award_ngn_bn
+FROM band
+GROUP BY buyer_id
+ORDER BY rank_in_band
+LIMIT 5;
+
+-- [RS10] Unit test: is an award about 1,000 times its budget (budget recorded in thousands)?
+SELECT count(*) FILTER (WHERE award_to_budget_ratio BETWEEN 900 AND 1100)                       AS ocids_with_ratio_900_to_1100,
+       count(*) FILTER (WHERE award_to_budget_ratio BETWEEN 900 AND 1100
+                          AND budget_amount >= 100000)                                          AS of_which_budget_100k_plus,
+       count(*) FILTER (WHERE award_to_budget_ratio > 10)                                       AS ocids_above_10x,
+       round(100.0 * count(*) FILTER (WHERE award_to_budget_ratio BETWEEN 900 AND 1100)
+             / nullif(count(*) FILTER (WHERE award_to_budget_ratio > 10), 0), 1)                AS ratio_900_to_1100_pct_of_above_10x,
+       'a "budget recorded in thousands" pattern would put most of the above-10x OCIDs near 1,000; it does not' AS reading
+FROM analytics.vw_budget_award_comparison;

@@ -10,6 +10,8 @@
 -- Sources:  analytics.vw_tender_duration_eligible, vw_award_lag_eligible,
 --           vw_signature_lag_eligible (one row per OCID / contract)
 -- Run:      psql -h localhost -p 5433 -U postgres -d nocopo_db -f sql/06_analysis/04_procurement_cycle_timing.sql
+-- DQ-20 (Phase 8.1): the portal test entity NG-BPP-BPP-NOC-90 is excluded by every
+--           analytics view used here, so it appears in no population or ranking.
 --
 -- ELIGIBLE POPULATION
 --   Both dates of the interval are present, flagged VALID (not the 2001-01-01
@@ -56,7 +58,7 @@ SELECT measure, eligible_n, median_days
 FROM (SELECT * FROM tender_duration UNION ALL SELECT * FROM award_lag UNION ALL SELECT * FROM signature_lag) u
 ORDER BY sort_order;
 
--- [RS1b] Coverage: candidate population, eligible count and eligible share (analytics.vw_metric_population; about 40 s)
+-- [RS1b] Coverage: candidate population, eligible count and eligible share (analytics.vw_metric_population; a few seconds)
 SELECT metric_id, metric_name, candidate_population, candidate_count, eligible_count, eligible_pct
 FROM analytics.vw_metric_population
 WHERE metric_id IN ('M-E01', 'M-E02', 'P5-SIG')

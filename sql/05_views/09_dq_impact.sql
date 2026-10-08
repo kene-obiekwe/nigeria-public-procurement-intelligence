@@ -27,7 +27,16 @@
 --   so the attribution here is tested against the eligibility rules, not
 --   assumed to match them.
 --
+-- DQ-20 (Phase 8.1): records of the portal test entity NG-BPP-BPP-NOC-90 are removed
+--   BEFORE each candidate population is defined (they are not procurement), so
+--   candidate counts match analytics.vw_metric_population and the reconciliation
+--   candidate - eligible = SUMMARY_ALL is unaffected. Their footprint is still
+--   reported, as one PRE_EXCLUDED row per metric whose candidate population is
+--   drawn from core (M-P01, M-C01/C02, M-V01, M-E01, M-E02, P5-SIG, ENTITY).
+--   M-S01 and P4-BvA start from the M-V01 eligible awards and inherit it.
+--
 -- impact_type
+--   PRE_EXCLUDED          DQ-20 only: removed before the candidate population
 --   EXCLUDES              record is removed from the metric
 --   EXCLUDES_FROM_PRIMARY removed from the primary result, kept in a sensitivity
 --                         population (DQ-04 only)
@@ -51,7 +60,8 @@ rec AS MATERIALIZED (
                CASE WHEN b.budget_monetary_flag IS NOT NULL THEN 'DQ-16' END,
                CASE WHEN r.party_flag           IS NOT NULL THEN 'DQ-18' END,
                CASE WHEN d.buyer_id_flag        IS NOT NULL THEN 'DQ-19' END], NULL) AS issues,
-           (b.budget_amount IS NULL OR b.budget_amount < 0) AS other_reason
+           (b.budget_amount IS NULL OR b.budget_amount < 0) AS other_reason,
+           (d.test_entity_flag IS NOT NULL) AS is_test
     FROM core.vw_budget_lines b
     JOIN stg.releases r ON r.release_id = b.release_id
     JOIN core.dim_buyer d ON d.buyer_id = b.buyer_id
@@ -62,8 +72,10 @@ rec AS MATERIALIZED (
            array_remove(ARRAY[
                CASE WHEN t.tenderer_count_flag = 'ELEVATED'  THEN 'DQ-04' END,
                CASE WHEN t.tenderer_count_flag = 'ANOMALOUS' THEN 'DQ-05' END], NULL),
-           (t.status IS NULL)
+           (t.status IS NULL),
+           (d.test_entity_flag IS NOT NULL)
     FROM core.vw_process_snapshot s
+    JOIN core.dim_buyer d ON d.buyer_id = s.buyer_id
     JOIN stg.tender t ON t.release_id = s.tender_release_id
 
     UNION ALL
@@ -72,8 +84,10 @@ rec AS MATERIALIZED (
            array_remove(ARRAY[
                CASE WHEN a.award_value_flag    IS NOT NULL THEN 'DQ-07' END,
                CASE WHEN a.award_monetary_flag IS NOT NULL THEN 'DQ-16' END], NULL),
-           (a.status IS DISTINCT FROM 'active')
+           (a.status IS DISTINCT FROM 'active'),
+           (d.test_entity_flag IS NOT NULL)
     FROM core.vw_process_snapshot s
+    JOIN core.dim_buyer d ON d.buyer_id = s.buyer_id
     JOIN stg.awards a ON a.award_id = s.award_id
 
     UNION ALL
@@ -82,7 +96,8 @@ rec AS MATERIALIZED (
            array_remove(ARRAY[
                CASE WHEN NOT coalesce(sp.has_complete, false) AND coalesce(sp.has_bare, false)
                     THEN 'DQ-14' END], NULL),
-           (NOT coalesce(sp.has_complete, false) AND NOT coalesce(sp.has_bare, false))
+           (NOT coalesce(sp.has_complete, false) AND NOT coalesce(sp.has_bare, false)),
+           false
     FROM analytics.vw_award_value_eligible v
     LEFT JOIN (SELECT x.award_id,
                       bool_or(sup.supplier_id_flag IS NULL)     AS has_complete,
@@ -100,7 +115,8 @@ rec AS MATERIALIZED (
                CASE WHEN s.budget_line_count = 1 AND b.budget_monetary_flag IS NOT NULL THEN 'DQ-16' END], NULL),
            (s.budget_line_count = 0
             OR (s.budget_line_count = 1 AND (b.budget_amount IS NULL OR b.budget_amount <= 0)
-                AND b.budget_amount_flag IS NULL AND b.budget_monetary_flag IS NULL))
+                AND b.budget_amount_flag IS NULL AND b.budget_monetary_flag IS NULL)),
+           false
     FROM analytics.vw_award_value_eligible v
     JOIN core.vw_process_snapshot s ON s.ocid = v.ocid
     LEFT JOIN core.vw_budget_lines b ON b.ocid = v.ocid AND s.budget_line_count = 1
@@ -114,8 +130,10 @@ rec AS MATERIALIZED (
                       OR t.tender_end_date_flag   IN ('FUTURE', 'IMPOSSIBLE')               THEN 'DQ-09' END,
                CASE WHEN t.tender_start_date_flag = 'VALID' AND t.tender_end_date_flag = 'VALID'
                      AND t.tender_end_date < t.tender_start_date                            THEN 'DATE-ORDER' END], NULL),
-           (t.tender_start_date_flag IS NULL OR t.tender_end_date_flag IS NULL)
+           (t.tender_start_date_flag IS NULL OR t.tender_end_date_flag IS NULL),
+           (d.test_entity_flag IS NOT NULL)
     FROM core.vw_process_snapshot s
+    JOIN core.dim_buyer d ON d.buyer_id = s.buyer_id
     JOIN stg.tender t ON t.release_id = s.tender_release_id
 
     UNION ALL
@@ -127,8 +145,10 @@ rec AS MATERIALIZED (
                       OR a.award_date_flag        IN ('FUTURE', 'IMPOSSIBLE')           THEN 'DQ-09' END,
                CASE WHEN t.tender_start_date_flag = 'VALID' AND a.award_date_flag = 'VALID'
                      AND a.award_date < t.tender_start_date                             THEN 'DATE-ORDER' END], NULL),
-           (t.tender_start_date_flag IS NULL OR a.award_date_flag IS NULL)
+           (t.tender_start_date_flag IS NULL OR a.award_date_flag IS NULL),
+           (d.test_entity_flag IS NOT NULL)
     FROM core.vw_process_snapshot s
+    JOIN core.dim_buyer d ON d.buyer_id = s.buyer_id
     JOIN stg.tender t ON t.release_id = s.tender_release_id
     JOIN stg.awards a ON a.award_id   = s.award_id
 
@@ -141,8 +161,10 @@ rec AS MATERIALIZED (
                       OR c.date_signed_flag IN ('FUTURE', 'IMPOSSIBLE')             THEN 'DQ-09' END,
                CASE WHEN a.award_date_flag = 'VALID' AND c.date_signed_flag = 'VALID'
                      AND c.date_signed < a.award_date                               THEN 'DATE-ORDER' END], NULL),
-           (a.award_date_flag IS NULL OR c.date_signed_flag IS NULL)
+           (a.award_date_flag IS NULL OR c.date_signed_flag IS NULL),
+           (d.test_entity_flag IS NOT NULL)
     FROM core.vw_process_snapshot s
+    JOIN core.dim_buyer d ON d.buyer_id = s.buyer_id
     JOIN stg.contracts c ON c.contract_id = s.contract_id
     LEFT JOIN stg.awards a ON a.award_id  = s.award_id
 
@@ -150,29 +172,41 @@ rec AS MATERIALIZED (
     -- ENTITY: buyer IDs
     SELECT 'ENTITY', NULL::numeric,
            array_remove(ARRAY[CASE WHEN d.buyer_id_flag IS NOT NULL THEN 'DQ-19' END], NULL),
-           false
+           false,
+           (d.test_entity_flag IS NOT NULL)
     FROM core.dim_buyer d
 ),
 
 -- ---- Aggregates ------------------------------------------------------------
+rec_ok AS MATERIALIZED (                                      -- DQ-20: test entity is not procurement
+    SELECT metric_id, val, issues, other_reason, cardinality(issues) AS n_issues
+    FROM rec
+    WHERE NOT is_test
+),
 hit AS (
     SELECT r.metric_id, i.dq_ref,
            count(*)                                                              AS records_with_issue,
-           count(*) FILTER (WHERE cardinality(r.issues) = 1 AND NOT r.other_reason) AS records_lost_only_to_issue,
+           count(*) FILTER (WHERE r.n_issues = 1 AND NOT r.other_reason)         AS records_lost_only_to_issue,
            sum(r.val)                                                            AS affected_value_ngn
-    FROM rec r
+    FROM rec_ok r
     CROSS JOIN LATERAL unnest(r.issues) AS i(dq_ref)
     GROUP BY r.metric_id, i.dq_ref
+),
+pre AS (                                                      -- DQ-20 footprint, reported separately
+    SELECT metric_id, count(*) AS test_records, sum(val) AS test_value_ngn
+    FROM rec
+    WHERE is_test
+    GROUP BY metric_id
 ),
 tot AS (
     SELECT metric_id,
            count(*)                                                                    AS candidate_records,
-           count(*) FILTER (WHERE cardinality(issues) > 0 OR other_reason)             AS excluded_records,
-           sum(val) FILTER (WHERE cardinality(issues) > 0 OR other_reason)             AS excluded_value_ngn,
+           count(*) FILTER (WHERE n_issues > 0 OR other_reason)                        AS excluded_records,
+           sum(val) FILTER (WHERE n_issues > 0 OR other_reason)                        AS excluded_value_ngn,
            count(*) FILTER (WHERE other_reason)                                        AS other_records,
-           count(*) FILTER (WHERE other_reason AND cardinality(issues) = 0)            AS other_only_records,
+           count(*) FILTER (WHERE other_reason AND n_issues = 0)                       AS other_only_records,
            sum(val) FILTER (WHERE other_reason)                                        AS other_value_ngn
-    FROM rec
+    FROM rec_ok
     GROUP BY metric_id
 ),
 
@@ -245,6 +279,8 @@ issue (dq_ref, dq_issue, treatment, note) AS (VALUES
         'Buyer cannot be derived, so the line is left out of buyer-level budget totals.'),
     ('DQ-19', 'Incomplete buyer ID (bare NG-BPP-)', 'EXCLUDE_FROM_METRIC',
         'Excluded from per-entity measures; kept in overall process counts.'),
+    ('DQ-20', 'Portal test entity (NG-BPP-BPP-NOC-90, TEST MINISTRY - NOCOPO)', 'EXCLUDE_FROM_METRIC',
+        'A portal test artefact, not procurement. Retained and flagged in stg/core; removed before each candidate population is defined, so it is outside candidate minus eligible.'),
     ('C-06',  'Several unrelated budget lines on one OCID (MULTI_PROJECT)', 'EXCLUDE_FROM_METRIC',
         'Kene I-2: no rule says which budget line an award answers, so the OCID is left out of budget-to-award.'),
     ('DATE-ORDER', 'Date chronology conflict (end before start)', 'EXCLUDE_FROM_METRIC',
@@ -256,8 +292,10 @@ issue (dq_ref, dq_issue, treatment, note) AS (VALUES
 -- ---- Disclosure rows: issues that keep the record but limit interpretation ---
 disc (metric_id, dq_ref, candidate_records, eligible_records, records_with_issue, affected_value_ngn, eligible_value_ngn) AS (
     SELECT 'ALL', 'DQ-01',
-           count(*), count(*), count(*) FILTER (WHERE release_count > 1), NULL::numeric, NULL::numeric
-    FROM core.vw_process_snapshot
+           count(*), count(*), count(*) FILTER (WHERE s.release_count > 1), NULL::numeric, NULL::numeric
+    FROM core.vw_process_snapshot s
+    JOIN core.dim_buyer d ON d.buyer_id = s.buyer_id
+    WHERE d.test_entity_flag IS NULL
     UNION ALL
     SELECT 'M-E03', 'DQ-02',
            count(*), count(*), count(*) FILTER (WHERE highest_stage_rank = 1), NULL, NULL
@@ -302,6 +340,15 @@ final AS (
            t.candidate_records, e.eligible_records,
            t.excluded_records, NULL::bigint, t.excluded_value_ngn, e.eligible_value_ngn
     FROM tot t
+    JOIN elig e USING (metric_id)
+
+    UNION ALL
+    -- DQ-20: portal test entity, removed before the candidate population
+    SELECT p.metric_id, 'DQ-20', 'PRE_EXCLUDED',
+           t.candidate_records, e.eligible_records,
+           p.test_records, NULL::bigint, p.test_value_ngn, e.eligible_value_ngn
+    FROM pre p
+    JOIN tot  t USING (metric_id)
     JOIN elig e USING (metric_id)
 
     UNION ALL

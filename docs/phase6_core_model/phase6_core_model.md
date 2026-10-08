@@ -39,10 +39,10 @@ No validation failure required dropping rows or redesigning the schema.
 
 | Object | Script | Rows | Notes |
 |---|---|---|---|
-| `core.dim_buyer` | `sql/04_transformations/01_build_dim_buyer.sql` | 667 | 666 complete IDs + bare `NG-BPP-` (flagged) |
+| `core.dim_buyer` | `sql/04_transformations/01_build_dim_buyer.sql` | 667 | 666 complete IDs + bare `NG-BPP-` (flagged). Phase 8.1 adds `test_entity_flag` (DQ-20): `NG-BPP-BPP-NOC-90` is retained here and excluded from analytics |
 | `core.dim_supplier` | `sql/04_transformations/02_build_dim_supplier.sql` | 10,325 | Parties ∪ award suppliers |
-| `core.vw_budget_lines` (view) | `sql/04_transformations/03_process_snapshot.sql` | 97,749 | M-P01 grain (C-06) |
-| `core.vw_process_snapshot` (view) | `sql/04_transformations/03_process_snapshot.sql` | 98,866 | One row per OCID |
+| `core.vw_budget_lines` (materialised view since Phase 8.1) | `sql/04_transformations/03_process_snapshot.sql` | 97,749 | M-P01 grain (C-06) |
+| `core.vw_process_snapshot` (materialised view since Phase 8.1) | `sql/04_transformations/03_process_snapshot.sql` | 98,866 | One row per OCID. Refresh with `sql/04_transformations/04_refresh_snapshot.sql` after any change to `stg.*` or `core.dim_buyer` |
 | Validation suite | `sql/03_data_quality/01–08_*.sql` | 119 checks | Run by `python/validation/04_run_validation_suite.py` |
 
 **Reproduce from scratch:**
@@ -65,6 +65,13 @@ psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/04_
 
 The Phase 6 results were produced by exactly this sequence on a freshly
 dropped `stg` / `core` / `analytics` schema set.
+
+> **Phase 8.1 update (2026-10-08).** Gate B now has **107 GATE checks** (102 plus
+> EN-15 to EN-19 for the DQ-20 test entity) and all pass; nothing in the original
+> 102 changed, because `stg` and the `core` row counts are unchanged. The snapshot
+> objects are materialised, so after step 3 run
+> `sql/05_views/01–09` to (re)create the analytics views. Detail:
+> `docs/phase8_analysis/phase8_1_dq20_and_performance.md`.
 
 ---
 

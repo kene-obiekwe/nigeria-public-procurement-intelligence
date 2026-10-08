@@ -10,7 +10,8 @@
 -- Run:      psql -h localhost -p 5433 -U postgres -d nocopo_db -f sql/06_analysis/05_entity_benchmarking.sql
 --
 -- ELIGIBLE POPULATION
---   666 entities (667 buyer IDs minus the bare 'NG-BPP-', DQ-19). For each KPI
+--   665 entities (667 buyer IDs minus the bare 'NG-BPP-', DQ-19, and the portal
+--   test entity NG-BPP-BPP-NOC-90, DQ-20). For each KPI
 --   an entity is compared only if it has at least the minimum n listed in
 --   RS0 below; otherwise its KPI is left out of that comparison (not set to zero).
 --
@@ -31,9 +32,8 @@
 --   4. implementation_coverage_rate is reporting coverage, not contract
 --      performance. tender_reach_rate reflects what was published to NOCOPO.
 --   5. Entities are identified by buyer ID and not merged on name similarity.
---      One entity named "TEST MINISTRY - NOCOPO" appears in the data. No
---      approved rule removes it, so it is retained and visible; see the
---      Phase 8 write-up.
+--      The portal test entity "TEST MINISTRY - NOCOPO" (DQ-20) is excluded from
+--      every analytics view, so it does not appear in any ranking here.
 -- ============================================================
 
 -- [RS0] Minimum eligible n applied to each KPI in this script (analytic parameters, not data rules)
@@ -57,7 +57,7 @@ SELECT count(*)                                                  AS entities,
        round(sum(planned_budget_total) / 1e9, 1)                 AS total_planned_budget_ngn_bn
 FROM analytics.vw_entity_benchmark;
 
--- [RS1b] Register entry (analytics.vw_metric_population; about 40 s because the register evaluates every view)
+-- [RS1b] Register entry (analytics.vw_metric_population; a few seconds)
 SELECT metric_id, candidate_population, candidate_count, eligible_count, eligible_pct
 FROM analytics.vw_metric_population
 WHERE metric_id = 'ENTITY';
