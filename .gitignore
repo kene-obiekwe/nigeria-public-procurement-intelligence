@@ -30,3 +30,6 @@ NOCOPO dataset/
 *.backup
 # Personal career-planning context — LOCAL ONLY
 docs/00_project_planning/Portfolio_Career_Plan_Context.docx
+
+# Power BI — the .pbix holds imported data; commit the .pbit template instead
+*.pbix
