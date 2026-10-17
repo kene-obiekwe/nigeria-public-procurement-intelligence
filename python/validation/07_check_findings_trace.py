@@ -23,6 +23,10 @@ specific SQL output. This script tests that mechanically:
    that value times the row's scale, rounded to the stated precision.
 3. Wording. The terms fraud, corrupt*, collu*, misconduct and kickback may
    appear only in the findings' disclaimer section ("About this report").
+4. Other documents. In the README and the portfolio documents (ALSO_CHECKED),
+   every figure in a block that carries a claim tag must match a claim_trace.md
+   row under that tag. Untagged blocks there (rule thresholds, suite counts,
+   audit evidence linked to its phase document) are not checked.
 
 With --live it also re-runs dashboard/reconciliation_expected_values.sql
 (read-only) and fails if any value cited from the reconciliation pack no
@@ -58,6 +62,8 @@ REC_LOG = os.path.join(ROOT, "dashboard", "reconciliation_log.md")
 REC_SQL = os.path.join(ROOT, "dashboard", "reconciliation_expected_values.sql")
 OUTPUT = os.path.join(ROOT, "docs", "phase10_findings", "claim_trace_check_results.md")
 
+ALSO_CHECKED = ["README.md", "docs/business_requirements.md", "docs/methodology.md",
+                "docs/data_dictionary.md", "docs/assumptions_and_limitations.md"]
 DISCLAIMER_HEADING = "About this report"
 PROHIBITED = re.compile(r"fraud|corrupt|collu|misconduct|kickback", re.I)
 TAG = re.compile(r"\[([A-Z]\d+)\]")
@@ -186,10 +192,10 @@ def load_trace():
     return rows
 
 
-def findings_blocks():
+def findings_blocks(path=FINDINGS):
     """(section heading, block text, first line number) for paragraphs, list items and table rows."""
     blocks, cur, start, section, in_code = [], [], 0, "", False
-    with open(FINDINGS, encoding="utf-8") as fh:
+    with open(path, encoding="utf-8") as fh:
         lines = fh.read().split("\n")
 
     def flush():
@@ -364,6 +370,26 @@ def main():
 
     orphans = [r for r in trace if (r.get("Tag"), parse_stated(r.get("Stated figure", ""))[0]) not in used]
 
+    # 4. tagged figures in the README and the portfolio documents
+    also_total, also_failed, also_files = 0, 0, []
+    for rel in ALSO_CHECKED:
+        path = os.path.join(ROOT, rel)
+        if not os.path.exists(path):
+            continue
+        also_files.append(rel)
+        for section, text, line in findings_blocks(path):
+            tags = TAG.findall(text)
+            if not tags:
+                continue
+            for t in tags:
+                if t not in by_tag:
+                    failures.append(f"{rel} line {line}: tag [{t}] has no rows in claim_trace.md")
+            for canon, raw in extract_tokens(text):
+                also_total += 1
+                if not any(canon in by_tag.get(t, set()) for t in tags):
+                    also_failed += 1
+                    failures.append(f"{rel} line {line}: '{raw}' not listed in claim_trace.md under {', '.join(tags)}")
+
     # 3. wording
     wording = []
     for section, text, line in blocks:
@@ -404,6 +430,8 @@ def main():
         f"| Figures without a matching claim-trace row | {sum(1 for f in failures if f.startswith('findings.md'))} |",
         f"| Claim-trace rows whose figure is not extracted from the findings text (verified, but not auto-located) | {len(orphans)} |",
         f"| Prohibited terms outside the disclaimer section | {len(wording)} |",
+        f"| Tagged figures in the README and portfolio documents ({len(also_files)} files) matched to claim-trace rows | "
+        f"{also_total - also_failed} of {also_total} |",
         f"| Reconciliation pack re-run against the database | {live_note} |",
         "",
     ]
@@ -427,7 +455,8 @@ def main():
     with open(OUTPUT, "w", encoding="utf-8", newline="\n") as fh:
         fh.write("\n".join(lines))
 
-    print(f"Claim-trace rows: {len(row_results)}; figures in findings: {tokens_total}; failures: {len(failures)}")
+    print(f"Claim-trace rows: {len(row_results)}; figures in findings: {tokens_total}; "
+          f"tagged figures in other documents: {also_total}; failures: {len(failures)}")
     for f in failures[:40]:
         print("  " + f)
     print(f"Report: {os.path.relpath(OUTPUT, ROOT)}")

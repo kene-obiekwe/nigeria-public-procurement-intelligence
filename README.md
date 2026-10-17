@@ -1,325 +1,223 @@
 # Nigeria Public Procurement Intelligence
 
-**Turning Nigeria's open contracting data into an audited PostgreSQL analytics
-database: one where every number can be traced to a validated SQL rule.**
+**An audited PostgreSQL analytics build over Nigeria's open contracting data, where every published figure traces
+to a validated SQL output.**
 
-> **Status: findings delivered; packaging next.** Data audit, relational design, the PostgreSQL
-> staging load, the validated core model and the analytical layer are complete.
-> **Gate B passed** (107/107); **Phase 7 views validated** (27/27); **Phase 8
-> business-question SQL validated** (31/31); **Phase 8.1** removed a portal test entity
-> (DQ-20) and made the analytical layer fast; **Phase 9** delivered the Power BI report over a
-> read-only role, with every dashboard figure reconciled to SQL and signed off (177/177).
-> **Phase 10** delivered the [executive findings](docs/phase10_findings/findings.md); every figure
-> in them traces to a SQL output (Gate D check: 236/236). **Phase 10.1** corrected the release-date
-> statements (C-12) and flagged possible award scale errors (DQ-21, flagged not excluded), with
-> results shown with and without them.
-> See [Project status](#project-status).
+> **In 30 seconds.** The Nigeria Open Contracting Portal (NOCOPO) publishes procurement records as a 210 MB nested
+> OCDS JSON file. This project audits that file before modelling it, loads it into a staged PostgreSQL model
+> (`stg` → `core` → `analytics`), and answers seven business questions on supplier concentration, competition,
+> budget against award, cycle timing, entity benchmarking, implementation reporting and data-quality impact.
+> Every metric declares its own eligible population, nothing is silently cleaned away, a Power BI report reads only
+> validated views through a read-only role, and the executive findings are checked figure by figure against the SQL
+> that produced them. One command rebuilds and re-validates everything from the raw file.
+>
+> **Status:** Phases 0–10.1 complete (Gate D signed off); Phase 11 packaging in progress; release tag after Phase 12 QA.
 
----
-
-## The business problem
-
-Public procurement produces a large amount of published information at every
-stage: planning, tender, award, contract and implementation. The **Nigeria Open
-Contracting Portal (NOCOPO)** publishes this data. In raw form it is a 210 MB
-nested JSON file, and it is hard to use for decisions.
-
-This project takes the perspective of an advisory analytics team supporting
-procurement and management stakeholders. It asks one question: **what patterns
-in published procurement activity deserve management attention, and how far can
-the data be trusted to show them?**
-
-### Core business questions
-
-1. How concentrated is awarded value among suppliers, by entity and category?
-2. How competitive are procurement processes, judged from recorded tenderer participation?
-3. How does awarded value compare with planned budgets?
-4. What do valid tender, award and contract dates reveal about procurement-cycle duration?
-5. Which procuring entities account for the most activity, and how do they compare?
-6. What share of contracts carries usable implementation and payment information?
-7. Which data-quality issues could materially change how these metrics should be read?
-
-Findings are framed as observed patterns and areas for further review. The
-project does **not** make claims of misconduct or causation.
-
-**Read the results:** [executive findings and recommendations](docs/phase10_findings/findings.md)
-(each figure traced in [`claim_trace.md`](docs/phase10_findings/claim_trace.md)) and the
-[dashboard screenshots](dashboard/screenshots/README.md).
+**Read first:** [executive findings](docs/phase10_findings/findings.md) ·
+[dashboard screenshots](dashboard/screenshots/README.md) · [methodology](docs/methodology.md) ·
+[limitations](docs/assumptions_and_limitations.md)
 
 ---
 
-## Approach
+## Key findings
 
+Descriptive patterns in published records, each with its population and main caveat. Tags such as `[S1]` resolve
+to the SQL output in [`claim_trace.md`](docs/phase10_findings/claim_trace.md). Full findings, implications and
+recommendations: [`findings.md`](docs/phase10_findings/findings.md).
+
+- **Supplier value is spread widely overall but concentrated in emergency procurement.** The top ten suppliers hold
+  29.0% of attributable award value (Herfindahl index 139.4); in Emergency procurement the largest supplier holds
+  61.4%, and still 55.3% without the awards flagged as possible scale errors. *Population:* 13,537 awards.
+  *Caveat:* 2,226 awards (₦670.4bn, 20.4% of eligible award value) have no usable supplier ID, so concentration is
+  a lower bound. [S1] [S2] [S4] [S6]
+- **Almost half of tenders record a single bidder.** 44.0% of 17,253 tenders record one tenderer, and 39.6% of
+  10,129 tenders under National Competitive Bidding. *Caveat:* the source does not define what the tenderer count
+  counts. [C1] [C3]
+- **Most processes are awarded close to budget, but a small group far above it holds much of the value.** The median
+  award is 0.93 of its budget across 15,574 processes, yet 227 processes (1.5%) above ten times budget hold 49.8% of
+  the compared award value (39.9% without the flagged awards). *Caveat:* a budget is a plan, not spend. [B1] [B3] [B8]
+- **Timing is measurable for under half of processes.** The median award lag is 97 days, but only 45.2% of candidate
+  processes publish the two valid dates it needs (7,462 processes). [T1] [T2]
+- **Implementation reporting is broad.** 87.2% of 16,221 contracts carry some implementation record. *Caveat:* this
+  is reporting coverage, not contract performance. [I1]
+
+The project does not make claims of misconduct or causation; patterns are prompts for review
+([findings §2](docs/phase10_findings/findings.md#2-about-this-report)).
+
+---
+
+## Dashboard
+
+Power BI report built on `analytics.*` only, through the read-only role `nocopo_bi`; 177 dashboard figures were
+reconciled to SQL and signed off page by page ([reconciliation log](dashboard/reconciliation_log.md)). The repository
+holds the `.pbit` template and screenshots; the `.pbix`, which contains imported data, is never committed.
+
+![Executive overview](dashboard/screenshots/01_executive_overview.png)
+
+![Supplier concentration](dashboard/screenshots/02a_supplier_concentration.png)
+
+![Budget versus award](dashboard/screenshots/03_budget_vs_award.png)
+
+All eight pages: [`dashboard/screenshots/`](dashboard/screenshots/README.md) · build guide:
+[`dashboard/README.md`](dashboard/README.md) · usage: [`dashboard/USAGE.md`](dashboard/USAGE.md)
+
+---
+
+## Architecture
+
+```mermaid
+flowchart LR
+    A["NOCOPO OCDS JSON<br/>pinned by SHA-256"] -->|"Python loader"| B["stg.*<br/>source-faithful staging,<br/>DQ flags in SQL"]
+    B -->|"SQL"| C["core.*<br/>dimensions, materialised<br/>process snapshot"]
+    C -->|"SQL views"| D["analytics.*<br/>eligibility per metric,<br/>population register"]
+    D -->|"read-only role"| E["Power BI report"]
+    D -->|"7 analysis scripts"| F["Findings<br/>traced to SQL"]
 ```
-NOCOPO OCDS JSON (public, immutable)
-        │  Python: structural profiling, targeted validation, loading
-        ▼
-PostgreSQL  stg.*        source-faithful staging, one row per release, DQ flags at grain
-        ▼
-PostgreSQL  core.*       validated entities: buyers, suppliers
-        ▼
-PostgreSQL  analytics.*  metric-specific eligibility views (snapshot rule, exclusions)
-        ▼
-Power BI                 presentation over validated views only
-        ▼
-Executive findings & recommendations
-```
 
-**Design principles**
+- **Audit before schema.** No table was designed until profiling and the data-quality decision log were complete.
+- **SQL-first.** Business logic lives in PostgreSQL; Python ingests and runs checks; Power BI only presents.
+- **No destructive cleaning.** Questionable records are kept and flagged, and excluded only from the metrics they
+  would distort. Missing values are never imputed.
+- **Eligibility per metric.** There is no single "clean dataset"; each metric reports its own population.
 
-- **Audit before schema.** No table was designed until profiling and the
-  data-quality decision log were complete.
-- **SQL-first.** Business logic and metrics live in PostgreSQL. Python handles
-  ingestion and profiling. Power BI only presents.
-- **No destructive cleaning.** Questionable records are retained and flagged,
-  and are excluded only from the metrics they would distort. Missing values are
-  never imputed as zero.
-- **Eligibility is per metric.** There is no single "clean dataset". Every
-  metric declares its own eligible population and reports its size.
+Detail: [`docs/methodology.md`](docs/methodology.md) and the [diagram notes](diagrams/architecture/README.md).
 
 ---
 
-## What the audit found
-
-All figures below are measured. Each is documented in `docs/`.
+## What the data audit found
 
 | Finding | Evidence | Treatment |
 |---|---|---|
-| 108,277 releases describe only **98,866** procurement processes (OCIDs) | 6,280 OCIDs repeat across releases | A section-level snapshot rule prevents double-counting |
-| Repeated releases are **not always identical** | 422 OCIDs revise their budget across releases; 192 hold unrelated budget lines | Integer-ordered "latest release" per section; budget handled at the budget-line grain |
-| Release IDs sort incorrectly as text | Text ordering picks the wrong "latest" release in 1,508 OCIDs | Integer `release_seq` ordering key |
-| Only ~17% of releases reach the tender stage | 89,869 releases are planning-only | Later-stage metrics report their own coverage |
-| Implausible tenderer counts (max 90,865) | 65 records > 1,000 tenderers | Flagged `ANOMALOUS`, excluded from competition metrics |
-| Placeholder and impossible dates (`2001-01-01`, year 2922) | Hundreds of date fields | Classified per date column; invalid dates excluded from timing metrics |
-| Supplier identity is fragmented | 1,483 IDs map to multiple names; 571 names map to multiple IDs | Source IDs only; no name-similarity merging |
-| Release dates are publication metadata, not event dates | Releases are dated 2021-05-03 to 2026-07-29 (9,786 distinct values); 2021-05-03 is the package metadata date (correction C-12) | Never used for temporal analysis; event dates are used instead |
+| 108,277 releases describe 98,866 processes (OCIDs); 6,280 OCIDs repeat across releases | [targeted validation](docs/phase2_profiling/targeted_validation_report.md) | Section-level snapshot; values counted once per process |
+| Repeated releases are not always identical: 192 OCIDs hold unrelated budget lines | [snapshot evidence](docs/phase4_data_model/phase4_1_snapshot_validation_report.md) | Integer-ordered latest release per section; budget at the budget-line grain (C-06) |
+| Text ordering of release IDs picks the wrong latest release in 1,508 OCIDs | [snapshot evidence](docs/phase4_data_model/phase4_1_snapshot_validation_report.md) | Integer `release_seq` ordering |
+| Implausible tenderer counts (maximum 90,865; 65 records above 1,000) | [profiling report](docs/phase2_profiling/data_profiling_report.md) | Flagged `ANOMALOUS`, excluded from competition metrics (DQ-05) |
+| Placeholder and impossible dates (`2001-01-01`, year 2922) | [profiling report](docs/phase2_profiling/data_profiling_report.md) | Classified per date column; excluded from timing metrics only (DQ-08, DQ-09) |
+| Supplier identity is fragmented: 1,483 IDs carry several names, 571 names carry several IDs | [targeted validation](docs/phase2_profiling/targeted_validation_report.md) | Source IDs only; no name-similarity merging (DQ-13 to DQ-15) |
+| Release dates are publication metadata; 2021-05-03 is the package date, not the date of every release | [source verification](docs/phase10_findings/source_verification.md) §D | Never used for temporal analysis (DQ-10, C-12) |
+| Some awards are out of scale with their own process record | [source verification](docs/phase10_findings/source_verification.md) | Flagged, not excluded; results shown with and without them (DQ-21) |
+
+All issues and treatments: [data-quality decision log](docs/phase3_data_quality/phase3_data_quality_decision_log.md) (DQ-01 to DQ-21).
 
 ---
 
-## Repository structure
+## Reproduce in 5 steps
 
-```
-├── data/README.md            Source inventory, checksum, licence, acquisition notes
-├── docs/                     Documentation grouped by phase (see docs/README.md)
-│   ├── 00_project_planning/  Scope, architecture, data-quality plan, implementation plan
-│   ├── phase2_profiling/     Profiling and targeted validation reports
-│   ├── phase3_data_quality/  DQ decision log, metric eligibility, data dictionary, corrections
-│   ├── phase4_data_model/    Relational model and snapshot-rule evidence
-│   ├── phase5_staging/       Staging load and reconciliation
-│   ├── phase6_core_model/    Core build, Gate B validation results
-│   ├── phase7_analytics/     Analytical views, eligible populations, validation
-│   ├── phase8_analysis/      Business-question analysis, results and validation
-│   ├── phase9_dashboard/     Power BI layer: role, dimensions, validation
-│   └── phase10_findings/     Executive findings, claim trace (Gate D), source verification
-├── python/
-│   ├── profiling/            Phase 2 profiling and targeted validation scripts
-│   ├── validation/           Validation suites, analysis runner, reconciliation log, findings trace check
-│   ├── ingest/               Staging loader and reconciliation (Phase 5)
-│   └── utils/
-├── sql/
-│   ├── 01_staging/           Staging DDL and load checks (Phase 5)
-│   ├── 02_schema/            Staging + core schema DDL (v1.2, executed)
-│   ├── 03_data_quality/      Validation suites: Gate B (01–08), views (09), analysis (10)
-│   ├── 04_transformations/   Core dimensions + process snapshot (Phase 6)
-│   ├── 05_views/             Metric-eligibility views (Phase 7) and DQ-impact view (Phase 8)
-│   └── 06_analysis/          One script per business question (Phase 8)
-├── diagrams/erd/             Entity-relationship diagram (Mermaid)
-├── database/seed_and_setup/  Database setup scripts
-└── dashboard/                Power BI template (.pbit), build guide, reconciliation log, screenshots (Phase 9)
-```
+Requires Python 3.12 and PostgreSQL 15+ (developed on 17.4). The raw file is not in the repository; see
+[Data access](#data-access).
 
----
+1. **Clone and install** the Python dependencies:
 
-## Key documents
+   ```bash
+   python -m venv .venv
+   ```
 
-| Document | Purpose |
-|---|---|
-| [`docs/phase2_profiling/data_profiling_report.md`](docs/phase2_profiling/data_profiling_report.md) | Structural and data-quality profile of the raw file |
-| [`docs/phase2_profiling/targeted_validation_report.md`](docs/phase2_profiling/targeted_validation_report.md) | Follow-up checks on profiling anomalies |
-| [`docs/phase3_data_quality/phase3_data_quality_decision_log.md`](docs/phase3_data_quality/phase3_data_quality_decision_log.md) | Issues DQ-01 to DQ-21 with treatment decisions |
-| [`docs/phase3_data_quality/phase3_metric_eligibility.md`](docs/phase3_data_quality/phase3_metric_eligibility.md) | Analytical grain and per-metric eligibility rules |
-| [`docs/phase3_data_quality/phase3_data_dictionary.md`](docs/phase3_data_quality/phase3_data_dictionary.md) | Source field → meaning → target column |
-| [`docs/phase3_data_quality/phase3_2_correction_log.md`](docs/phase3_data_quality/phase3_2_correction_log.md) | C-06: budget metric aggregated per budget line |
-| [`docs/phase4_data_model/phase4_relational_model.md`](docs/phase4_data_model/phase4_relational_model.md) | Relational design, release strategy, flag placement (v1.1) |
-| [`docs/phase4_data_model/phase4_1_snapshot_validation_report.md`](docs/phase4_data_model/phase4_1_snapshot_validation_report.md) | Evidence behind the v1.1 snapshot rule |
-| [`docs/phase5_staging/phase5_staging_reconciliation.md`](docs/phase5_staging/phase5_staging_reconciliation.md) | Staging load, schema v1.2 changes, reconciliation and findings |
-| [`docs/phase6_core_model/phase6_core_model.md`](docs/phase6_core_model/phase6_core_model.md) | Core build, design decisions, Gate B summary |
-| [`docs/phase6_core_model/phase6_validation_results.md`](docs/phase6_core_model/phase6_validation_results.md) | Check-by-check Gate B results (119 checks) |
-| [`docs/phase7_analytics/phase7_analytical_views.md`](docs/phase7_analytics/phase7_analytical_views.md) | Analytical views, eligibility rules, populations and disclosures |
-| [`docs/phase8_analysis/phase8_business_question_analysis.md`](docs/phase8_analysis/phase8_business_question_analysis.md) | Script catalogue, findings by question, limitations, decisions |
-| [`docs/phase8_analysis/phase8_1_dq20_and_performance.md`](docs/phase8_analysis/phase8_1_dq20_and_performance.md) | DQ-20 test-entity exclusion, indexes and materialised snapshot, before/after populations and timings, build and refresh sequence |
-| [`dashboard/README.md`](dashboard/README.md) | Power BI build guide: connection, data model, DAX measures, pages, caveats, reconciliation |
-| [`docs/phase9_dashboard/phase9_dashboard.md`](docs/phase9_dashboard/phase9_dashboard.md) | Phase 9 write-up: read-only role, dimensions, design decisions, validation |
-| [`docs/phase8_analysis/phase8_analysis_results.md`](docs/phase8_analysis/phase8_analysis_results.md) | Every result set produced by the seven analysis scripts |
-| [`dashboard/reconciliation_log.md`](dashboard/reconciliation_log.md) | Dashboard-to-SQL reconciliation: 177 figures, all matching, signed per page |
-| [`dashboard/screenshots/`](dashboard/screenshots/README.md) | One screenshot per dashboard page |
-| [`docs/phase10_findings/findings.md`](docs/phase10_findings/findings.md) | Executive findings, recommendations, assumptions and limitations |
-| [`docs/phase10_findings/claim_trace.md`](docs/phase10_findings/claim_trace.md) | Every figure in the findings mapped to its SQL output (Gate D) |
-| [`docs/phase10_findings/source_verification.md`](docs/phase10_findings/source_verification.md) | Raw-source checks of the records behind the open anomalies |
-| [`docs/phase10_findings/phase10_1_correction_pass.md`](docs/phase10_findings/phase10_1_correction_pass.md) | Phase 10.1: release-date correction (C-12), possible award scale errors (DQ-21) and their sensitivity results |
-| [`diagrams/erd/nocopo_erd.md`](diagrams/erd/nocopo_erd.md) | Entity-relationship diagram |
-| [`sql/02_schema/00_draft_core_schema.sql`](sql/02_schema/00_draft_core_schema.sql) | Draft DDL with constraints tied to DQ issues |
+   ```bash
+   .venv/Scripts/python -m pip install -r requirements.txt
+   ```
+
+   On macOS or Linux use `.venv/bin/python`.
+2. **Point at PostgreSQL** with the standard variables (`PGHOST`, `PGPORT`, `PGUSER`; defaults `localhost`, `5433`,
+   `postgres`) and keep the password in `pgpass.conf` or `~/.pgpass`, never on the command line.
+3. **Place the source file** at `NOCOPO dataset/all07010.json` and check its SHA-256 against
+   [`data/README.md`](data/README.md). The loader refuses any other file.
+4. **Build and validate** everything into a new database:
+
+   ```bash
+   .venv/Scripts/python python/run_pipeline.py --db nocopo_db --create-db
+   ```
+
+   This runs schema → staging load → core → snapshot → analytics views → read-only BI role → `ANALYZE` → validation suites
+   (Phases 6–10) → the seven analysis scripts → the findings trace check, and stops at the first failure.
+   It refuses to build into a database that already holds the schema.
+5. **Explore:** read the regenerated [analysis results](docs/phase8_analysis/phase8_analysis_results.md) and
+   [findings](docs/phase10_findings/findings.md), or open `dashboard/NOCOPO_Dashboard.pbit` in Power BI Desktop
+   after setting a password for `nocopo_bi` (`\password nocopo_bi` in psql;
+   [`dashboard/README.md`](dashboard/README.md)).
+
+Step 4 rewrites the committed result logs in `docs/`; on the pinned file the only differences are run dates,
+timings and the database name. Individual stages can still be run on their own (see
+[`methodology.md`](docs/methodology.md) §6 and each phase document).
 
 ---
 
-## Reproducing the work
+## Data access
 
-**Prerequisites:** Python 3.12, PostgreSQL 15+, and the NOCOPO source file
-described in [`data/README.md`](data/README.md), placed at
-`NOCOPO dataset/all07010.json` and verified against its SHA-256.
-
-```bash
-python -m venv .venv
-```
-
-```bash
-.venv/Scripts/python -m pip install -r requirements.txt
-```
-
-On macOS or Linux, use `.venv/bin/python` instead.
-
-Run the scripts from the repository root. Each one reads the raw file
-read-only and writes a Markdown report to `docs/`:
-
-```bash
-.venv/Scripts/python python/profiling/01_structural_profiler.py
-```
-
-```bash
-.venv/Scripts/python python/profiling/02_targeted_validation.py
-```
-
-```bash
-.venv/Scripts/python python/validation/03_snapshot_rule_validation.py
-```
-
-**Build the staging database** (PostgreSQL 15+; password via `pgpass.conf`;
-connection defaults `localhost:5433`, user `postgres`, overridable with the
-standard `PGHOST` / `PGPORT` / `PGUSER` / `PGDATABASE` variables):
-
-```bash
-psql -h localhost -p 5433 -U postgres -c "CREATE DATABASE nocopo_db WITH TEMPLATE template0 ENCODING 'UTF8'"
-```
-
-```bash
-psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/02_schema/00_draft_core_schema.sql
-```
-
-```bash
-.venv/Scripts/python python/ingest/01_load_staging.py
-```
-
-```bash
-.venv/Scripts/python python/ingest/02_reconcile_staging.py
-```
-
-**Build the core model and run the Gate B validation suite:**
-
-```bash
-psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/02_schema/02_performance_indexes.sql -f sql/04_transformations/01_build_dim_buyer.sql -f sql/04_transformations/02_build_dim_supplier.sql -f sql/04_transformations/03_process_snapshot.sql
-```
-
-The process snapshot is a materialised view. After any later change to `stg.*` or
-`core.dim_buyer`, refresh it before using the analytics views:
-
-```bash
-psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/04_transformations/04_refresh_snapshot.sql
-```
-
-A database built before Phase 8.1 needs the one-off migrations first; see
-[`docs/phase8_analysis/phase8_1_dq20_and_performance.md`](docs/phase8_analysis/phase8_1_dq20_and_performance.md) §6.
-
-```bash
-.venv/Scripts/python python/validation/04_run_validation_suite.py
-```
-
-**Build the analytical views and validate them:**
-
-```bash
-psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/05_views/01_budget_eligible.sql -f sql/05_views/02_competition_eligible.sql -f sql/05_views/03_award_and_supplier_eligible.sql -f sql/05_views/04_budget_award_comparison.sql -f sql/05_views/05_timing_eligible.sql -f sql/05_views/06_lifecycle_and_implementation.sql -f sql/05_views/07_entity_benchmark.sql -f sql/05_views/08_metric_population.sql
-```
-
-```bash
-.venv/Scripts/python python/validation/04_run_validation_suite.py --phase 7
-```
-
-**Create the Power BI presentation dimensions and the read-only role, then validate them:**
-
-```bash
-psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/05_views/10_dim_views.sql -f database/seed_and_setup/01_create_bi_role.sql
-```
-
-Set the role's password yourself with `\password nocopo_bi` in psql; no password is stored in the repository.
-
-```bash
-.venv/Scripts/python python/validation/04_run_validation_suite.py --phase 9
-```
-
-**Build the data-quality impact view, run the seven business-question scripts and validate them:**
-
-```bash
-psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/05_views/09_dq_impact.sql
-```
-
-```bash
-.venv/Scripts/python python/validation/05_run_analysis_scripts.py
-```
-
-```bash
-.venv/Scripts/python python/validation/04_run_validation_suite.py --phase 8
-```
-
-**Build and validate the DQ-21 award scale flag (Phase 10.1):**
-
-```bash
-psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/05_views/11_award_scale_flag.sql
-```
-
-```bash
-.venv/Scripts/python python/validation/04_run_validation_suite.py --phase 10
-```
-
-**Check the findings against the SQL outputs (Gate D) and regenerate the source checks:**
-
-```bash
-.venv/Scripts/python python/validation/07_check_findings_trace.py --live
-```
-
-```bash
-.venv/Scripts/python python/validation/08_verify_source_items.py
-```
+The source is a public NOCOPO OCDS bulk export published by the Bureau of Public Procurement under the ODC Public
+Domain Dedication and Licence. It is not committed (209.6 MB, over GitHub's file limit); the repository records its
+origin, licence and SHA-256 instead. A fresh download from the portal will not match the checksum, so results are
+reproducible only from the pinned file. Details: [`data/README.md`](data/README.md).
 
 ---
 
-## Project status
+## Validation evidence
 
-| Phase | Scope | Status |
+| Check | Result | Log |
 |---|---|---|
-| 0–1 | Environment, repository, source inventory | Complete |
-| 2 | Data profiling and audit | Complete |
-| 3 | Data-quality decision log, metric eligibility, data dictionary | Complete (frozen) |
-| 4 | Relational model, ERD, draft DDL | Complete (v1.1 approved) |
-| 5 | PostgreSQL staging load and reconciliation | Complete (64/64 checks) |
-| 6 | Core model and validation suite | Complete (Gate B: 107/107 after DQ-20) |
-| 7 | Analytical views (metric eligibility) | Complete (27/27 checks) |
-| 8 | Business-question SQL | Complete (31/31 checks) |
-| 8.1 | Test-entity exclusion (DQ-20), performance, re-validation | Complete |
-| 9 | Power BI data model, DAX, read-only role, report, reconciliation | Complete (16/16 checks; 177/177 figures reconciled and signed) |
-| 10 | Executive findings and recommendations | Delivered (Gate D trace check 236/236); owner sign-off pending |
-| 10.1 | Release-date correction (C-12); possible award scale errors flagged with sensitivity results (DQ-21) | Complete (14/14 checks; earlier suites and the 177 reconciliation figures unchanged) |
-| 11–12 | Packaging and final QA | Planned |
+| Raw file → staging reconciliation | 64 / 64 | [Phase 5](docs/phase5_staging/phase5_staging_results.md) |
+| Gate B: core model (keys, integrity, values, dates, entities, layer reconciliation) | 107 / 107 | [Phase 6](docs/phase6_core_model/phase6_validation_results.md) |
+| Analytical view populations against an independent recount | 27 / 27 | [Phase 7](docs/phase7_analytics/phase7_view_validation_results.md) |
+| Business-question outputs and DQ-impact reconciliation | 31 / 31 | [Phase 8](docs/phase8_analysis/phase8_validation_results.md) |
+| Read-only BI role and presentation dimensions (Gate C) | 16 / 16 | [Phase 9](docs/phase9_dashboard/phase9_validation_results.md) |
+| DQ-21 award scale flag | 14 / 14 | [Phase 10.1](docs/phase10_findings/phase10_validation_results.md) |
+| Dashboard figures reconciled to SQL | 177 / 177 | [reconciliation log](dashboard/reconciliation_log.md) |
+| Gate D: every figure in the findings traced to SQL | 236 / 236 | [trace check](docs/phase10_findings/claim_trace_check_results.md) |
+
+---
+
+## Repository map
+
+```
+├── README.md                 This page
+├── data/README.md            Source inventory, SHA-256, licence, acquisition
+├── docs/                     Portfolio documents + evidence by phase (index: docs/README.md)
+│   ├── business_requirements.md · methodology.md · data_dictionary.md · assumptions_and_limitations.md
+│   ├── 00_project_planning/  Scope, architecture, data-quality plan, implementation plan
+│   ├── phase2_profiling/ … phase9_dashboard/   Evidence and generated validation logs per phase
+│   └── phase10_findings/     Executive findings, claim trace, source verification, Phase 10.1
+├── python/
+│   ├── run_pipeline.py       One-command rebuild and validation
+│   ├── ingest/               Staging loader and raw-to-staging reconciliation
+│   ├── profiling/            Phase 2 profiling scripts
+│   └── validation/           Suite runner, analysis runner, trace check, source verification, link check
+├── sql/
+│   ├── 01_staging/           (reserved: the staging DDL lives in 02_schema)
+│   ├── 02_schema/            00_draft_core_schema.sql = the executed stg + core schema (v1.x); upgrade migrations
+│   ├── 03_data_quality/      Validation suites 01–12 (Gate B to Phase 10.1)
+│   ├── 04_transformations/   Core dimensions and the materialised process snapshot
+│   ├── 05_views/             analytics.* views (01–11)
+│   └── 06_analysis/          One read-only script per business question
+├── database/seed_and_setup/  Read-only Power BI role and its test
+├── diagrams/                 ERD (Mermaid) and architecture notes
+└── dashboard/                Power BI template (.pbit), build guide, reconciliation log, screenshots
+```
 
 ---
 
 ## Tech stack
 
-PostgreSQL · Python (standard library, pandas, psycopg, SQLAlchemy) · Power BI ·
-Mermaid / diagrams.net · Git
+PostgreSQL 17 (CTEs, window functions, materialised views, generated columns, role-based access) · Python 3.12
+(standard library, psycopg 3, pandas) · Power BI Desktop · Mermaid · Git and GitHub.
 
 ---
 
-## Licence and data
+## Portfolio positioning
 
-Code and documentation: MIT (see [`LICENSE`](LICENSE)).
-Source data: Bureau of Public Procurement, published under ODC-PDDL (see [`NOTICE.md`](NOTICE.md)).
-This is an independent portfolio analysis and is not endorsed by the BPP.
+This is **Stage 1 of a four-stage portfolio**: SQL and analytics → Python / data science → data engineering →
+integrated BI and decision intelligence. It deliberately stays SQL-first and leaves out machine learning, cloud
+infrastructure and orchestration, which the source (one static export) does not need.
+
+Natural extensions, each a later project rather than part of this one:
+
+- **Python / data science:** entity segmentation or anomaly scoring on the validated `analytics.*` layer, with the
+  same eligibility and no-causation discipline.
+- **Data engineering:** scheduled ingestion of fresh portal exports, the suites and trace check in CI (for example
+  GitHub Actions against a containerised PostgreSQL), and versioned snapshots.
+- **Integrated BI:** a broader decision-support layer that combines procurement data with budget execution sources.
+
+---
+
+## Licence
+
+Code and documentation: MIT ([`LICENSE`](LICENSE)). Source data: Bureau of Public Procurement, ODC-PDDL
+([`NOTICE.md`](NOTICE.md)). This is an independent portfolio analysis, not endorsed by the BPP.

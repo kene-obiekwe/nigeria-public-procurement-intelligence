@@ -1,6 +1,16 @@
 # Project Documentation
 
-Documents are grouped by implementation phase, following
+Start with the four portfolio documents; they summarise the project and link to the phase evidence below.
+
+| Document | Purpose |
+|---|---|
+| [`business_requirements.md`](business_requirements.md) | Problem, stakeholders, the seven business questions, KPIs and metric IDs, scope, definition of success |
+| [`methodology.md`](methodology.md) | Pipeline layers, release and snapshot strategy, eligibility per metric, validation gates A–D, how results trace to SQL |
+| [`data_dictionary.md`](data_dictionary.md) | Final dictionary of the 16 `analytics.*` views (columns, types, meaning, rules applied) |
+| [`assumptions_and_limitations.md`](assumptions_and_limitations.md) | The single authoritative list of assumptions and limitations |
+| [`phase10_findings/findings.md`](phase10_findings/findings.md) | Executive findings and recommendations (kept in the Phase 10 folder with its evidence) |
+
+Below, documents are grouped by implementation phase, following
 [`00_project_planning/NOCOPO_Implementation_Plan.docx`](00_project_planning/NOCOPO_Implementation_Plan.docx).
 Within a phase, later correction logs take precedence over the documents they
 correct.
@@ -94,6 +104,15 @@ The ERD is in [`../diagrams/erd/`](../diagrams/erd/nocopo_erd.md) and the DDL is
 | [`source_verification.md`](phase10_findings/source_verification.md) | Generated raw-source evidence for the three open items, release dates and award-to-budget ratio clustering |
 | [`phase10_1_correction_pass.md`](phase10_findings/phase10_1_correction_pass.md) | Phase 10.1: C-12 release-date correction, DQ-21 award scale flag (rule, size, sensitivity, validation) |
 | [`phase10_validation_results.md`](phase10_findings/phase10_validation_results.md) | Generated Phase 10.1 results: DQ-21 flag checks (14 GATE + 3 INFO) |
+
+## Phase 11 — Packaging
+
+| Item | Purpose |
+|---|---|
+| [`../python/run_pipeline.py`](../python/run_pipeline.py) | One-command rebuild of an empty database from the raw file, then every suite, the analysis scripts and the trace check |
+| [`../python/validation/09_check_links.py`](../python/validation/09_check_links.py) | Checks every relative link, image and heading anchor in the tracked Markdown files |
+| [`../diagrams/architecture/README.md`](../diagrams/architecture/README.md) | Architecture and gate diagrams (Mermaid) |
+| [`../README.md`](../README.md) | Entry point for readers: summary, key findings, dashboard, reproduction steps |
 
 ## Generated Reports
 
