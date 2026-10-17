@@ -1,7 +1,7 @@
 # Phase 7 — Analytical View Validation Results
 
 > **Runner:** `python/validation/04_run_validation_suite.py --phase 7`  
-> **Run date:** 2026-10-17 19:01:13  
+> **Run date:** 2026-10-17 21:44:36  
 > **Database:** `nocopo_db` on localhost:5433 (PostgreSQL 17.4)  
 > **Phase 7 exit-gate result:** **PASSED**. 27 / 27 GATE checks passed; 13 INFO measurements.
 

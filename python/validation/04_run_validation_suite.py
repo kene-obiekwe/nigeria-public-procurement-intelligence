@@ -74,6 +74,13 @@ SUITES = {
            "Phase 10.1 — Award Scale Flag (DQ-21) Validation Results",
            "docs/phase10_findings/phase10_1_correction_pass.md", False),
 }
+# Session planner settings per suite. They change how a query is executed, never
+# what it returns. Phase 7: the independent recounts in 09_analytical_views.sql
+# join unindexed CTEs (latest_line, award_ok). On a freshly loaded database the
+# sampled statistics can lead the planner to a nested loop over those CTE scans,
+# which runs for many minutes; with nested loops off the file takes about 15 s and
+# returns identical results (verified on a fresh rebuild, Phase 11).
+PLANNER_SETTINGS = {"7": {"enable_nestloop": "off"}}
 GATE_LABELS = {"6": "Gate B result", "7": "Phase 7 exit-gate result", "8": "Phase 8 validation result",
                 "9": "Phase 9 validation result", "10": "Phase 10.1 validation result"}
 
@@ -103,6 +110,8 @@ def main():
     results = []
     with psycopg.connect(**conninfo) as conn, conn.cursor() as cur:
         server = cur.execute("SHOW server_version").fetchone()[0]
+        for name, value in PLANNER_SETTINGS.get(args.phase, {}).items():
+            cur.execute(f"SET {name} = {value}")
         for path in files:
             with open(path, encoding="utf-8") as fh:
                 cur.execute(fh.read())
