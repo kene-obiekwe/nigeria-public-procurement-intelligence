@@ -7,10 +7,10 @@
 > this repository creates or edits one.
 >
 > **Status of this guide:** written against the validated `analytics.*` layer as of 2026-10-08 (Phase 8.1
-> populations). The DAX and Power Query below were checked line by line against the SQL definitions and
-> the expected values in `reconciliation_expected_values.sql`, but they could not be run inside Power BI
-> Desktop here. Any difference you find when you build is a defect to report; the reconciliation log
-> (§9) is how you find it.
+> populations), then built and reconciled in Power BI Desktop on 2026-10-15: 177 of 177 figures match
+> (`reconciliation_log.md`). The build changed three measures (the supplier ranking measures in §5.3, now
+> corrected) and split page 2 into 2a and 2b, so the report has 8 pages (see `docs/phase9_dashboard/phase9_dashboard.md` §6
+> for the deviations from §7). `USAGE.md` describes the finished report.
 
 ---
 
@@ -185,7 +185,7 @@ Create these in Model view. All are **single direction** (dimension filters fact
 |---|---|---|
 | `Budget`, `Competition`, `Awards`, `Suppliers`, `BudgetVsAward`, `TenderDuration`, `AwardLag`, `SignatureLag`, `Lifecycle`, `Contracts` | `DimBuyer` | `buyer_id` → `buyer_id` |
 | `Competition`, `Awards`, `Suppliers`, `BudgetVsAward`, `TenderDuration`, `AwardLag` | `DimMethod` | `procurement_method` → `procurement_method` |
-| `EntityBenchmark` | `DimBuyer` | `buyer_id` → `buyer_id`; **one-to-one**, single direction |
+| `EntityBenchmark` | `DimBuyer` | `buyer_id` → `buyer_id`; **one-to-one**. Power BI forces the filter direction to *Both* for one-to-one relationships; this is harmless because both tables hold the same 665 buyers |
 
 ```
                        DimMethod                         DimBuyer
@@ -377,12 +377,13 @@ Supplier HHI               =
     RETURN SUMX(VALUES(Suppliers[supplier_id]), DIVIDE([Supplier Value (NGN)], Total) ^ 2) * 10000
 Suppliers With One Award   =
     COUNTROWS(FILTER(VALUES(Suppliers[supplier_id]), CALCULATE(DISTINCTCOUNT(Suppliers[award_id])) = 1))
-Supplier Rank              = RANKX(ALLSELECTED(Suppliers[supplier_id]), [Supplier Value (NGN)], , DESC, Skip)
-Supplier Share             = DIVIDE([Supplier Value (NGN)], CALCULATE([Supplier Value (NGN)], ALLSELECTED(Suppliers[supplier_id])))
+Supplier Rank              = RANKX(ALL(Suppliers[supplier_id], Suppliers[supplier_name]), [Supplier Value (NGN)], , DESC, Skip)
+Supplier Share             =
+    DIVIDE([Supplier Value (NGN)], CALCULATE([Supplier Value (NGN)], ALL(Suppliers[supplier_id], Suppliers[supplier_name])))
 Cumulative Supplier Share  =
     VAR r = [Supplier Rank]
-    VAR Total = CALCULATE([Supplier Value (NGN)], ALLSELECTED(Suppliers[supplier_id]))
-    RETURN DIVIDE(SUMX(TOPN(r, ALLSELECTED(Suppliers[supplier_id]), [Supplier Value (NGN)], DESC), [Supplier Value (NGN)]), Total)
+    VAR Total = CALCULATE([Supplier Value (NGN)], ALL(Suppliers[supplier_id], Suppliers[supplier_name]))
+    RETURN IF(r <= 100, DIVIDE(SUMX(TOPN(r, ALL(Suppliers[supplier_id], Suppliers[supplier_name]), [Supplier Value (NGN)], DESC), [Supplier Value (NGN)]), Total))
 
 -- M-S01 disclosure (read from the data, never typed in)
 M-S01 Excluded Awards      = [Eligible Awards (n)] - [M-S01 Eligible Awards]
@@ -417,8 +418,12 @@ Notes:
   whole-dataset figure from `vw_dq_impact`) and is shown on page 7 as a cross-check.
 - `TOPN` returns every row tied at the cut-off. Supplier values are not tied at ranks 1, 5, 10, 20 and 100 (the reconciled
   cut-offs). Other values of N can show a marginally larger share if a tie falls on the boundary.
-- `Supplier Rank` and `Cumulative Supplier Share` are for the top-20 table (visual-level filter *Top N* by `[Supplier Value (NGN)]`
-  = 20). Do not use them in a visual that lists all 9,800 suppliers.
+- `Supplier Rank`, `Supplier Share` and `Cumulative Supplier Share` are for the top-20 table. Correction of 2026-10-15 (approved by
+  Kene): the three measures use `ALL` on both `supplier_id` and `supplier_name`, because a table that shows both columns otherwise filters each
+  row to a single supplier (rank 1 and share 100% on every row), and `ALLSELECTED` also sees the visual-level top-20 filter, so every share
+  came out relative to the top-20 total (11.41% for a supplier that holds 4.28% of all value). Buyer and method slicers still apply (they
+  filter through the relationships). The top-20 limit is a visual-level filter on `[Supplier Rank]` <= 20. `Cumulative Supplier Share` is blank below rank 100 to keep the table fast. Check: rank 1
+  share = SUP-04 and the cumulative share at rank 20 = SUP-07.
 - `Net Variance` is award minus budget. A negative number means awards were below budget in total; it is not a saving.
 
 ### 5.4 Competition (M-C01, M-C02), timing, implementation, entities
@@ -663,7 +668,8 @@ timing (TIM), entity benchmark (ENT), implementation and lifecycle (IMP), and th
 
 - **No date column** exists in the competition, budget, lifecycle, implementation or entity views, so time-period slicing is
   available only for awards and the three timing metrics (`Award Year`, `Tender Start Year`, `Signed Year`). There is no shared
-  date dimension. If a time slicer is wanted on the other pages, add valid date columns to those views in SQL (a later phase),
+  date dimension (decision of 2026-10-14: no shared date dimension; time analysis only on the award and timing pages, via
+  `Award Year`, `Tender Start Year` and `Signed Year`). If a time slicer is wanted on the other pages, add valid date columns to those views in SQL (a later phase),
   not in DAX.
 - **Procurement method** is the only category-like field. There is no sector or commodity category in the source.
 - **Entity-level medians** are precomputed per entity; there is no way to combine them across entities in DAX.
@@ -680,4 +686,5 @@ timing (TIM), entity benchmark (ENT), implementation and lifecycle (IMP), and th
 4. §5 measures into `_Measures`; formats set.
 5. §7 pages; §8 caveats; §7.3 wording check.
 6. §9 reconciliation log completed with every row `yes`.
-7. Save the `.pbix` and screenshots to `dashboard/` and `dashboard/screenshots/` (see the note there). Do not commit credentials.
+7. Save the `.pbix` locally, export the `.pbit` template to `dashboard/`, and save screenshots to `dashboard/screenshots/` (see the note there).
+   The `.pbix` is gitignored and never committed (decision of 2026-10-14). Do not commit credentials.

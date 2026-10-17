@@ -80,7 +80,9 @@ The ERD is in [`../diagrams/erd/`](../diagrams/erd/nocopo_erd.md) and the DDL is
 | [`phase9_dashboard.md`](phase9_dashboard/phase9_dashboard.md) | Read-only BI role, presentation dimensions, design decisions, findings to carry forward |
 | [`phase9_validation_results.md`](phase9_dashboard/phase9_validation_results.md) | Generated Phase 9 results: role privileges and dimension checks (16 GATE + 1 INFO) |
 | [`../dashboard/README.md`](../dashboard/README.md) | Power BI build guide: connection, model, DAX, pages, caveats, reconciliation |
-| [`../dashboard/reconciliation_log.md`](../dashboard/reconciliation_log.md) | Dashboard-to-SQL reconciliation log (177 figures) |
+| [`../dashboard/USAGE.md`](../dashboard/USAGE.md) | Usage note: opening the template, reading the 8 pages, known limitations |
+| [`../dashboard/reconciliation_log.md`](../dashboard/reconciliation_log.md) | Dashboard-to-SQL reconciliation log (177 figures, 177 matching) and page sign-off |
+| [`../dashboard/screenshots/`](../dashboard/screenshots/README.md) | One screenshot per report page |
 
 ## Generated Reports
 
