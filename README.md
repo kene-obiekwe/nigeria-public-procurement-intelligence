@@ -42,7 +42,7 @@ recommendations: [`findings.md`](docs/phase10_findings/findings.md).
   is reporting coverage, not contract performance. [I1]
 
 The project does not make claims of misconduct or causation; patterns are prompts for review
-([findings §2](docs/phase10_findings/findings.md#2-about-this-report)).
+([findings 2](docs/phase10_findings/findings.md#2-about-this-report)).
 
 ---
 
@@ -198,22 +198,6 @@ reproducible only from the pinned file. Details: [`data/README.md`](data/README.
 
 PostgreSQL 17 (CTEs, window functions, materialised views, generated columns, role-based access) · Python 3.12
 (standard library, psycopg 3, pandas) · Power BI Desktop · Mermaid · Git and GitHub.
-
----
-
-## Portfolio positioning
-
-This is **Stage 1 of a four-stage portfolio**: SQL and analytics → Python / data science → data engineering →
-integrated BI and decision intelligence. It deliberately stays SQL-first and leaves out machine learning, cloud
-infrastructure and orchestration, which the source (one static export) does not need.
-
-Natural extensions, each a later project rather than part of this one:
-
-- **Python / data science:** entity segmentation or anomaly scoring on the validated `analytics.*` layer, with the
-  same eligibility and no-causation discipline.
-- **Data engineering:** scheduled ingestion of fresh portal exports, the suites and trace check in CI (for example
-  GitHub Actions against a containerised PostgreSQL), and versioned snapshots.
-- **Integrated BI:** a broader decision-support layer that combines procurement data with budget execution sources.
 
 ---
 
