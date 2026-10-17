@@ -1251,6 +1251,14 @@ The confirmed correct metrics are:
 
 > **CONFIRMED FACT:** The release-level `date` field is the package publication date (2021-05-03) for all 108,277 releases. Internal event dates must be used for any temporal analysis. These are substantially available: tender start has 9,593 valid dates, award date has 14,658 valid dates.
 
+> **⚠️ CORRECTION C-12 (2026-10-17):** The fact above originally stated that the release-level `date` is 2021-05-03
+> for all 108,277 releases. This was a **reporting error**: the sentence was written into the script as text, not
+> measured. `2021-05-03T22:44:00Z` is the package `publishedDate`. Measured across all releases, release dates run
+> from `2021-05-03T22:44:00Z` to `2026-07-29T11:17:00Z` (9,786 distinct values; 786 releases carry the package date).
+> The treatment is unchanged: the release `date` is publication metadata, and internal event dates are used for
+> temporal analysis (DQ-10). The original text is preserved above for traceability. Evidence:
+> `docs/phase10_findings/source_verification.md` §D.
+
 > **RECOMMENDED FUTURE TREATMENT:** Exclude placeholder dates (2001-01-01, year 2922, any year > 2030) from timing metrics. Retain these records in the database; apply a date-quality flag column in staging. Do not delete or silently correct erroneous dates.
 
 ---

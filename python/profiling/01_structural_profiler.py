@@ -816,13 +816,14 @@ A("| 6 | **Supplier entity resolution** — name/ID ratio indicates variation | 
 A("| 7 | **`implementation` section presence** — tag present but section structure unclear | 14,894 releases tagged | Requires deeper field inspection |")
 A("| 8 | **Zero monetary values** — some budget/award amounts are exactly 0 | To be measured | Requires investigation — may be legitimate or placeholder |")
 A("| 9 | **Releases with no `parties`** — 20 releases | 20 releases | FLAG — investigate; may affect buyer/supplier joins |")
-A("| 10 | **Single published date** — all releases share `2021-05-03` as `date` | 108,277 releases | UNRESOLVED — release dates may reflect publication batch, not individual event dates |")
+A("| 10 | **Release date semantics** — release `date` values may reflect publication, not individual event dates (C-12: they run 2021-05-03 to 2026-07-29; the package publishedDate is 2021-05-03) | 108,277 releases | UNRESOLVED — release dates may reflect publication batch, not individual event dates |")
 A("")
 
 # ---- What Still Requires Investigation ----
 A("## 14. Open Questions Requiring Further Investigation")
 A("")
-A("1. **Release date semantics:** All sampled releases share `date=2021-05-03T22:44:00Z`.")
+A("1. **Release date semantics:** Do release `date` values record publication rather than events?")
+A("   (C-12: the package `publishedDate` is 2021-05-03; release dates vary.)")
 A("   Are there internal date fields (e.g., `tender.tenderPeriod.startDate`,")
 A("   `awards[].date`) that carry the actual procurement event dates?")
 A("")

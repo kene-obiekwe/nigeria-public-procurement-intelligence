@@ -79,11 +79,11 @@ eventual table structure (that is a Phase 4 concern).
 |-----------|--------|
 | **Field name** | `release_date` |
 | **Source location** | `releases[].date` |
-| **Business meaning** | The date and time this release was published to NOCOPO. For this dataset, all releases were published as part of a single bulk export. |
+| **Business meaning** | The date and time this release was published to NOCOPO (publication metadata). It is not the date of any procurement event. |
 | **Data type** | ISO 8601 datetime string |
-| **Expected values / range** | All 108,277 releases = `2021-05-03T22:44:00Z` |
+| **Expected values / range** | `2021-05-03T22:44:00Z` to `2026-07-29T11:17:00Z`; 9,786 distinct values across 108,277 releases. *(Corrected by C-12: previously stated that all 108,277 releases equal `2021-05-03T22:44:00Z`, which is the package `publishedDate`; 786 releases carry it. Evidence: `docs/phase10_findings/source_verification.md` §D.)* |
 | **Missingness** | 0 null (0%) |
-| **Quality issues** | DQ-10 — represents the package publication date, not the procurement event date. Cannot be used for temporal analysis. |
+| **Quality issues** | DQ-10 — release publication metadata, not the procurement event date. Cannot be used for temporal analysis. |
 | **Analytical role** | Metadata only. NOT used for procurement event timing. |
 | **Transformation required** | Parse to datetime type. Store as metadata. Do NOT use for time-series analysis. |
 | **Notes** | Internal event dates (tender start, award date, contract signed date) must be used instead. |
@@ -617,7 +617,8 @@ eventual table structure (that is a Phase 4 concern).
 
 ---
 
-*Document version: 1.2 — 2026-10-07. Phase 3.2 correction C-08 (O-1 value semantics) applied.*
+*Document version: 1.3 — 2026-10-17. Correction C-12 (release_date range) applied.*
+*Version 1.2 — 2026-10-07. Phase 3.2 correction C-08 (O-1 value semantics) applied.*
 *Version 1.1 — 2026-08-18. Phase 3.1 correction pass applied.*
 *Version 1.0 approved by project owner on 2026-08-16.*
 *No substantive corrections required in this document during Phase 3.1.*

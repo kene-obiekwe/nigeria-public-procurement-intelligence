@@ -278,6 +278,7 @@ def main():
               f"| Package `publishedDate` | {pkg.get('publishedDate')} |",
               f"| Releases | {len(releases):,} |",
               f"| Distinct release `date` values | {len(set(dates)):,} |",
+              f"| Releases whose `date` equals the package `publishedDate` | {sum(1 for d in dates if d == pkg.get('publishedDate')):,} |",
               f"| Earliest / latest release `date` | {dates[0]} / {dates[-1]} |"]
     lines += [f"| Releases dated {y} | {n:,} |" for y, n in sorted(years.items())]
     multi = [rs for rs in by_ocid.values() if len(rs) > 1]
@@ -286,7 +287,7 @@ def main():
     lines += [f"| OCIDs with more than one release | {len(multi):,} |",
               f"| ... where a release with a lower integer ID has a later date | {disagree:,} |"]
     lines += ["",
-              "Only the package metadata carries 2021-05-03. No metric uses the release date (timing metrics use "
+              "2021-05-03 is the package metadata date, not the date of every release. No metric uses the release date (timing metrics use "
               "event dates; the snapshot orders releases by integer release ID).", ""]
 
     # ---------- DQ-21 sizing ----------

@@ -219,7 +219,7 @@ def main():
     before = sha256(SOURCE)
     if before != EXPECTED_SHA256:
         sys.exit(f"Source checksum mismatch: {before} (expected {EXPECTED_SHA256}). "
-                 "This loader is pinned to the 2021-05-03 snapshot; see data/README.md.")
+                 "This loader is pinned to the source file's SHA-256; see data/README.md.")
 
     with open(SOURCE, encoding="utf-8") as fh:
         releases = json.load(fh, parse_float=Decimal)["releases"]

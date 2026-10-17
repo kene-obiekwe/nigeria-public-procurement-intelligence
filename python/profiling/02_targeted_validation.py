@@ -834,7 +834,8 @@ A("")
 issue("Placeholder dates (2001-01-01) appear in tender start dates and award dates, indicating "
       "a system default date used when the actual date was not recorded.")
 A("")
-fact("The release-level `date` field is the package publication date (2021-05-03) for all 108,277 releases. "
+fact("The release-level `date` field is release publication metadata, not a procurement event date "
+     "(DQ-10; its range is measured in docs/phase10_findings/source_verification.md, correction C-12). "
      "Internal event dates must be used for any temporal analysis. These are substantially available: "
      f"tender start has {date_summary['tender_start']['classification'].get('valid',0):,} valid dates, "
      f"award date has {date_summary['award_date']['classification'].get('valid',0):,} valid dates.")

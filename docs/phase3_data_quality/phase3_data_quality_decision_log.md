@@ -220,8 +220,8 @@ RETAIN + FLAG + EXCLUDE_FROM_METRIC for a given metric.
 |-----------|--------|
 | **Issue ID** | DQ-10 |
 | **Data field / entity** | releases[].date |
-| **Observed problem** | All 108,277 releases carry date = 2021-05-03T22:44:00Z - the OCDS package publication date, not the individual procurement event date. |
-| **Evidence** | docs/phase2_profiling/data_profiling_report.md Section 4; docs/phase2_profiling/targeted_validation_report.md Section 5 |
+| **Observed problem** | The release-level `date` is publication metadata, not the individual procurement event date. Releases are dated from 2021-05-03T22:44:00Z to 2026-07-29T11:17:00Z (9,786 distinct values across 108,277 releases); the package `publishedDate` is 2021-05-03T22:44:00Z. *(Corrected by C-12: previously stated that all 108,277 releases carry 2021-05-03T22:44:00Z. That value is the package metadata date; 786 releases carry it.)* |
+| **Evidence** | docs/phase2_profiling/data_profiling_report.md Section 4; docs/phase2_profiling/targeted_validation_report.md Section 5; corrected by docs/phase10_findings/source_verification.md §D (C-12) |
 | **Severity** | High - affects any time-series or trend analysis |
 | **Treatment** | RETAIN (accurately represents publication metadata) |
 | **Retained?** | Yes |
@@ -436,7 +436,7 @@ RETAIN + FLAG + EXCLUDE_FROM_METRIC for a given metric.
 | DQ-07 | Award NGN 1.004T (FCTA) | High | Yes | Yes | Yes | - | - |
 | DQ-08 | Placeholder date 2001-01-01 | High | Yes | Yes | Yes | - | - |
 | DQ-09 | Year 2922 / extreme future dates | High | Yes | Yes | Yes | - | - |
-| DQ-10 | Release date = publication batch | High | Yes | - | Yes (temporal metrics) | - | - |
+| DQ-10 | Release date = publication metadata, not event date | High | Yes | - | Yes (temporal metrics) | - | - |
 | DQ-11 | Transaction dates absent | High | Yes | - | Yes (payment timing) | - | - |
 | DQ-12 | Transaction value semantics unclear | Medium | Yes | - | - | Yes | - |
 | DQ-13 | Supplier ID to multiple names | Medium | Yes | - | - | Yes | - |
@@ -469,7 +469,8 @@ columns are not yet created.
 
 ---
 
-*Document version: 1.4 - 2026-10-08. DQ-20 added (C-11).*
+*Document version: 1.5 - 2026-10-17. DQ-10 observed problem corrected (C-12); the DQ-10 rule is unchanged.*
+*Version 1.4 - 2026-10-08. DQ-20 added (C-11).*
 *Version 1.3 - 2026-10-07. DQ-19 added (C-10).*
 *Version 1.2 - 2026-10-07. Phase 3.2 corrections C-07 (DQ-04 count) and C-09 (field-name artefact repair) applied.*
 *Version 1.1 - 2026-08-18. Phase 3.1 correction pass applied.*

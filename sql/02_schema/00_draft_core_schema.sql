@@ -108,7 +108,7 @@ CREATE TABLE stg.releases (
                                                     -- v1.1: numeric ordering key; release_id is a numeric
                                                     -- string and must never be ordered as text
     ocid                VARCHAR(64)     NOT NULL,
-    release_date        TIMESTAMPTZ,                -- DQ-10: all = 2021-05-03T22:44:00Z (package pub date, NOT event date)
+    release_date        TIMESTAMPTZ,                -- DQ-10: publication metadata, NOT event date (2021-05-03..2026-07-29, C-12)
     tag                 TEXT[]          NOT NULL,    -- e.g. {planning}, {planning,tender,award,contract,implementation}
     initiation_type     VARCHAR(32),
     language            VARCHAR(8),

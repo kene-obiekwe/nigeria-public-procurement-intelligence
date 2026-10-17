@@ -15,7 +15,7 @@
 Phase 3 documentation was frozen on 2026-08-18. Changes are allowed only
 through an explicitly approved correction pass. This log records the corrections
 made in the Phase 3.2 pass (C-06 to C-10). It arose from the Phase 4.1 validation of the process-snapshot
-rule against the raw data. C-11 was added on 2026-10-08 after the Phase 8 review.
+rule against the raw data. C-11 was added on 2026-10-08 after the Phase 8 review. C-12 was added on 2026-10-17 in Phase 10.1, after the Phase 10 source checks.
 
 ---
 
@@ -112,6 +112,23 @@ rule against the raw data. C-11 was added on 2026-10-08 after the Phase 8 review
 
 ---
 
+## Correction C-12 — Release-Date Range (DQ-10 Observed Problem)
+
+| Attribute | Detail |
+|-----------|--------|
+| **Correction ID** | C-12 |
+| **Documents** | `phase3_data_quality_decision_log.md` DQ-10 (observed problem, evidence) and summary-matrix label; `phase3_data_dictionary.md` §1.3 `release_date`; `docs/phase2_profiling/data_profiling_report.md` §13 row 10 and §14 question 1 (dated correction note, original kept); `docs/phase2_profiling/targeted_validation_report.md` §5 (dated correction note, original kept); `docs/phase4_data_model/phase4_relational_model.md` §6.2 and §10; `data/README.md`; `README.md` audit table. Comment and message text only in `sql/02_schema/00_draft_core_schema.sql`, `sql/04_transformations/03_process_snapshot.sql`, `python/ingest/01_load_staging.py`, and the hard-coded report sentences in `python/profiling/01_structural_profiler.py` and `02_targeted_validation.py`. |
+| **Issue** | These documents said every one of the 108,277 releases carries `date = 2021-05-03T22:44:00Z`. That value is the package `publishedDate`. The Phase 2 statement came from a sample (profiler) and from a sentence written into the script as text (targeted validation); it was never measured across the file. Found during the Phase 10 source checks. |
+| **Evidence** | `docs/phase10_findings/source_verification.md` §D (`python/validation/08_verify_source_items.py`, raw file, SHA-256 checked): release dates run from `2021-05-03T22:44:00Z` to `2026-07-29T11:17:00Z`; 9,786 distinct values; 786 releases carry the package date. In all 6,280 multi-release OCIDs, no release with a lower integer ID has a later date. `stg.releases.release_date` gives the same range. |
+| **Previous wording (DQ-10)** | `All 108,277 releases carry date = 2021-05-03T22:44:00Z - the OCDS package publication date, not the individual procurement event date.` |
+| **Corrected wording** | The release-level `date` is publication metadata, not the procurement event date. Releases are dated 2021-05-03 to 2026-07-29 (9,786 distinct values); the package `publishedDate` is 2021-05-03. |
+| **Did the underlying Phase 3 decision change?** | No. The DQ-10 rule stands: the release date is publication metadata and is never used as a procurement event date. The snapshot rule never used it (it orders releases by integer `release_seq`), and integer order agrees with date order in every multi-release OCID. |
+| **Impact on metrics** | None. No figure changes. The DQ-09 FUTURE class (event dates in 2026 to 2050) was re-checked against the new range: none of the 24 dates it flags in the four event-date columns used by the timing metrics (award date 9, contract signature 4, tender start 5, tender end 6) falls on or before the last release date, 2026-07-29, so the class excludes no event that could already have happened. |
+| **Approved by** | Project owner, 2026-10-17 (Phase 10 proposal) |
+| **Status** | Applied ✓ |
+
+---
+
 ## Not Changed in This Pass
 
 `phase3_metric_eligibility.md` §1.3 says "deduplicate at award ID level within
@@ -129,8 +146,10 @@ metric's result.
 > `phase3_metric_eligibility.md` v1.2 (C-06), `phase3_data_quality_decision_log.md` v1.3
 > (C-07, C-09, C-10), `phase3_data_dictionary.md` v1.2 (C-08).
 > Re-frozen on 2026-10-08 after C-11: `phase3_data_quality_decision_log.md` v1.4 (DQ-20).
+> Re-frozen on 2026-10-17 after C-12: `phase3_data_quality_decision_log.md` v1.5, `phase3_data_dictionary.md` v1.3.
 
 ---
 
-*Correction log version: 1.3 — 2026-10-08 (C-11 added in Phase 8.1)*
+*Correction log version: 1.4 — 2026-10-17 (C-12 added in Phase 10.1)*
+*Version 1.3 — 2026-10-08 (C-11 added in Phase 8.1)*
 *Version 1.2 — 2026-10-07 (C-07 to C-09 added in Phase 6; C-10 in Phase 7)*

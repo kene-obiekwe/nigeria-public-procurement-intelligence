@@ -337,8 +337,12 @@ naively join through all releases, monetary values and counts are doubled.
 **Ordering.** "Latest" always means the highest `release_seq`
 (`release_id` cast to integer; in SQL, `ORDER BY release_seq DESC`, which is
 equivalent to `release_id::INTEGER DESC`). Text ordering is never used.
-`release_date` is **not** part of the ordering: it carries one identical
-publication timestamp on all 108,277 releases (DQ-10), so it cannot break ties.
+`release_date` is **not** part of the ordering: it is publication metadata
+(DQ-10), not an event date. *(Corrected by C-12, 2026-10-17: this sentence
+previously said that one identical timestamp is carried by all 108,277 releases.
+Release dates in fact run from 2021-05-03 to 2026-07-29; integer release order
+agrees with release date in every multi-release OCID, so the rule and its results
+are unchanged. Evidence: `docs/phase10_findings/source_verification.md` §D.)*
 
 **Which budget value.** When a budget line's amount differs across releases,
 M-P01 uses the amount from the **latest** release carrying that line. It does
@@ -519,9 +523,11 @@ on the same record can have different quality statuses (e.g., a contract's
   - PLACEHOLDER — 2001-01-01 (DQ-08)
   - FUTURE — year 2026–2050 (DQ-09)
   - IMPOSSIBLE — year > 2050 (DQ-09, e.g., year 2922)
-- **release_date (DQ-10):** All 108,277 releases share the identical value
-  `2021-05-03T22:44:00Z`. This is package publication metadata, NOT a
-  procurement event date. It must never be used for temporal analysis.
+- **release_date (DQ-10):** Release publication metadata, NOT a procurement
+  event date. It must never be used for temporal analysis. Values run from
+  `2021-05-03T22:44:00Z` to `2026-07-29T11:17:00Z` (9,786 distinct values).
+  *(Corrected by C-12, 2026-10-17: previously stated that all 108,277 releases
+  share `2021-05-03T22:44:00Z`, which is the package `publishedDate`.)*
 - **Chronological validation:** Duration metrics require end_date ≥ start_date;
   negative durations indicate invalid pairs to be excluded.
 
@@ -694,8 +700,9 @@ Before Phase 5 implementation can begin:
 | 1.1 | 2026-10-07 | Snapshot rule tested against raw data. Integer `release_seq` ordering. Section-level selection restored per Phase 3 §1.2. Budget-line grain `(ocid, budget_project_id)` with `multi_project_flag` (approved by project owner). Corrected the "identical content" claim (§3.2). `tender_id` UNIQUE. Milestone counts and date quality measured. Open issues dispositioned. Analytical views re-attributed to Phase 7, per the Implementation Plan. |
 | 1.1 (review closure) | 2026-10-07 | Overseer review closure. Explicit 836 budget-divergence figure (§3.2). Latest-not-max-not-earliest budget choice stated, plus why `release_date` cannot order releases (§6.2). M-P01 grain recorded as Phase 3 correction C-06. Decisions recorded for tender_id (global UNIQUE kept), milestones (excluded from timing metrics) and dim_supplier_canonical (no earlier than Phase 7). Indexing aligned to Phases 7–8. |
 | 1.1 (Phase 6 note) | 2026-10-07 | Snapshot views built in Phase 6 in `core` (D-1); `dim_supplier` sourced from parties ∪ award suppliers (D-2). See `docs/phase6_core_model/phase6_core_model.md`. |
+| 1.2 | 2026-10-17 | Correction C-12: `release_date` statements in §6.2 and §10 corrected (release dates vary; 2021-05-03 is the package `publishedDate`). Design unchanged. |
 
 ---
 
-*Document version: 1.1 — 2026-10-07*
+*Document version: 1.2 — 2026-10-17*
 *Phase 4 design artifact. No DDL executed. No data loaded.*

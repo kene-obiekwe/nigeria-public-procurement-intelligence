@@ -1,7 +1,7 @@
 # Source Verification of Open Items
 # Nigeria Public Procurement Intelligence
 
-> **Generated:** 2026-10-17 17:54 by `python/validation/08_verify_source_items.py`  
+> **Generated:** 2026-10-17 18:09 by `python/validation/08_verify_source_items.py`  
 > **Source:** `NOCOPO dataset/all07010.json`, SHA-256 `6151466…bc90c` (matches the pinned file)  
 > **Mode:** read-only. Nothing in the raw file, `stg`, `core` or `analytics` was changed.  
 > **Classification and proposals:** `docs/phase10_findings/findings.md` §9 (this file holds the evidence only).
@@ -166,6 +166,7 @@ Full record of the largest award:
 | Package `publishedDate` | 2021-05-03T22:44:00Z |
 | Releases | 108,277 |
 | Distinct release `date` values | 9,786 |
+| Releases whose `date` equals the package `publishedDate` | 786 |
 | Earliest / latest release `date` | 2021-05-03T22:44:00Z / 2026-07-29T11:17:00Z |
 | Releases dated 2021 | 18,462 |
 | Releases dated 2022 | 155 |
@@ -176,7 +177,7 @@ Full record of the largest award:
 | OCIDs with more than one release | 6,280 |
 | ... where a release with a lower integer ID has a later date | 0 |
 
-Only the package metadata carries 2021-05-03. No metric uses the release date (timing metrics use event dates; the snapshot orders releases by integer release ID).
+2021-05-03 is the package metadata date, not the date of every release. No metric uses the release date (timing metrics use event dates; the snapshot orders releases by integer release ID).
 
 ## E. Award-to-budget ratios near 100 and near 1,000 (sizing for proposed issue DQ-21)
 

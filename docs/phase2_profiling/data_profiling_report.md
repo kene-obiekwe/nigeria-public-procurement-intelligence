@@ -308,6 +308,14 @@ Tag combinations observed within the set of repeated (multi-release) OCIDs:
 > - **9,411 excess releases** exist (i.e., sum of (count − 1) across all repeated OCIDs)
 > The original text is preserved below for traceability. See `docs/phase2_profiling/targeted_validation_report.md` Section 1.
 
+> **⚠️ CORRECTION C-12 (2026-10-17):** Row 10 of this table, and open question 1 in §14, originally stated that all
+> releases share `2021-05-03` as `date`. This was a **reporting error**: the statement came from a sample of releases
+> and was not measured across the file. `2021-05-03T22:44:00Z` is the package `publishedDate`. Measured across all
+> 108,277 releases, release dates run from `2021-05-03T22:44:00Z` to `2026-07-29T11:17:00Z` (9,786 distinct values;
+> 786 releases carry the package date). The conclusion is unchanged: the release `date` is publication metadata and
+> internal event dates are used for temporal analysis (DQ-10). The original text is preserved below for traceability.
+> See `docs/phase10_findings/source_verification.md` §D and `docs/phase3_data_quality/phase3_2_correction_log.md` (C-12).
+
 | # | Issue | Scope | Preliminary treatment |
 |---|-------|-------|----------------------|
 | 1 | **OCID repetition** — ~~9,411 OCIDs~~ → **6,280 OCIDs** appear in >1 release (9,411 *excess releases*) | 6,280 OCIDs / 9,411 excess releases | UNRESOLVED — release strategy required (Phase 3) |
@@ -319,7 +327,7 @@ Tag combinations observed within the set of repeated (multi-release) OCIDs:
 | 7 | **`implementation` section** — confirmed nested inside `contracts[].implementation`; transactions have no `date` field; all 13,617 transactions have `value` field | 14,884 contracts | FLAG — frame as reporting-coverage metric, not payment analysis |
 | 8 | **Zero monetary values** — 561 budget zeros, 268 award zeros, 1,259 tender value zeros | To be investigated | Requires investigation — may be legitimate or placeholder |
 | 9 | **Releases with no `parties`** — 20 releases | 20 releases | FLAG — investigate; may affect buyer/supplier joins |
-| 10 | **Single published date** — all releases share `2021-05-03` as `date` | 108,277 releases | CONFIRMED: use internal event dates for temporal analysis |
+| 10 | **Release date is publication metadata** — ~~all releases share `2021-05-03` as `date`~~ → **releases dated 2021-05-03 to 2026-07-29; 2021-05-03 is the package `publishedDate`** (C-12) | 108,277 releases | CONFIRMED: use internal event dates for temporal analysis |
 | 11 | **Extreme budget values** — 32 records ≥ ₦1 trillion; max ₦6.5T (TCN), others from NPHCDA (Hajj vaccines) and Fed. Min. Works | 32 records | FLAG — retain; exclude from summary statistics without special handling |
 | 12 | **Extreme award/tender value** — ₦1.004 trillion (FCTA, warehouse construction, M/S Turaki Trading) | 1 record | FLAG — retain; investigate plausibility before inclusion in aggregations |
 | 13 | **Extreme future / erroneous dates** — award date year 2922; tender/award dates up to 2029–2033 | Multiple records | FLAG — exclude from timing metrics; retain in dataset |
@@ -328,6 +336,7 @@ Tag combinations observed within the set of repeated (multi-release) OCIDs:
 ## 14. Open Questions Requiring Further Investigation
 
 1. **Release date semantics:** All sampled releases share `date=2021-05-03T22:44:00Z`.
+   *(Corrected by C-12, 2026-10-17: true of the sample only; across the file, release dates run to 2026-07-29. See the §13 note.)*
    Are there internal date fields (e.g., `tender.tenderPeriod.startDate`,
    `awards[].date`) that carry the actual procurement event dates?
 

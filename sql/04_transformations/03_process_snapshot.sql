@@ -6,7 +6,7 @@
 -- Phase 3 correction C-06.
 --
 --   * "Latest" = highest release_seq (integer). Never text order, never
---     release_date (identical on every release, DQ-10).
+--     release_date (publication metadata, DQ-10 / C-12).
 --   * Each lifecycle section is taken from the latest release containing it.
 --   * Award, contract, implementation and suppliers come from the SAME release
 --     (contracts never reference an award in another release).

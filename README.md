@@ -90,7 +90,7 @@ All figures below are measured. Each is documented in `docs/`.
 | Implausible tenderer counts (max 90,865) | 65 records > 1,000 tenderers | Flagged `ANOMALOUS`, excluded from competition metrics |
 | Placeholder and impossible dates (`2001-01-01`, year 2922) | Hundreds of date fields | Classified per date column; invalid dates excluded from timing metrics |
 | Supplier identity is fragmented | 1,483 IDs map to multiple names; 571 names map to multiple IDs | Source IDs only; no name-similarity merging |
-| Every release shares one publication date | 2021-05-03 on all 108,277 releases | Never used for temporal analysis |
+| Release dates are publication metadata, not event dates | Releases are dated 2021-05-03 to 2026-07-29 (9,786 distinct values); 2021-05-03 is the package metadata date (correction C-12) | Never used for temporal analysis; event dates are used instead |
 
 ---
 
