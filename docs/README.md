@@ -84,6 +84,15 @@ The ERD is in [`../diagrams/erd/`](../diagrams/erd/nocopo_erd.md) and the DDL is
 | [`../dashboard/reconciliation_log.md`](../dashboard/reconciliation_log.md) | Dashboard-to-SQL reconciliation log (177 figures, 177 matching) and page sign-off |
 | [`../dashboard/screenshots/`](../dashboard/screenshots/README.md) | One screenshot per report page |
 
+## Phase 10 — Findings & Recommendations
+
+| Document | Purpose |
+|---|---|
+| [`findings.md`](phase10_findings/findings.md) | Executive findings: summary, findings by business question with stakeholder implications and recommendations, source checks, assumptions and limitations, proposals (DQ-21, C-12) |
+| [`claim_trace.md`](phase10_findings/claim_trace.md) | Gate D evidence: every figure in the findings mapped to its script, result set, row, column and value |
+| [`claim_trace_check_results.md`](phase10_findings/claim_trace_check_results.md) | Generated result of the automated claim-trace check |
+| [`source_verification.md`](phase10_findings/source_verification.md) | Generated raw-source evidence for the three open items, release dates and award-to-budget ratio clustering |
+
 ## Generated Reports
 
 The following files are written by scripts. Regenerate them by running the
@@ -101,6 +110,8 @@ script rather than editing them by hand.
 | `phase8_analysis/phase8_validation_results.md` | `python/validation/04_run_validation_suite.py --phase 8` |
 | `phase9_dashboard/phase9_validation_results.md` | `python/validation/04_run_validation_suite.py --phase 9` |
 | `../dashboard/reconciliation_log.md` | `python/validation/06_generate_reconciliation_log.py` (not overwritten once signed) |
+| `phase10_findings/claim_trace_check_results.md` | `python/validation/07_check_findings_trace.py --live` |
+| `phase10_findings/source_verification.md` | `python/validation/08_verify_source_items.py` |
 
 ⚠ `data_profiling_report.md` contains a manual correction note in §13. Re-running
 its script would overwrite that note.

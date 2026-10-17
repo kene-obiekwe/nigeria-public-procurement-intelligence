@@ -3,12 +3,14 @@
 **Turning Nigeria's open contracting data into an audited PostgreSQL analytics
 database: one where every number can be traced to a validated SQL rule.**
 
-> **Status: in progress.** Data audit, relational design, the PostgreSQL
+> **Status: findings delivered; packaging next.** Data audit, relational design, the PostgreSQL
 > staging load, the validated core model and the analytical layer are complete.
 > **Gate B passed** (107/107); **Phase 7 views validated** (27/27); **Phase 8
 > business-question SQL validated** (31/31); **Phase 8.1** removed a portal test entity
-> (DQ-20) and made the analytical layer fast; **Phase 9** delivered the Power BI blueprint,
-> a read-only database role and a reconciliation pack (16/16). The `.pbix` is built from the blueprint.
+> (DQ-20) and made the analytical layer fast; **Phase 9** delivered the Power BI report over a
+> read-only role, with every dashboard figure reconciled to SQL and signed off (177/177).
+> **Phase 10** delivered the [executive findings](docs/phase10_findings/findings.md); every figure
+> in them traces to a SQL output (Gate D check: 206/206).
 > See [Project status](#project-status).
 
 ---
@@ -37,6 +39,10 @@ the data be trusted to show them?**
 
 Findings are framed as observed patterns and areas for further review. The
 project does **not** make claims of misconduct or causation.
+
+**Read the results:** [executive findings and recommendations](docs/phase10_findings/findings.md)
+(each figure traced in [`claim_trace.md`](docs/phase10_findings/claim_trace.md)) and the
+[dashboard screenshots](dashboard/screenshots/README.md).
 
 ---
 
@@ -101,10 +107,11 @@ All figures below are measured. Each is documented in `docs/`.
 │   ├── phase6_core_model/    Core build, Gate B validation results
 │   ├── phase7_analytics/     Analytical views, eligible populations, validation
 │   ├── phase8_analysis/      Business-question analysis, results and validation
-│   └── phase9_dashboard/     Power BI layer: role, dimensions, validation
+│   ├── phase9_dashboard/     Power BI layer: role, dimensions, validation
+│   └── phase10_findings/     Executive findings, claim trace (Gate D), source verification
 ├── python/
 │   ├── profiling/            Phase 2 profiling and targeted validation scripts
-│   ├── validation/           Design-validation scripts (e.g. snapshot rule)
+│   ├── validation/           Validation suites, analysis runner, reconciliation log, findings trace check
 │   ├── ingest/               Staging loader and reconciliation (Phase 5)
 │   └── utils/
 ├── sql/
@@ -116,7 +123,7 @@ All figures below are measured. Each is documented in `docs/`.
 │   └── 06_analysis/          One script per business question (Phase 8)
 ├── diagrams/erd/             Entity-relationship diagram (Mermaid)
 ├── database/seed_and_setup/  Database setup scripts
-└── dashboard/                Power BI blueprint, reconciliation pack, screenshots (Phase 9)
+└── dashboard/                Power BI template (.pbit), build guide, reconciliation log, screenshots (Phase 9)
 ```
 
 ---
@@ -142,6 +149,11 @@ All figures below are measured. Each is documented in `docs/`.
 | [`dashboard/README.md`](dashboard/README.md) | Power BI build guide: connection, data model, DAX measures, pages, caveats, reconciliation |
 | [`docs/phase9_dashboard/phase9_dashboard.md`](docs/phase9_dashboard/phase9_dashboard.md) | Phase 9 write-up: read-only role, dimensions, design decisions, validation |
 | [`docs/phase8_analysis/phase8_analysis_results.md`](docs/phase8_analysis/phase8_analysis_results.md) | Every result set produced by the seven analysis scripts |
+| [`dashboard/reconciliation_log.md`](dashboard/reconciliation_log.md) | Dashboard-to-SQL reconciliation: 177 figures, all matching, signed per page |
+| [`dashboard/screenshots/`](dashboard/screenshots/README.md) | One screenshot per dashboard page |
+| [`docs/phase10_findings/findings.md`](docs/phase10_findings/findings.md) | Executive findings, recommendations, assumptions and limitations |
+| [`docs/phase10_findings/claim_trace.md`](docs/phase10_findings/claim_trace.md) | Every figure in the findings mapped to its SQL output (Gate D) |
+| [`docs/phase10_findings/source_verification.md`](docs/phase10_findings/source_verification.md) | Raw-source checks of the records behind the open anomalies |
 | [`diagrams/erd/nocopo_erd.md`](diagrams/erd/nocopo_erd.md) | Entity-relationship diagram |
 | [`sql/02_schema/00_draft_core_schema.sql`](sql/02_schema/00_draft_core_schema.sql) | Draft DDL with constraints tied to DQ issues |
 
@@ -254,6 +266,16 @@ psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/05_
 .venv/Scripts/python python/validation/04_run_validation_suite.py --phase 8
 ```
 
+**Check the findings against the SQL outputs (Gate D) and regenerate the source checks:**
+
+```bash
+.venv/Scripts/python python/validation/07_check_findings_trace.py --live
+```
+
+```bash
+.venv/Scripts/python python/validation/08_verify_source_items.py
+```
+
 ---
 
 ## Project status
@@ -269,8 +291,8 @@ psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/05_
 | 7 | Analytical views (metric eligibility) | Complete (27/27 checks) |
 | 8 | Business-question SQL | Complete (31/31 checks) |
 | 8.1 | Test-entity exclusion (DQ-20), performance, re-validation | Complete |
-| 9 | Power BI data model, DAX blueprint, read-only role, reconciliation pack | Blueprint complete (16/16 checks); report build and sign-off pending |
-| 10 | Executive findings | Next |
+| 9 | Power BI data model, DAX, read-only role, report, reconciliation | Complete (16/16 checks; 177/177 figures reconciled and signed) |
+| 10 | Executive findings and recommendations | Delivered (Gate D trace check 206/206); owner sign-off pending |
 | 11–12 | Packaging and final QA | Planned |
 
 ---
