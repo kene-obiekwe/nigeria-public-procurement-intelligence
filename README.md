@@ -10,7 +10,9 @@ database: one where every number can be traced to a validated SQL rule.**
 > (DQ-20) and made the analytical layer fast; **Phase 9** delivered the Power BI report over a
 > read-only role, with every dashboard figure reconciled to SQL and signed off (177/177).
 > **Phase 10** delivered the [executive findings](docs/phase10_findings/findings.md); every figure
-> in them traces to a SQL output (Gate D check: 206/206).
+> in them traces to a SQL output (Gate D check: 236/236). **Phase 10.1** corrected the release-date
+> statements (C-12) and flagged possible award scale errors (DQ-21, flagged not excluded), with
+> results shown with and without them.
 > See [Project status](#project-status).
 
 ---
@@ -134,7 +136,7 @@ All figures below are measured. Each is documented in `docs/`.
 |---|---|
 | [`docs/phase2_profiling/data_profiling_report.md`](docs/phase2_profiling/data_profiling_report.md) | Structural and data-quality profile of the raw file |
 | [`docs/phase2_profiling/targeted_validation_report.md`](docs/phase2_profiling/targeted_validation_report.md) | Follow-up checks on profiling anomalies |
-| [`docs/phase3_data_quality/phase3_data_quality_decision_log.md`](docs/phase3_data_quality/phase3_data_quality_decision_log.md) | Issues DQ-01 to DQ-20 with treatment decisions |
+| [`docs/phase3_data_quality/phase3_data_quality_decision_log.md`](docs/phase3_data_quality/phase3_data_quality_decision_log.md) | Issues DQ-01 to DQ-21 with treatment decisions |
 | [`docs/phase3_data_quality/phase3_metric_eligibility.md`](docs/phase3_data_quality/phase3_metric_eligibility.md) | Analytical grain and per-metric eligibility rules |
 | [`docs/phase3_data_quality/phase3_data_dictionary.md`](docs/phase3_data_quality/phase3_data_dictionary.md) | Source field → meaning → target column |
 | [`docs/phase3_data_quality/phase3_2_correction_log.md`](docs/phase3_data_quality/phase3_2_correction_log.md) | C-06: budget metric aggregated per budget line |
@@ -154,6 +156,7 @@ All figures below are measured. Each is documented in `docs/`.
 | [`docs/phase10_findings/findings.md`](docs/phase10_findings/findings.md) | Executive findings, recommendations, assumptions and limitations |
 | [`docs/phase10_findings/claim_trace.md`](docs/phase10_findings/claim_trace.md) | Every figure in the findings mapped to its SQL output (Gate D) |
 | [`docs/phase10_findings/source_verification.md`](docs/phase10_findings/source_verification.md) | Raw-source checks of the records behind the open anomalies |
+| [`docs/phase10_findings/phase10_1_correction_pass.md`](docs/phase10_findings/phase10_1_correction_pass.md) | Phase 10.1: release-date correction (C-12), possible award scale errors (DQ-21) and their sensitivity results |
 | [`diagrams/erd/nocopo_erd.md`](diagrams/erd/nocopo_erd.md) | Entity-relationship diagram |
 | [`sql/02_schema/00_draft_core_schema.sql`](sql/02_schema/00_draft_core_schema.sql) | Draft DDL with constraints tied to DQ issues |
 
@@ -266,6 +269,16 @@ psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/05_
 .venv/Scripts/python python/validation/04_run_validation_suite.py --phase 8
 ```
 
+**Build and validate the DQ-21 award scale flag (Phase 10.1):**
+
+```bash
+psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/05_views/11_award_scale_flag.sql
+```
+
+```bash
+.venv/Scripts/python python/validation/04_run_validation_suite.py --phase 10
+```
+
 **Check the findings against the SQL outputs (Gate D) and regenerate the source checks:**
 
 ```bash
@@ -292,7 +305,8 @@ psql -h localhost -p 5433 -U postgres -d nocopo_db -v ON_ERROR_STOP=1 -f sql/05_
 | 8 | Business-question SQL | Complete (31/31 checks) |
 | 8.1 | Test-entity exclusion (DQ-20), performance, re-validation | Complete |
 | 9 | Power BI data model, DAX, read-only role, report, reconciliation | Complete (16/16 checks; 177/177 figures reconciled and signed) |
-| 10 | Executive findings and recommendations | Delivered (Gate D trace check 206/206); owner sign-off pending |
+| 10 | Executive findings and recommendations | Delivered (Gate D trace check 236/236); owner sign-off pending |
+| 10.1 | Release-date correction (C-12); possible award scale errors flagged with sensitivity results (DQ-21) | Complete (14/14 checks; earlier suites and the 177 reconciliation figures unchanged) |
 | 11–12 | Packaging and final QA | Planned |
 
 ---

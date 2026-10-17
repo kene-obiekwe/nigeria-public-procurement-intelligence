@@ -1,7 +1,7 @@
 # Phase 8 — Business-Question Validation Results
 
 > **Runner:** `python/validation/04_run_validation_suite.py --phase 8`  
-> **Run date:** 2026-10-08 18:55:46  
+> **Run date:** 2026-10-17 19:01:26  
 > **Database:** `nocopo_db` on localhost:5433 (PostgreSQL 17.4)  
 > **Phase 8 validation result:** **PASSED**. 31 / 31 GATE checks passed; 2 INFO measurements.
 

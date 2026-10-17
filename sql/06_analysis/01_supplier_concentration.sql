@@ -215,3 +215,84 @@ SELECT count(*)                                                                 
        count(*) FILTER (WHERE top_1_share >= 0.5)                                  AS entities_where_one_supplier_holds_half
 FROM entity, params
 WHERE eligible_awards >= params.min_awards;
+
+-- ------------------------------------------------------------
+-- Phase 10.1 sensitivity (DQ-21, correction C-13). The result sets above are
+-- unchanged. The ones below repeat the headline measures without the awards in
+-- analytics.vw_award_scale_flag (POSSIBLE_SCALE_ERROR). Nothing is excluded from
+-- the metric: "as published" remains the reported figure, and the second
+-- scenario shows how far it depends on the flagged awards.
+-- ------------------------------------------------------------
+
+-- [RS6] Sensitivity (DQ-21): overall concentration as published and without awards flagged POSSIBLE_SCALE_ERROR
+WITH flagged AS MATERIALIZED (SELECT award_id FROM analytics.vw_award_scale_flag),
+base AS MATERIALIZED (
+    SELECT s.supplier_id, s.supplier_name, s.award_value_amount,
+           EXISTS (SELECT 1 FROM flagged f WHERE f.award_id = s.award_id) AS is_flagged
+    FROM analytics.vw_supplier_award_eligible s
+),
+scenario AS (
+    SELECT '1  as published (RS2)' AS scenario, b.* FROM base b
+    UNION ALL
+    SELECT '2  without DQ-21 flagged awards', b.* FROM base b WHERE NOT b.is_flagged
+),
+supplier_total AS (
+    SELECT scenario, supplier_id, max(supplier_name) AS supplier_name,
+           count(*) AS awards, sum(award_value_amount) AS value
+    FROM scenario
+    GROUP BY scenario, supplier_id
+),
+ranked AS (
+    SELECT scenario, supplier_id, supplier_name, awards, value,
+           row_number() OVER (PARTITION BY scenario ORDER BY value DESC, supplier_id) AS supplier_rank,
+           value / sum(value) OVER (PARTITION BY scenario)                            AS value_share
+    FROM supplier_total
+)
+SELECT scenario,
+       sum(awards)                                                          AS awards_in_scope,
+       (SELECT count(*) FROM base WHERE is_flagged)                         AS flagged_awards_in_m_s01,
+       round(sum(value) / 1e9, 1)                                           AS value_in_scope_ngn_bn,
+       round(100 * sum(value_share) FILTER (WHERE supplier_rank <= 1), 2)   AS top_1_share_pct,
+       round(100 * sum(value_share) FILTER (WHERE supplier_rank <= 5), 2)   AS top_5_share_pct,
+       round(100 * sum(value_share) FILTER (WHERE supplier_rank <= 10), 2)  AS top_10_share_pct,
+       round(100 * sum(value_share) FILTER (WHERE supplier_rank <= 100), 2) AS top_100_share_pct,
+       round((sum(value_share * value_share) * 10000)::numeric, 1)          AS herfindahl_index_0_to_10000,
+       max(supplier_name) FILTER (WHERE supplier_rank = 1)                  AS largest_supplier,
+       round(max(value) FILTER (WHERE supplier_rank = 1) / 1e9, 2)          AS largest_supplier_value_ngn_bn
+FROM ranked
+GROUP BY scenario
+ORDER BY scenario;
+
+-- [RS6b] Sensitivity (DQ-21): concentration by procurement method, as published and without flagged awards
+WITH flagged AS MATERIALIZED (SELECT award_id FROM analytics.vw_award_scale_flag),
+base AS MATERIALIZED (
+    SELECT coalesce(s.procurement_method_details, '(method not stated)') AS procurement_method,
+           s.supplier_id, s.award_value_amount,
+           EXISTS (SELECT 1 FROM flagged f WHERE f.award_id = s.award_id) AS is_flagged
+    FROM analytics.vw_supplier_award_eligible s
+),
+by_supplier AS (
+    SELECT procurement_method, supplier_id,
+           sum(award_value_amount)                               AS value_published,
+           sum(award_value_amount) FILTER (WHERE NOT is_flagged) AS value_without,
+           count(*) FILTER (WHERE is_flagged)                    AS flagged_awards
+    FROM base
+    GROUP BY procurement_method, supplier_id
+),
+shares AS (
+    SELECT procurement_method, flagged_awards, value_published, value_without,
+           value_published / sum(value_published) OVER (PARTITION BY procurement_method)        AS share_published,
+           value_without / nullif(sum(value_without) OVER (PARTITION BY procurement_method), 0) AS share_without
+    FROM by_supplier
+)
+SELECT procurement_method,
+       sum(flagged_awards)                                                         AS flagged_awards,
+       round(sum(value_published) / 1e9, 2)                                        AS value_published_ngn_bn,
+       round(coalesce(sum(value_without), 0) / 1e9, 2)                             AS value_without_flagged_ngn_bn,
+       round(100 * max(share_published), 1)                                        AS top_1_share_pct_published,
+       round(100 * max(share_without), 1)                                          AS top_1_share_pct_without_flagged,
+       round(sum(share_published * share_published) * 10000)                       AS herfindahl_published,
+       round(sum(coalesce(share_without, 0) * coalesce(share_without, 0)) * 10000) AS herfindahl_without_flagged
+FROM shares
+GROUP BY procurement_method
+ORDER BY sum(value_published) DESC;

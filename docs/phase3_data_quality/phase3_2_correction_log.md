@@ -15,7 +15,7 @@
 Phase 3 documentation was frozen on 2026-08-18. Changes are allowed only
 through an explicitly approved correction pass. This log records the corrections
 made in the Phase 3.2 pass (C-06 to C-10). It arose from the Phase 4.1 validation of the process-snapshot
-rule against the raw data. C-11 was added on 2026-10-08 after the Phase 8 review. C-12 was added on 2026-10-17 in Phase 10.1, after the Phase 10 source checks.
+rule against the raw data. C-11 was added on 2026-10-08 after the Phase 8 review. C-12 and C-13 were added on 2026-10-17 in Phase 10.1, after the Phase 10 source checks.
 
 ---
 
@@ -129,6 +129,22 @@ rule against the raw data. C-11 was added on 2026-10-08 after the Phase 8 review
 
 ---
 
+## Correction C-13 — New Issue DQ-21 (Possible Award Scale Error)
+
+| Attribute | Detail |
+|-----------|--------|
+| **Correction ID** | C-13 |
+| **Document** | `docs/phase3_data_quality/phase3_data_quality_decision_log.md`: new issue DQ-21, summary-matrix row, flag specification row |
+| **Issue** | The Phase 10 source checks found award amounts out of scale with their own process record in an entry-error pattern (a dropped decimal point; a lot about a thousand times the same supplier's similar lot). They sit below the DQ-07 EXTREME threshold, so no rule flagged them, and they carry a large share of award value. |
+| **Change** | DQ-21 added: RETAIN + FLAG + sensitivity, **no exclusion**. The flag is a new view, `analytics.vw_award_scale_flag` (`sql/05_views/11_award_scale_flag.sql`), over the M-V01 eligible awards: DROPPED_DECIMAL (whole-naira award at 50 to 200 times its budget line) or SIBLING_LOT (at least 500 times the same supplier's largest other award from the same buyer, complete buyer IDs only). New sensitivity result sets: script 01 RS6, RS6b; script 03 RS11, RS11a, RS11b; script 05 RS7, RS7b. |
+| **Size** | 45 awards (39 DROPPED_DECIMAL, 6 SIBLING_LOT, none both) across 31 entities; NGN 509.5bn, 15.5% of M-V01 award value (script 03 RS11a). This passed the task's stop threshold (10% of value); the project owner chose the documented rule on 2026-10-17 after seeing the size and a tighter alternative (30 awards, 10.4%). One award (NGN 210.08bn, SIBLING_LOT) is 41% of the flagged value. |
+| **Did an existing Phase 3 decision change?** | No. No metric definition, eligibility rule or population changes; no existing view, result set or dashboard measure reads the flag. The Phase 6, 7, 8 and 9 suites pass with unchanged expected values, every pre-existing Phase 8 result is identical, and the 177 reconciliation figures are identical. |
+| **Implemented in** | `sql/05_views/11_award_scale_flag.sql`; `sql/06_analysis/01`, `03`, `05` (new result sets only); checks SF-01 to SF-17 in `sql/03_data_quality/12_award_scale_flag_checks.sql` (`04_run_validation_suite.py --phase 10`, 14/14 GATE) |
+| **Approved by** | Project owner, 2026-10-17 |
+| **Status** | Applied ✓ |
+
+---
+
 ## Not Changed in This Pass
 
 `phase3_metric_eligibility.md` §1.3 says "deduplicate at award ID level within
@@ -147,9 +163,11 @@ metric's result.
 > (C-07, C-09, C-10), `phase3_data_dictionary.md` v1.2 (C-08).
 > Re-frozen on 2026-10-08 after C-11: `phase3_data_quality_decision_log.md` v1.4 (DQ-20).
 > Re-frozen on 2026-10-17 after C-12: `phase3_data_quality_decision_log.md` v1.5, `phase3_data_dictionary.md` v1.3.
+> Re-frozen on 2026-10-17 after C-13: `phase3_data_quality_decision_log.md` v1.6 (DQ-21).
 
 ---
 
-*Correction log version: 1.4 — 2026-10-17 (C-12 added in Phase 10.1)*
+*Correction log version: 1.5 — 2026-10-17 (C-13 added in Phase 10.1)*
+*Version 1.4 — 2026-10-17 (C-12 added in Phase 10.1)*
 *Version 1.3 — 2026-10-08 (C-11 added in Phase 8.1)*
 *Version 1.2 — 2026-10-07 (C-07 to C-09 added in Phase 6; C-10 in Phase 7)*

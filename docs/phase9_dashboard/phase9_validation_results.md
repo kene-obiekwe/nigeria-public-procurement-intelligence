@@ -1,7 +1,7 @@
 # Phase 9 — Power BI Layer Validation Results
 
 > **Runner:** `python/validation/04_run_validation_suite.py --phase 9`  
-> **Run date:** 2026-10-08 21:15:06  
+> **Run date:** 2026-10-17 19:01:36  
 > **Database:** `nocopo_db` on localhost:5433 (PostgreSQL 17.4)  
 > **Phase 9 validation result:** **PASSED**. 16 / 16 GATE checks passed; 1 INFO measurements.
 

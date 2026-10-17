@@ -265,6 +265,41 @@ gives the same value.
 | Q8 | Test-entity awards removed before M-V01 (DQ-20) | 188 awards | 07/RS2 | metric_id=M-V01; dq_ref=DQ-20 | records_with_issue | 188 | 1 | 16,527 OCIDs |
 | Q8 | Test-entity share of candidate award value | 1.7% | 07/RS2 | metric_id=M-V01; dq_ref=DQ-20 | value_pct_of_candidate | 1.7 | 1 | 16,527 OCIDs |
 
+## Phase 10.1 sensitivity: DQ-21 possible award scale errors (§1, §3, §5, §7, §9, §10, §11, §12)
+
+| Tag | Claim | Stated figure | Source | Row | Column | Source value | Scale | Eligible n |
+|---|---|---|---|---|---|---|---|---|
+| X1 | Awards flagged POSSIBLE_SCALE_ERROR | 45 awards | 03/RS11a | — | flagged_awards | 45 | 1 | 15,763 awards (M-V01) |
+| X1 | Flagged by the dropped-decimal test | 39 | 03/RS11a | — | dropped_decimal | 39 | 1 | 15,763 awards (M-V01) |
+| X1 | Flagged by the sibling-lot test | 6 | 03/RS11a | — | sibling_lot | 6 | 1 | 15,763 awards (M-V01) |
+| X1 | Flagged award value | ₦509.5bn | 03/RS11a | — | flagged_value_ngn_bn | 509.5 | 1 | 15,763 awards (M-V01) |
+| X1 | Flagged share of M-V01 award value | 15.5% | 03/RS11a | — | pct_of_m_v01_award_value | 15.5 | 1 | 15,763 awards (M-V01) |
+| X1 | Entities with a flagged award | 31 entities | 03/RS11a | — | entities | 31 | 1 | 15,763 awards (M-V01) |
+| S6 | Flagged awards inside the M-S01 population | 39 | 01/RS6 | scenario=2  without DQ-21 flagged awards | flagged_awards_in_m_s01 | 39 | 1 | 13,537 awards |
+| S6 | Top-1 supplier share without flagged awards | 5.2% | 01/RS6 | scenario=2  without DQ-21 flagged awards | top_1_share_pct | 5.22 | 1 | 13,498 awards |
+| S6 | Largest supplier's value without flagged awards | ₦112.09bn | 01/RS6 | scenario=2  without DQ-21 flagged awards | largest_supplier_value_ngn_bn | 112.09 | 1 | 13,498 awards |
+| S6 | Top-10 supplier share without flagged awards | 26.1% | 01/RS6 | scenario=2  without DQ-21 flagged awards | top_10_share_pct | 26.13 | 1 | 13,498 awards |
+| S6 | Top-100 supplier share without flagged awards | 53.2% | 01/RS6 | scenario=2  without DQ-21 flagged awards | top_100_share_pct | 53.22 | 1 | 13,498 awards |
+| S6 | Herfindahl index without flagged awards | 101.3 | 01/RS6 | scenario=2  without DQ-21 flagged awards | herfindahl_index_0_to_10000 | 101.3 | 1 | 13,498 awards |
+| S6 | Emergency top-1 supplier share without flagged awards | 55.3% | 01/RS6b | procurement_method=Emergency | top_1_share_pct_without_flagged | 55.3 | 1 | 363 awards less 2 flagged |
+| S6 | Emergency Herfindahl index without flagged awards | 3,197 | 01/RS6b | procurement_method=Emergency | herfindahl_without_flagged | 3,197 | 1 | 363 awards less 2 flagged |
+| B8 | Comparable processes carrying a flagged award | 45 | 03/RS11 | scenario=2  without DQ-21 flagged awards | flagged_ocids_in_comparison | 45 | 1 | 15,574 OCIDs |
+| B8 | Processes above ten times budget without flagged awards | 186 processes | 03/RS11 | scenario=2  without DQ-21 flagged awards | ocids_above_10x | 186 | 1 | 15,529 OCIDs |
+| B8 | Above-ten-times value without flagged awards | ₦1,030.9bn | 03/RS11 | scenario=2  without DQ-21 flagged awards | above_10x_award_ngn_bn | 1,030.9 | 1 | 15,529 OCIDs |
+| B8 | Above-ten-times share of compared award value without flagged awards | 39.9% | 03/RS11 | scenario=2  without DQ-21 flagged awards | above_10x_pct_of_award_value | 39.93 | 1 | 15,529 OCIDs |
+| B8 | Aggregate ratio without flagged awards | 0.21 | 03/RS11 | scenario=2  without DQ-21 flagged awards | aggregate_award_to_budget_ratio | 0.208 | 1 | 15,529 OCIDs |
+| B8 | Median ratio without flagged awards | 0.93 | 03/RS11 | scenario=2  without DQ-21 flagged awards | median_ratio | 0.9285 | 1 | 15,529 OCIDs |
+| B8 | Works & Housing HQ share of the group without flagged awards | 87.7% | 03/RS11b | rank_in_band=1 | pct_of_band_value | 87.7 | 1 | 186 OCIDs |
+| B8 | Works & Housing HQ processes in the group without flagged awards | 93 processes | 03/RS11b | rank_in_band=1 | ocids_above_10x | 93 | 1 | 186 OCIDs |
+| B8 | Works & Housing HQ value in the group without flagged awards | ₦904.1bn | 03/RS11b | rank_in_band=1 | award_ngn_bn | 904.1 | 1 | 186 OCIDs |
+| E7 | Largest entity's share without flagged awards | 47.1% | 05/RS7 | largest_entities=1 | pct_of_award_value_without_flagged | 47.1 | 1 | 665 entities |
+| E7 | Ten largest entities' share without flagged awards | 76.2% | 05/RS7 | largest_entities=10 | pct_of_award_value_without_flagged | 76.2 | 1 | 665 entities |
+| E7 | FCTA award value as published | ₦470.1bn | 05/RS7b | rank_without=2 | award_value_published_ngn_bn | 470.1 | 1 | 844 awards |
+| E7 | FCTA award value without flagged awards | ₦257.8bn | 05/RS7b | rank_without=2 | award_value_without_flagged_ngn_bn | 257.8 | 1 | 844 awards less 3 flagged |
+| E7 | HADEJIA-JAMAÄ»ARE RBDA award value as published | ₦86.2bn | 05/RS7b | rank_without=8 | award_value_published_ngn_bn | 86.2 | 1 | 58 awards |
+| E7 | HADEJIA-JAMAÄ»ARE RBDA award value without flagged awards | ₦32.4bn | 05/RS7b | rank_without=8 | award_value_without_flagged_ngn_bn | 32.4 | 1 | 58 awards less 5 flagged |
+| E7 | HADEJIA-JAMAÄ»ARE RBDA flagged awards | 5 | 05/RS7b | rank_without=8 | flagged_awards | 5 | 1 | 58 awards |
+
 ---
 
-*Claim trace version 1.0 — 2026-10-17. Every row is checked by `python/validation/07_check_findings_trace.py`.*
+*Claim trace version 1.1 — 2026-10-17 (Phase 10.1 DQ-21 sensitivity rows added). Every row is checked by `python/validation/07_check_findings_trace.py`.*

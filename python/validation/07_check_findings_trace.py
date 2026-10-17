@@ -70,7 +70,7 @@ MASKS = [
     r"\]\([^)]*\)",                               # link targets
     r"\[[A-Z]\d+\]",                              # claim tags
     r"\b(?:DQ|C|P|D|I|O|R|M|BQ|RS|AV|SP|WF|EXE|SUP|COM|BVA|TIM|ENT|IMP)-?[A-Z]?\d+[A-Za-z0-9-]*",
-    r"\b(?:Phase|phase|version|v)\s?\d+(?:\.\d+)+",
+    r"\b(?:Phase|phase|Version|version|v)\s?\d+(?:\.\d+)+",
     r"§\s?\d+(?:\.\d+)*",
     r"\b\d{4}-\d{2}-\d{2}\b",
     r"SHA-256",
@@ -80,7 +80,7 @@ TOKEN_PATTERNS = [
     ("PCT", re.compile(r"([−-])?(\d[\d,]*(?:\.\d+)?)\s?%")),
     ("NUM", re.compile(r"(?<![\w.])([−-])?(\d[\d,]*(?:\.\d+)?)\s(?:" + UNITS + r")\b")),
     ("NUM", re.compile(r"(?<![\w.,])([−-])?(\d{1,3}(?:,\d{3})+(?:\.\d+)?)(?![\d,])")),
-    ("NUM", re.compile(r"(?<![\w.,])([−-])?(\d+\.\d+)(?![\d.])")),
+    ("NUM", re.compile(r"(?<![\w.,])([−-])?(\d+\.\d+)(?!\.?\d)")),     # a sentence-final full stop is not part of it
 ]
 NO_UNIT_PREFIX = re.compile(r"(?:top|largest|first|Top)[ -]$")
 

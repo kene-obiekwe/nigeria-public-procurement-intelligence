@@ -1,9 +1,9 @@
 # Phase 8 — Business-Question Analysis Results
 
 > **Runner:** `python/validation/05_run_analysis_scripts.py`  
-> **Run date:** 2026-10-08 18:52:45  
+> **Run date:** 2026-10-17 19:03:39  
 > **Database:** `nocopo_db` on localhost:5433 (PostgreSQL 17.4)  
-> **Scripts:** 7; 50 result sets run; no failures.
+> **Scripts:** 7; 57 result sets run; no failures.
 
 Every script reads only `analytics.*` views and runs in a read-only transaction. Interpretation, limitations and spot-checks: `docs/phase8_analysis/phase8_business_question_analysis.md`.
 
@@ -13,7 +13,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS1 — Eligible population and the disclosed exclusion (every M-S01 figure must carry this)
 
-*1 row(s), 0.5 s*
+*1 row(s), 0.4 s*
 
 | metric | candidate_awards | eligible_awards | eligible_pct_of_candidate | distinct_suppliers | eligible_value_ngn_bn | excluded_awards_bare_supplier_id | excluded_value_ngn_bn | excluded_pct_of_candidate_value |
 |---|---|---|---|---|---|---|---|---|
@@ -21,7 +21,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS1b — Register entry for M-S01 (analytics.vw_metric_population; a few seconds)
 
-*1 row(s), 1.8 s*
+*1 row(s), 1.4 s*
 
 | metric_id | candidate_population | candidate_count | eligible_count | eligible_pct |
 |---|---|---|---|---|
@@ -29,7 +29,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS2 — Overall concentration: share held by the largest suppliers, Herfindahl index, depth to 50% / 80%
 
-*1 row(s), 0.3 s*
+*1 row(s), 0.2 s*
 
 | suppliers | awards_in_scope | value_in_scope_ngn_bn | top_1_share_pct | top_5_share_pct | top_10_share_pct | top_20_share_pct | top_100_share_pct | herfindahl_index_0_to_10000 | suppliers_to_reach_50_pct | suppliers_to_reach_80_pct | suppliers_with_one_award |
 |---|---|---|---|---|---|---|---|---|---|---|---|
@@ -64,7 +64,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS4 — Concentration by procurement method (the only category-like field available)
 
-*11 row(s), 0.8 s*
+*11 row(s), 0.3 s*
 
 | procurement_method | eligible_awards | suppliers | value_ngn_bn | top_1_share_pct | top_5_share_pct | herfindahl_index | reliability_note |
 |---|---|---|---|---|---|---|---|
@@ -82,7 +82,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS5 — Concentration by procuring entity (entities with at least min_awards eligible awards)
 
-*15 row(s), 0.6 s*
+*15 row(s), 0.3 s*
 
 | concentration_rank | buyer_id | buyer_name | eligible_awards | suppliers | value_ngn_bn | top_1_supplier_share_pct | top_3_suppliers_share_pct | herfindahl_index | percentile_among_entities | entities_in_comparison |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -104,11 +104,38 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS5b — Distribution of entity-level concentration (same entities as RS5)
 
-*1 row(s), 0.5 s*
+*1 row(s), 0.3 s*
 
 | entities_in_comparison | min_awards_threshold | p25_top_1_share_pct | median_top_1_share_pct | p75_top_1_share_pct | entities_where_one_supplier_holds_half |
 |---|---|---|---|---|---|
 | 166 | 10 | 13.8 | 21 | 29 | 13 |
+
+### RS6 — Sensitivity (DQ-21): overall concentration as published and without awards flagged POSSIBLE_SCALE_ERROR
+
+*2 row(s), 1.4 s*
+
+| scenario | awards_in_scope | flagged_awards_in_m_s01 | value_in_scope_ngn_bn | top_1_share_pct | top_5_share_pct | top_10_share_pct | top_100_share_pct | herfindahl_index_0_to_10000 | largest_supplier | largest_supplier_value_ngn_bn |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1  as published (RS2) | 13,537 | 39 | 2,620.2 | 8.03 | 21.46 | 29 | 59.45 | 139.4 | Lemaco Engineering Ltd | 210.29 |
+| 2  without DQ-21 flagged awards | 13,498 | 39 | 2,147.1 | 5.22 | 18.73 | 26.13 | 53.22 | 101.3 | M/s RCC Limited | 112.09 |
+
+### RS6b — Sensitivity (DQ-21): concentration by procurement method, as published and without flagged awards
+
+*11 row(s), 1.5 s*
+
+| procurement_method | flagged_awards | value_published_ngn_bn | value_without_flagged_ngn_bn | top_1_share_pct_published | top_1_share_pct_without_flagged | herfindahl_published | herfindahl_without_flagged |
+|---|---|---|---|---|---|---|---|
+| National Competitive Bidding | 26 | 1,630.1 | 1,450.09 | 6.9 | 7.7 | 146 | 167 |
+| Selective Tendering | 9 | 451.91 | 371.14 | 11.1 | 13.5 | 282 | 336 |
+| Emergency | 2 | 342.26 | 130.18 | 61.4 | 55.3 | 4,238 | 3,197 |
+| Direct Procurement | 0 | 117.85 | 117.85 | 17.5 | 17.5 | 637 | 637 |
+| (method not stated) | 0 | 31.04 | 31.04 | 57.5 | 57.5 | 3,677 | 3,677 |
+| International Competitive Bidding | 0 | 16.13 | 16.13 | 9.3 | 9.3 | 707 | 707 |
+| Request for quotation | 1 | 14.3 | 14.28 | 2.5 | 2.5 | 56 | 56 |
+| Repeat Procurement | 0 | 11.97 | 11.97 | 8.9 | 8.9 | 222 | 222 |
+| National Shopping | 1 | 2.68 | 2.44 | 8.9 | 5.8 | 155 | 91 |
+| Sole Source | 0 | 1.79 | 1.79 | 25.1 | 25.1 | 1,267 | 1,267 |
+| Direct Labour | 0 | 0.15 | 0.15 | 23.3 | 23.3 | 1,303 | 1,303 |
 
 
 ## 02_competition.sql
@@ -126,7 +153,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS1b — Register entry (analytics.vw_metric_population; a few seconds)
 
-*2 row(s), 3.0 s*
+*2 row(s), 2.2 s*
 
 | metric_id | candidate_population | candidate_count | eligible_count | eligible_pct |
 |---|---|---|---|---|
@@ -158,7 +185,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS4 — Competition by procurement method (primary population)
 
-*11 row(s), 0.1 s*
+*11 row(s), 0.2 s*
 
 | procurement_method | eligible_tenders | median_tenderers | single_bidder_rate_pct | six_plus_tenderers_pct | single_bidder_gap_vs_overall_pts | reliability_note |
 |---|---|---|---|---|---|---|
@@ -221,7 +248,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS1 — Eligible population, totals and headline ratios
 
-*1 row(s), 0.3 s*
+*1 row(s), 0.4 s*
 
 | candidate_awards | eligible_ocids | eligible_pct_of_candidate | excluded_ocids | total_budget_ngn_bn | total_award_ngn_bn | net_variance_ngn_bn | aggregate_award_to_budget_ratio | median_ratio |
 |---|---|---|---|---|---|---|---|---|
@@ -229,7 +256,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS1b — Register entry (analytics.vw_metric_population; a few seconds)
 
-*1 row(s), 2.6 s*
+*1 row(s), 2.2 s*
 
 | metric_id | candidate_population | candidate_count | eligible_count | eligible_pct |
 |---|---|---|---|---|
@@ -276,7 +303,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS5 — Entities with the largest net variance between awards and budgets (absolute NGN)
 
-*15 row(s), 0.3 s*
+*15 row(s), 0.2 s*
 
 | rank_by_abs_variance | buyer_id | buyer_name | eligible_ocids | budget_ngn_bn | award_ngn_bn | net_variance_ngn_bn | aggregate_ratio | median_ratio | cumulative_share_of_abs_variance_pct | entities_in_comparison |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -320,7 +347,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS7 — Double-count check: is any planning budget line compared against more than one OCID?
 
-*1 row(s), 0.3 s*
+*1 row(s), 0.2 s*
 
 | budget_project_ids | ids_used_by_several_ocids | summed_budget_ngn_bn | budget_counted_once_ngn_bn | reading |
 |---|---|---|---|---|
@@ -354,6 +381,35 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 |---|---|---|---|---|
 | 9 | 6 | 227 | 4 | a "budget recorded in thousands" pattern would put most of the above-10x OCIDs near 1,000; it does not |
 
+### RS11 — Sensitivity (DQ-21): totals, ratios and the above-10x band, as published and without flagged awards
+
+*2 row(s), 1.3 s*
+
+| scenario | comparable_ocids | flagged_ocids_in_comparison | total_budget_ngn_bn | total_award_ngn_bn | aggregate_award_to_budget_ratio | median_ratio | ocids_above_10x | above_10x_award_ngn_bn | above_10x_pct_of_award_value |
+|---|---|---|---|---|---|---|---|---|---|
+| 1  as published (RS1, RS3) | 15,574 | 45 | 12,434.5 | 3,091.5 | 0.2486 | 0.9298 | 227 | 1,540.1 | 49.82 |
+| 2  without DQ-21 flagged awards | 15,529 | 45 | 12,412.7 | 2,582.1 | 0.208 | 0.9285 | 186 | 1,030.9 | 39.93 |
+
+### RS11a — Footprint of the DQ-21 flag: awards flagged POSSIBLE_SCALE_ERROR, their value and where they sit
+
+*1 row(s), 1.3 s*
+
+| flagged_awards | dropped_decimal | sibling_lot | flagged_value_ngn_bn | pct_of_m_v01_award_value | in_budget_comparison | entities |
+|---|---|---|---|---|---|---|
+| 45 | 39 | 6 | 509.5 | 15.5 | 45 | 31 |
+
+### RS11b — Sensitivity (DQ-21): the above-10x band by entity without flagged awards (compare RS9)
+
+*5 row(s), 1.2 s*
+
+| rank_in_band | buyer_id | buyer_name | ocids_above_10x | award_ngn_bn | pct_of_band_value | band_ocids | band_award_ngn_bn |
+|---|---|---|---|---|---|---|---|
+| 1 | NG-BPP-BPP-NOC-231001001 | FEDERAL MINISTRY OF WORKS & HOUSING - HQTRS | 93 | 904.1 | 87.7 | 186 | 1,030.9 |
+| 2 | NG-BPP-BPP-NOC-3 | FEDERAL MINISTRY OF AGRICULTURE | 2 | 50.1 | 4.9 | 186 | 1,030.9 |
+| 3 | NG-BPP-BPP-NOC-252041001 | HADEJIA-JAMAÄ»ARE RBDA | 4 | 28.2 | 2.7 | 186 | 1,030.9 |
+| 4 | NG-BPP-BPP-NOC-123031011 | NATIONAL INSTITUTE FOR CULTURE ORIENTATION | 1 | 11.3 | 1.1 | 186 | 1,030.9 |
+| 5 | NG-BPP-BPP-NOC-2 | FEDERAL CAPITAL TERRITORY ADMINISTRATION | 10 | 9.5 | 0.9 | 186 | 1,030.9 |
+
 
 ## 04_procurement_cycle_timing.sql
 
@@ -361,7 +417,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS1 — Eligible population sizes and medians (headline timing metrics)
 
-*3 row(s), 0.7 s*
+*3 row(s), 0.5 s*
 
 | measure | eligible_n | median_days |
 |---|---|---|
@@ -371,7 +427,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS1b — Coverage: candidate population, eligible count and eligible share (analytics.vw_metric_population; a few seconds)
 
-*3 row(s), 3.0 s*
+*3 row(s), 2.1 s*
 
 | metric_id | metric_name | candidate_population | candidate_count | eligible_count | eligible_pct |
 |---|---|---|---|---|---|
@@ -381,7 +437,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS2 — Distribution of each interval, with counts of unusually long intervals (kept, not removed)
 
-*3 row(s), 0.7 s*
+*3 row(s), 0.6 s*
 
 | measure | eligible_n | min_days | p25 | median | p75 | p90 | p99 | max_days | mean_days | same_day | over_1_year | over_1_year_pct |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -391,7 +447,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS3 — Duration bands (CASE classification)
 
-*18 row(s), 0.7 s*
+*18 row(s), 0.6 s*
 
 | measure | duration_band | processes | pct_of_measure | cumulative_pct |
 |---|---|---|---|---|
@@ -416,7 +472,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS4 — Timing by procurement method (eligible populations only; n shown for each measure)
 
-*11 row(s), 0.5 s*
+*11 row(s), 0.4 s*
 
 | procurement_method | tender_duration_n | median_tender_duration_days | award_lag_n | median_award_lag_days | reliability_note |
 |---|---|---|---|---|---|
@@ -490,7 +546,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS1 — Population: entities and how many have data for each KPI
 
-*1 row(s), 0.6 s*
+*1 row(s), 0.5 s*
 
 | entities | processes_in_scope | entities_with_budget_lines | entities_with_competition_data | entities_competition_n_30_plus | entities_with_awards | entities_award_n_10_plus | entities_with_contracts | entities_contract_n_20_plus | total_award_value_ngn_bn | total_planned_budget_ngn_bn |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -498,7 +554,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS1b — Register entry (analytics.vw_metric_population; a few seconds)
 
-*1 row(s), 3.1 s*
+*1 row(s), 2.3 s*
 
 | metric_id | candidate_population | candidate_count | eligible_count | eligible_pct |
 |---|---|---|---|---|
@@ -519,7 +575,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS3 — Top 15 entities by awarded value, with their rank on each activity measure
 
-*15 row(s), 0.4 s*
+*15 row(s), 0.3 s*
 
 | rank_award_value | buyer_id | buyer_name | award_value_ngn_bn | cumulative_share_of_award_value_pct | award_n | process_count | planned_budget_ngn_bn | rank_processes | rank_awards | rank_budget |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -541,7 +597,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS4 — KPI profile of the top 15 entities by awarded value, each KPI beside its own n and percentile position
 
-*15 row(s), 1.3 s*
+*15 row(s), 1.1 s*
 
 | rank_award_value | buyer_name | tender_reach_pct | reach_pctile | competition_n | median_tenderers | tenderers_pctile | single_bidder_pct | single_bidder_pctile | award_n | top_supplier_share_pct | top_supplier_pctile | contract_n | implementation_coverage_pct | implementation_pctile |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -563,7 +619,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS5 — Spread of each KPI across entities that meet the minimum n (the yardstick for RS4)
 
-*5 row(s), 1.6 s*
+*5 row(s), 1.4 s*
 
 | kpi | entities_compared | p10 | p25 | median | p75 | p90 |
 |---|---|---|---|---|---|---|
@@ -575,7 +631,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS6 — Do larger entities differ? KPI medians by quartile of awarded value (entities with awards)
 
-*4 row(s), 0.6 s*
+*4 row(s), 0.5 s*
 
 | value_quartile | entities | award_value_ngn_bn | pct_of_award_value | entities_with_competition_n | median_single_bidder_pct | entities_with_contract_n | median_implementation_coverage_pct | reliability_note |
 |---|---|---|---|---|---|---|---|---|
@@ -583,6 +639,36 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 | 2 | 65 | 132.6 | 4 | 40 | 50.4 | 52 | 99.3 |  |
 | 3 | 65 | 33.5 | 1 | 4 | 82.3 | 10 | 98.9 | fewer than 10 entities in a KPI: read with caution |
 | 4 | 64 | 5.1 | 0.2 | 3 | 33.3 | 3 | 100 | fewer than 10 entities in a KPI: read with caution |
+
+### RS7 — Sensitivity (DQ-21): share of award value held by the largest entities, as published and without flagged awards
+
+*6 row(s), 1.3 s*
+
+| largest_entities | pct_of_award_value_published | pct_of_award_value_without_flagged | total_award_value_published_ngn_bn | total_award_value_without_flagged_ngn_bn |
+|---|---|---|---|---|
+| 1 | 40.6 | 47.1 | 3,289.4 | 2,780 |
+| 5 | 66.6 | 68.3 | 3,289.4 | 2,780 |
+| 10 | 76 | 76.2 | 3,289.4 | 2,780 |
+| 20 | 83.7 | 82.8 | 3,289.4 | 2,780 |
+| 50 | 92.6 | 91.7 | 3,289.4 | 2,780 |
+| 100 | 97.6 | 97.2 | 3,289.4 | 2,780 |
+
+### RS7b — Sensitivity (DQ-21): the 10 largest entities by award value without flagged awards, with their published rank
+
+*10 row(s), 1.3 s*
+
+| rank_without | rank_published | buyer_id | buyer_name | award_value_published_ngn_bn | flagged_awards | award_value_without_flagged_ngn_bn |
+|---|---|---|---|---|---|---|
+| 1 | 1 | NG-BPP-BPP-NOC-231001001 | FEDERAL MINISTRY OF WORKS & HOUSING - HQTRS | 1,335.1 | 5 | 1,309.4 |
+| 2 | 2 | NG-BPP-BPP-NOC-2 | FEDERAL CAPITAL TERRITORY ADMINISTRATION | 470.1 | 3 | 257.8 |
+| 3 | 3 | NG-BPP-BPP-NOC-521027034 | FEDERAL MEDICAL CENTRE, TARABA STATE | 175.8 | 0 | 175.8 |
+| 4 | 4 | NG-BPP-BPP-NOC-220007049 | FEDERAL INLAND REVENUE SERVICE | 125 | 2 | 88 |
+| 5 | 7 | NG-BPP-BPP-NOC-539001003 | BORDER COMMUNITIES DEVELOPMENT AGENCY | 71.6 | 1 | 66.8 |
+| 6 | 8 | NG-BPP-BPP-NOC-3 | FEDERAL MINISTRY OF AGRICULTURE | 66.5 | 0 | 66.5 |
+| 7 | 6 | NG-BPP-BPP-NOC-232007001 | NIGERIA CONTENT DEVELOPMENT AND MONITORING BOARD | 77.9 | 1 | 66.2 |
+| 8 | 5 | NG-BPP-BPP-NOC-252041001 | HADEJIA-JAMAÄ»ARE RBDA | 86.2 | 5 | 32.4 |
+| 9 | 10 | NG-BPP-BPP-NOC-553001001 | MINISTRY OF HUMANITARIAN AFFAIRS, DISASTER MANAGEMENT AND SOCIAL DEVELOPMENT HQRS | 43 | 2 | 28.6 |
+| 10 | 15 | NG-BPP-BPP-NOC-124002001 | NIGERIAN CORRECTIONAL SERVICE | 25.9 | 0 | 25.9 |
 
 
 ## 06_implementation_coverage.sql
@@ -599,7 +685,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS1b — Register entries (analytics.vw_metric_population; a few seconds)
 
-*2 row(s), 2.7 s*
+*2 row(s), 2.6 s*
 
 | metric_id | candidate_population | candidate_count | eligible_count | eligible_pct |
 |---|---|---|---|---|
@@ -608,7 +694,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS2 — What kind of implementation data exists (CASE classification)
 
-*3 row(s), 0.2 s*
+*3 row(s), 0.1 s*
 
 | implementation_data_type | contracts | pct_of_contracts | transactions | implementation_milestones |
 |---|---|---|---|---|
@@ -629,7 +715,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS4 — Distribution of coverage across entities (entities with at least min_contracts contracts)
 
-*5 row(s), 0.1 s*
+*5 row(s), 0.2 s*
 
 | entity_coverage_band | entities | pct_of_entities | contracts_held | pct_of_contracts | min_contracts_threshold |
 |---|---|---|---|---|---|
@@ -680,7 +766,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS1 — Exclusions by metric: candidate, eligible, and how the excluded records divide by cause
 
-*9 row(s), 4.1 s*
+*9 row(s), 4.2 s*
 
 | metric_order | metric_id | metric_name | candidate_records | eligible_records | eligible_pct | excluded_records | lost_to_one_dq_issue_only | lost_to_non_dq_rule_only | lost_to_two_or_more_reasons | reconciles_candidate_minus_eligible |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -696,7 +782,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS2 — Issue-by-metric matrix: size of each issue's footprint, value at stake, materiality
 
-*32 row(s), 5.3 s*
+*32 row(s), 4.3 s*
 
 | metric_id | dq_ref | dq_issue | impact_type | treatment | candidate_records | records_with_issue | pct_of_candidate | records_lost_only_to_issue | affected_value_ngn_bn | value_pct_of_candidate | materiality | rank_within_metric | note |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -735,7 +821,7 @@ Every script reads only `analytics.*` views and runs in a read-only transaction.
 
 ### RS3 — Which issues matter most across metrics (how many metrics each touches materially)
 
-*18 row(s), 4.6 s*
+*18 row(s), 3.8 s*
 
 | issue_rank | dq_ref | dq_issue | treatment | metrics_touched | metrics_high | metrics_moderate | metrics_affected |
 |---|---|---|---|---|---|---|---|

@@ -11,6 +11,9 @@
 > `python/validation/07_check_findings_trace.py` confirms that each figure matches its source
 > ([`claim_trace_check_results.md`](claim_trace_check_results.md)).
 > **Source checks:** [`source_verification.md`](source_verification.md) (raw JSON, read-only).
+> **Phase 10.1 (2026-10-17):** corrections C-12 (release dates) and C-13 / DQ-21 (possible award scale errors,
+> flagged, not excluded) applied; headline value figures are shown with and without the flagged awards
+> ([`phase10_1_correction_pass.md`](phase10_1_correction_pass.md)).
 
 ---
 
@@ -23,19 +26,22 @@ they are not conclusions about how any entity or supplier behaved (see §2).
    hold 29.0% of attributable award value, and the Herfindahl index is 139.4, low on its scale. In Emergency
    procurement the largest supplier holds 61.4% of value across 363 awards. *Population:* 13,537 awards with a
    usable supplier ID. *Caveat:* 2,226 awards (₦670.4bn, 20.4% of eligible award value) have no usable supplier ID
-   and are left out, so concentration is a lower bound. [S1] [S2] [S4]
+   and are left out, so concentration is a lower bound. Without the awards flagged as possible scale errors (§10)
+   the top ten hold 26.1% and the Emergency share is 55.3%, so the pattern holds. [S1] [S2] [S4] [S6]
 2. **Almost half of tenders record a single bidder.** 44.0% of tenders record one tenderer (median 2 tenderers).
    Even in National Competitive Bidding the rate is 39.6% across 10,129 tenders. *Population:* 17,253 tenders with
    a plausible recorded count (one to a hundred tenderers). *Caveat:* the count is what was published; the source
    does not define whether it counts bids received or bids found responsive. [C1] [C3]
 3. **Most processes are awarded close to budget, but a small group is far above it.** The median award is 0.93 of
    its budget line and 42.2% of processes are awarded within a tenth of their budget. Yet 227 processes (1.5%) are
-   awarded more than ten times their budget and hold 49.8% of the compared award value. *Population:* 15,574 processes with one usable
-   budget line. *Caveat:* a budget is a plan, not spend; the source checks (§10) find a possible data-entry pattern
-   inside this group. [B1] [B2] [B3]
+   awarded more than ten times their budget and hold 49.8% of the compared award value. Without the awards flagged as
+   possible scale errors, 186 processes remain above ten times budget with 39.9% of the value, and the median stays at
+   0.93. *Population:* 15,574 processes with one usable budget line. *Caveat:* a budget is a plan, not spend; the
+   flagged awards are kept in the figures and shown separately (§10). [B1] [B2] [B3] [B8]
 4. **Activity sits with a few entities.** The largest entity holds 40.6% of eligible award value and the ten largest
-   hold 76.0%. *Population:* 665 procuring entities. *Caveat:* value shares are sensitive to a handful of very large
-   awards, some of which are under source review (§10). [E1] [E2]
+   hold 76.0% (47.1% and 76.2% without the flagged awards). *Population:* 665 procuring entities. *Caveat:* value
+   shares are sensitive to a handful of very large awards, some of which are flagged or under source review
+   (§10). [E1] [E2] [E7]
 5. **Timing can be measured for only about half of processes.** Median award lag is 97 days (from tender start to
    award), but only 45.2% of candidate processes publish the two valid dates it needs. *Population:* 7,462
    processes. *Caveat:* results describe processes that published valid dates, not the rest. [T1] [T2]
@@ -43,9 +49,10 @@ they are not conclusions about how any entity or supplier behaved (see §2).
    ministry reports for 21.6% of its 1,677 contracts. *Population:* 16,221 contracts. *Caveat:* this is reporting
    coverage, not contract performance. [I1] [I4]
 7. **Data-quality effects are concentrated in a few issues.** 82.3% of processes were published only at planning
-   stage, and missing supplier IDs remove 20.4% of award value from supplier analysis. *Population:* 98,454
-   processes. *Caveat:* most other issues each touch only a small share of the records in the metrics they
-   affect. [Q1] [S1]
+   stage, missing supplier IDs remove 20.4% of award value from supplier analysis, and 45 awards (₦509.5bn, 15.5% of
+   eligible award value) are flagged as possible scale errors and reported with and without them. *Population:*
+   98,454 processes. *Caveat:* most other issues each touch only a small share of the records in the metrics they
+   affect. [Q1] [S1] [X1]
 
 **What we recommend first (§11).** Validate the three records in §10 before quoting any figure that depends on them.
 Review single-bidder and emergency processes in a sample. Ask publishers to fix three reporting gaps: supplier IDs,
@@ -85,11 +92,16 @@ from the dashboard.
   Emergency (363 awards, ₦342.3bn, Herfindahl index 4,238) and 57.5% where no method is stated (105 awards). [S4]
 - Across 166 entities with at least 10 eligible awards, the median entity's largest supplier holds 21.0% of its award
   value; in 13 entities one supplier holds half or more. [S5]
+- **Sensitivity (DQ-21).** 39 awards in this population are flagged as possible scale errors. Without them the
+  largest supplier holds 5.2% (M/s RCC Limited, ₦112.09bn), the top ten 26.1% and the top hundred 53.2%, and the
+  Herfindahl index is 101.3. In Emergency procurement the largest supplier still holds 55.3% (Herfindahl index
+  3,197). [S6]
 
 **Reading.** Overall, supplier value is spread widely, with a long tail of one-off suppliers. Concentration rises
 where the method itself limits competition (emergency) or the method is unrecorded. The overall top-supplier share
-rests on one record that the source check classifies as a possible data-entry issue (§10), so it should not be quoted
-without that caveat. Concentration is a lower bound for two reasons: 2,226 awards (₦670.4bn, 20.4% of eligible award
+rests on one record now flagged as a possible scale error (§10): it is 8.0% as published and 5.2% without the flagged
+awards, so quote both [S2] [S6]. Concentration is low on either basis, and emergency procurement stays the most
+concentrated method. Concentration is a lower bound for two reasons: 2,226 awards (₦670.4bn, 20.4% of eligible award
 value) have only the bare `NG-BPP-` supplier ID and are excluded (DQ-14) [S1], and IDs are never merged by name, while
 34.1% of the eligible value sits with supplier IDs that carry several name variants (DQ-13). [Q4]
 
@@ -150,6 +162,10 @@ bid was received or one was found responsive. Then publish that distinction.
 - That group is concentrated. The Federal Ministry of Works & Housing headquarters has 98 of these processes, worth
   ₦929.8bn (60.4% of the group's value, median ratio 23.3). The Federal Capital Territory Administration has 13 worth
   ₦221.8bn, and HADEJIA-JAMAÄ»ARE RBDA (the name as published) has 9 worth ₦81.9bn. [B4]
+- **Sensitivity (DQ-21).** 45 comparable processes carry an award flagged as a possible scale error. Without them,
+  186 processes are above ten times budget, holding ₦1,030.9bn (39.9% of compared award value); the aggregate ratio
+  is 0.21 and the median stays at 0.93. The Federal Ministry of Works & Housing headquarters then holds 87.7% of the
+  group's value (93 processes, ₦904.1bn). [B8]
 - The Federal Ministry of Works & Housing headquarters also accounts for 56.5% of the summed absolute
   budget-to-award difference across 171 entities (net difference −₦5,559.9bn on 1,678 processes). [B5]
 - A "budget recorded in thousands" pattern was tested and not found: only 9 processes are near a thousand times their
@@ -158,9 +174,10 @@ bid was received or one was found responsive. Then publish that distinction.
 
 **Reading.** The typical process is awarded close to its budget [B1]. The aggregate ratio of 0.25 is pulled down by very
 large planned budgets with smaller awards, so it should not be read as a saving. The group above ten times budget
-holds half the compared value in only 1.5% of processes, which makes it the main risk to any value total [B3]. The source
-check (§10) finds that several of HADEJIA-JAMAÄ»ARE RBDA's largest awards match a dropped-decimal pattern, and that
-the FCTA group includes the ₦210bn record under review [S3]. A budget is a plan; an award below budget is not a saving,
+holds half the compared value in only 1.5% of processes, which makes it the main risk to any value total [B3]. A large part
+of the group's value rests on awards flagged as possible scale errors (§10), including the ₦210bn record [S3] and
+five of HADEJIA-JAMAÄ»ARE RBDA's nine; once they are set aside, the group is concentrated even more in one entity
+[B8]. A budget is a plan; an award below budget is not a saving,
 and an award above it is not an overrun.
 
 | Stakeholder | Implication |
@@ -171,7 +188,7 @@ and an award above it is not an overrun.
 | Risk / advisory | The above-ten-times group is the highest-value area for record-level review in this dataset. [B3] |
 
 **Recommendation.** Treat the above-ten-times group as a validation queue: confirm units and decimal entry for each
-record, starting with the largest. Consider the proposed data-quality flag in §13.
+record, starting with the awards flagged in `analytics.vw_award_scale_flag` (DQ-21, §10).
 
 ---
 
@@ -229,11 +246,16 @@ coverage alongside cycle-time medians.
 - The same entity can sit at opposite ends of different measures. The Federal Ministry of Works & Housing
   headquarters is at the competitive end on single bidders (3.7% of 1,635 tenders) and the dispersed end on
   supplier share (11.1%), but near the bottom on implementation coverage (21.6% of 1,677 contracts). [E6]
+- **Sensitivity (DQ-21).** Without the flagged awards the largest entity holds 47.1% of award value and the ten
+  largest 76.2%. The Federal Capital Territory Administration falls from ₦470.1bn to ₦257.8bn but stays second;
+  HADEJIA-JAMAÄ»ARE RBDA falls from fifth to eighth (₦86.2bn to ₦32.4bn). The Federal Medical Centre, Taraba State,
+  is not flagged (§10) and stays third. [E7]
 
 **Reading.** A few entities dominate value, so entity totals and portfolio-level shares are driven by them. Rankings
 on one measure say little about another. The top-supplier median here (22.2%, 173 entities) differs slightly from
 §3 (21.0%, 166 entities) because the benchmark counts every eligible award towards the minimum, including awards
-without a usable supplier ID. [E4] [S5]
+without a usable supplier ID. [E4] [S5] Without the flagged awards the largest entity's share rises and the
+ten largest hold almost the same share, so this finding does not depend on them. [E7]
 
 | Stakeholder | Implication |
 |---|---|
@@ -294,8 +316,9 @@ largest-volume entities that report for fewer than half of their contracts.
 
 **Reading.** The analysis is robust to most individual issues because each excluded group is small. The exceptions
 are the extreme values, which would dominate any total if included, and the missing supplier IDs, which cut a fifth
-of value out of supplier analysis. The source checks add one more: suspected magnitude-entry errors that the current
-rules do not flag (§10).
+of value out of supplier analysis. The source checks added one more, now flagged as DQ-21: 45 awards worth ₦509.5bn
+(15.5% of eligible award value) whose amount is out of scale with its own process record. They stay in every
+metric, and the sensitivity results show their effect (§10). [X1]
 
 | Stakeholder | Implication |
 |---|---|
@@ -304,8 +327,8 @@ rules do not flag (§10).
 | Analysts | Use `analytics.vw_dq_impact` to state the exclusion behind every figure. |
 | Risk / advisory | Publication quality is itself a finding: it determines which questions the open data can answer. |
 
-**Recommendation.** Publish the eligible population with every metric (as the dashboard does), and route the
-proposed DQ-21 rule (§13) through a correction pass before external use of value totals.
+**Recommendation.** Publish the eligible population with every metric (as the dashboard does), and quote
+value totals with the DQ-21 sensitivity beside them until the flagged awards are confirmed at source.
 
 ---
 
@@ -317,15 +340,17 @@ analyst's reading of the published record, not a finding about the parties.
 
 | Item | What the source shows | Classification |
 |---|---|---|
-| A. The top supplier's ₦210.29bn (2 awards, FCTA) [S3] | One award, an emergency drainage lot, is roughly a thousand times the same supplier's award for a similar lot from the same buyer. Its budget line was first published at a fraction of the award and later replaced by a larger "service wide contingency" line shared with the other lot. Titles disagree across sections (Abaji, Bwari/Kubwa, Gwagwalada); one tenderer; no implementation data. | **Possible data-entry issue** (magnitude). It cannot be confirmed from the source alone. |
-| B. Federal Medical Centre, Taraba State, ₦175.8bn from 10 awards [E3] | Nearly all of the value is one award for upgrading medical facilities. It has no budget line, no contract and only the bare supplier ID, so it is already outside supplier analysis, but inside award-value totals and the entity benchmark. The entity's other nine awards are of a far smaller order. | **Unresolved.** The magnitude is out of line with the entity's other records, but no internal comparator tests a specific error pattern. |
-| C. HADEJIA-JAMAÄ»ARE RBDA, awards at 21.4 times budget in aggregate (58 processes) [B7] | 9 processes are above ten times budget (₦81.9bn) [B4]. Several are whole-naira amounts that become close to their budget when divided by a hundred; in one, the award equals the budget times a hundred exactly. That is the signature of a two-decimal amount entered without its decimal point. The name is double-encoded UTF-8 in the source and is kept as published. | **Possible data-entry issue** (dropped decimal) for the awards that pass the test; **unresolved** for the rest. |
+| A. The top supplier's ₦210.29bn (2 awards, FCTA) [S3] | One award, an emergency drainage lot, is roughly a thousand times the same supplier's award for a similar lot from the same buyer. Its budget line was first published at a fraction of the award and later replaced by a larger "service wide contingency" line shared with the other lot. Titles disagree across sections (Abaji, Bwari/Kubwa, Gwagwalada); one tenderer; no implementation data. | **Possible data-entry issue** (magnitude). It cannot be confirmed from the source alone. Flagged SIBLING_LOT (DQ-21). |
+| B. Federal Medical Centre, Taraba State, ₦175.8bn from 10 awards [E3] | Nearly all of the value is one award for upgrading medical facilities. It has no budget line, no contract and only the bare supplier ID, so it is already outside supplier analysis, but inside award-value totals and the entity benchmark. The entity's other nine awards are of a far smaller order. | **Unresolved.** The magnitude is out of line with the entity's other records, but no internal comparator tests a specific error pattern. Not flagged: neither DQ-21 test can be applied. |
+| C. HADEJIA-JAMAÄ»ARE RBDA, awards at 21.4 times budget in aggregate (58 processes) [B7] | 9 processes are above ten times budget (₦81.9bn) [B4]. Several are whole-naira amounts that become close to their budget when divided by a hundred; in one, the award equals the budget times a hundred exactly. That is the signature of a two-decimal amount entered without its decimal point. The name is double-encoded UTF-8 in the source and is kept as published. | **Possible data-entry issue** (dropped decimal) for the awards that pass the test, five of the nine, now flagged DROPPED_DECIMAL (DQ-21); **unresolved** for the rest. |
 
-**Effect on the findings.** Every figure stays as validated; the caveats above are stated where the figures appear
-(§3, §5, §7). Item A drives the overall top-supplier share, and items A and C contribute to the group above ten times
-budget. Item B drives one entity's value rank and part of the ₦670.4bn excluded from supplier analysis. [S1] A wider
-read-only scan (`source_verification.md` §E) shows that ratios near a hundred are more frequent than ratios near a
-thousand, which the Phase 8 unit test did not cover. That is the basis for the DQ-21 proposal in §13.
+**Effect on the findings.** Every figure stays as validated. A wider read-only scan (`source_verification.md` §E)
+showed that ratios near a hundred are more frequent than ratios near a thousand, which the Phase 8 unit test did not
+cover. Since Phase 10.1 both tests run as DQ-21 (`analytics.vw_award_scale_flag`; flag and sensitivity, no
+exclusion): 45 awards, 39 by the dropped-decimal test and 6 by the sibling-lot test, ₦509.5bn, 15.5% of eligible award
+value, across 31 entities [X1]. Item A drives the overall top-supplier share, and items A and C contribute to the
+group above ten times budget; the sensitivity results in §3, §5 and §7 show each effect. Item B drives one entity's
+value rank and part of the ₦670.4bn excluded from supplier analysis. [S1]
 
 ---
 
@@ -339,7 +364,7 @@ Each recommendation is proportional to its evidence. "Validate" means confirm a 
 | R1 | Confirm the three records in §10 against the published award notices before quoting any figure that depends on them. | Validate | Analysts, risk / advisory | §10 |
 | R2 | Review a sample of emergency awards: concentration (top supplier 61.4%) and short award lags (9 days). [S4] [T4] | Review | Procurement management | §3, §6 |
 | R3 | Review a sample of single-bidder National Competitive Bidding tenders (39.6% of 10,129) and define what the tenderer count records. [C3] | Review | Procurement management, analysts | §4 |
-| R4 | Treat processes above ten times budget (227, holding 49.8% of compared value) as a validation queue for unit and decimal entry. [B3] | Validate | Procuring entities, analysts | §5 |
+| R4 | Treat processes above ten times budget (227, holding 49.8% of compared value) as a validation queue for unit and decimal entry, starting with the 45 awards flagged under DQ-21. [B3] [X1] | Validate | Procuring entities, analysts | §5 |
 | R5 | Ask the publisher to complete supplier IDs: the bare prefix removes 20.4% of award value from supplier analysis. [S1] | Improve reporting | Risk / advisory | §3, §9 |
 | R6 | Require valid tender and award dates; award lag can be measured for only 45.2% of candidates. [T2] | Improve reporting | Procuring entities | §6 |
 | R7 | Track implementation coverage per entity as a publication indicator, not as performance. [I4] | Improve reporting | Procurement management | §8 |
@@ -369,23 +394,25 @@ None of these recommendations presumes a cause. Each one tests a pattern before 
   exist: tender start, award date and contract signature.
 - **Exclusions by design.** The bare buyer prefix (DQ-19) is excluded from entity comparisons, and the portal test
   entity (DQ-20) from every metric. [Q8] Extreme budgets and awards (DQ-06, DQ-07) are excluded from value metrics. [Q7]
-- **Magnitude entry.** Current rules do not flag suspected decimal or unit entry errors below the extreme-value
-  threshold (§10, proposed DQ-21).
+- **Magnitude entry.** Suspected decimal or scale entry errors below the extreme-value threshold are flagged (DQ-21:
+  45 awards, 15.5% of eligible award value) but not excluded; headline value figures are shown with and without them.
+  Awards without a comparator (no budget line and no usable supplier ID) cannot be tested. [X1]
 - **Snapshot.** The analysis is pinned to the source file identified by SHA-256 `6151466…bc90c`. Its package metadata
-  is dated 2021-05-03, but its releases carry dates up to July 2026 (`source_verification.md` §D). The live portal now
-  serves a newer export, so a fresh download will not reproduce these figures.
+  is dated 2021-05-03, but its releases carry dates up to July 2026 (`source_verification.md` §D). A fresh download will
+  not match the checksum, so it will not reproduce these figures.
 - **No causation.** All findings are descriptive. Differences between methods, years or entities are not attributed
   to any cause.
 
 ---
 
-## 13. Proposals for the project owner (not applied)
+## 13. Proposals for the project owner (both applied in Phase 10.1)
 
-| # | Proposal | Why | Effect if approved |
+| # | Proposal | Why | Outcome |
 |---|---|---|---|
-| DQ-21 | A new data-quality issue, "award magnitude inconsistent with its own process record". FLAG awards that pass the dropped-decimal test (a whole-naira award whose value divided by a hundred is within a factor of two of its budget line), and list sibling-lot anomalies of the item A kind for manual review. Recommended treatment: FLAG plus a sensitivity result set, not exclusion (outliers are not removed by rule). | §10 items A and C; ratio clustering near a hundred (`source_verification.md` §E). | Phase 10.1 correction pass: Phase 3 log entry, flag column, sensitivity result sets in scripts 01, 03 and 05, re-run of the Phase 7–9 suites and re-signing of the affected reconciliation rows. |
+| DQ-21 | A new data-quality issue, "award magnitude inconsistent with its own process record". FLAG awards that pass the dropped-decimal test (a whole-naira award whose value divided by a hundred is within a factor of two of its budget line), and list sibling-lot anomalies of the item A kind for manual review. Recommended treatment: FLAG plus a sensitivity result set, not exclusion (outliers are not removed by rule). | §10 items A and C; ratio clustering near a hundred (`source_verification.md` §E). | **Applied 2026-10-17** (Phase 10.1, C-13): the owner chose this rule after seeing its size; flag view `analytics.vw_award_scale_flag`, sensitivity result sets in scripts 01, 03 and 05; existing figures, suites and the 177 reconciliation figures unchanged, so no re-signing was needed. |
 | C-12 | Correct the statement that every release carries the date 2021-05-03 (DQ-10 observed problem, Phase 2 profiling finding 10 and targeted validation, README audit table, `data/README.md` snapshot wording). That date is the package metadata date; 786 releases carry it. | `source_verification.md` §D. No metric uses the release date, and integer release order agrees with release date in every multi-release process. | **Applied 2026-10-17** (Phase 10.1, `phase3_2_correction_log.md` C-12). Documentation only; no figure changed. |
 
 ---
 
-*Findings version 1.0 — 2026-10-17. Raw dataset not modified; no stg.*, core.* or analytics.* object changed.*
+*Findings version 1.1 — 2026-10-17 (Phase 10.1: C-12, DQ-21 sensitivity). Version 1.0 — 2026-10-17.*
+*Raw dataset not modified; no stg.* or core.* object changed; one analytics view added (DQ-21 flag).*

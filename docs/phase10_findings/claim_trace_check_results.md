@@ -1,19 +1,19 @@
 # Findings Claim-Trace Check (Gate D)
 # Nigeria Public Procurement Intelligence
 
-> **Generated:** 2026-10-17 18:10 by `python/validation/07_check_findings_trace.py` --live  
+> **Generated:** 2026-10-17 19:11 by `python/validation/07_check_findings_trace.py` --live  
 > **Checks:** `docs/phase10_findings/findings.md` against `docs/phase10_findings/claim_trace.md`, `docs/phase8_analysis/phase8_analysis_results.md` and the reconciliation pack  
 > **Result:** PASS
 
 | Check | Result |
 |---|---|
-| Claim-trace rows verified against their source cell | 206 of 206 |
-| Claim tags | 40 |
-| Figures extracted from the findings | 253 |
+| Claim-trace rows verified against their source cell | 236 of 236 |
+| Claim tags | 44 |
+| Figures extracted from the findings | 299 |
 | Figures without a matching claim-trace row | 0 |
-| Claim-trace rows whose figure is not extracted from the findings text (verified, but not auto-located) | 12 |
+| Claim-trace rows whose figure is not extracted from the findings text (verified, but not auto-located) | 16 |
 | Prohibited terms outside the disclaimer section | 0 |
-| Reconciliation pack re-run against the database | run 2026-10-17 18:10: 177 figures returned; 8 cited figures compared, 0 mismatches |
+| Reconciliation pack re-run against the database | run 2026-10-17 19:11: 177 figures returned; 8 cited figures compared, 0 mismatches |
 
 ## Rows verified but not auto-located in the text
 
@@ -33,6 +33,10 @@ These figures are written without a unit the extractor recognises (for example a
 | I4 | 1 | 06/RS4 |
 | I4 | 83 | 06/RS5 |
 | Q7 | 32 | 07/RS2 |
+| X1 | 39 | 03/RS11a |
+| X1 | 6 | 03/RS11a |
+| B8 | 45 | 03/RS11 |
+| E7 | 5 | 05/RS7b |
 
 ## Row-by-row result
 
@@ -244,6 +248,36 @@ These figures are written without a unit the extractor recognises (for example a
 | Q7 | ₦1,004.2bn | 07/RS2 | metric_id=M-V01; dq_ref=DQ-07 | affected_value_ngn_bn | 1,004.2 | 1 | ok |
 | Q8 | 188 awards | 07/RS2 | metric_id=M-V01; dq_ref=DQ-20 | records_with_issue | 188 | 1 | ok |
 | Q8 | 1.7% | 07/RS2 | metric_id=M-V01; dq_ref=DQ-20 | value_pct_of_candidate | 1.7 | 1 | ok |
+| X1 | 45 awards | 03/RS11a | — | flagged_awards | 45 | 1 | ok |
+| X1 | 39 | 03/RS11a | — | dropped_decimal | 39 | 1 | ok |
+| X1 | 6 | 03/RS11a | — | sibling_lot | 6 | 1 | ok |
+| X1 | ₦509.5bn | 03/RS11a | — | flagged_value_ngn_bn | 509.5 | 1 | ok |
+| X1 | 15.5% | 03/RS11a | — | pct_of_m_v01_award_value | 15.5 | 1 | ok |
+| X1 | 31 entities | 03/RS11a | — | entities | 31 | 1 | ok |
+| S6 | 39 | 01/RS6 | scenario=2  without DQ-21 flagged awards | flagged_awards_in_m_s01 | 39 | 1 | ok |
+| S6 | 5.2% | 01/RS6 | scenario=2  without DQ-21 flagged awards | top_1_share_pct | 5.22 | 1 | ok |
+| S6 | ₦112.09bn | 01/RS6 | scenario=2  without DQ-21 flagged awards | largest_supplier_value_ngn_bn | 112.09 | 1 | ok |
+| S6 | 26.1% | 01/RS6 | scenario=2  without DQ-21 flagged awards | top_10_share_pct | 26.13 | 1 | ok |
+| S6 | 53.2% | 01/RS6 | scenario=2  without DQ-21 flagged awards | top_100_share_pct | 53.22 | 1 | ok |
+| S6 | 101.3 | 01/RS6 | scenario=2  without DQ-21 flagged awards | herfindahl_index_0_to_10000 | 101.3 | 1 | ok |
+| S6 | 55.3% | 01/RS6b | procurement_method=Emergency | top_1_share_pct_without_flagged | 55.3 | 1 | ok |
+| S6 | 3,197 | 01/RS6b | procurement_method=Emergency | herfindahl_without_flagged | 3,197 | 1 | ok |
+| B8 | 45 | 03/RS11 | scenario=2  without DQ-21 flagged awards | flagged_ocids_in_comparison | 45 | 1 | ok |
+| B8 | 186 processes | 03/RS11 | scenario=2  without DQ-21 flagged awards | ocids_above_10x | 186 | 1 | ok |
+| B8 | ₦1,030.9bn | 03/RS11 | scenario=2  without DQ-21 flagged awards | above_10x_award_ngn_bn | 1,030.9 | 1 | ok |
+| B8 | 39.9% | 03/RS11 | scenario=2  without DQ-21 flagged awards | above_10x_pct_of_award_value | 39.93 | 1 | ok |
+| B8 | 0.21 | 03/RS11 | scenario=2  without DQ-21 flagged awards | aggregate_award_to_budget_ratio | 0.208 | 1 | ok |
+| B8 | 0.93 | 03/RS11 | scenario=2  without DQ-21 flagged awards | median_ratio | 0.9285 | 1 | ok |
+| B8 | 87.7% | 03/RS11b | rank_in_band=1 | pct_of_band_value | 87.7 | 1 | ok |
+| B8 | 93 processes | 03/RS11b | rank_in_band=1 | ocids_above_10x | 93 | 1 | ok |
+| B8 | ₦904.1bn | 03/RS11b | rank_in_band=1 | award_ngn_bn | 904.1 | 1 | ok |
+| E7 | 47.1% | 05/RS7 | largest_entities=1 | pct_of_award_value_without_flagged | 47.1 | 1 | ok |
+| E7 | 76.2% | 05/RS7 | largest_entities=10 | pct_of_award_value_without_flagged | 76.2 | 1 | ok |
+| E7 | ₦470.1bn | 05/RS7b | rank_without=2 | award_value_published_ngn_bn | 470.1 | 1 | ok |
+| E7 | ₦257.8bn | 05/RS7b | rank_without=2 | award_value_without_flagged_ngn_bn | 257.8 | 1 | ok |
+| E7 | ₦86.2bn | 05/RS7b | rank_without=8 | award_value_published_ngn_bn | 86.2 | 1 | ok |
+| E7 | ₦32.4bn | 05/RS7b | rank_without=8 | award_value_without_flagged_ngn_bn | 32.4 | 1 | ok |
+| E7 | 5 | 05/RS7b | rank_without=8 | flagged_awards | 5 | 1 | ok |
 
 ---
 

@@ -27,11 +27,11 @@ Source acquisition (Phase 1) is documented in [`../data/README.md`](../data/READ
 
 | Document | Purpose |
 |---|---|
-| [`phase3_data_quality_decision_log.md`](phase3_data_quality/phase3_data_quality_decision_log.md) | Issues DQ-01 to DQ-20 and their treatment decisions |
+| [`phase3_data_quality_decision_log.md`](phase3_data_quality/phase3_data_quality_decision_log.md) | Issues DQ-01 to DQ-21 and their treatment decisions |
 | [`phase3_metric_eligibility.md`](phase3_data_quality/phase3_metric_eligibility.md) | Analytical grains and per-metric eligibility rules (v1.2) |
 | [`phase3_data_dictionary.md`](phase3_data_quality/phase3_data_dictionary.md) | Source field → business meaning → target column |
 | [`phase3_1_correction_log.md`](phase3_data_quality/phase3_1_correction_log.md) | Corrections C-01 to C-05 |
-| [`phase3_2_correction_log.md`](phase3_data_quality/phase3_2_correction_log.md) | Corrections C-06 to C-12 (budget-line grain, DQ-04 count, value semantics, artefact repair, DQ-19, DQ-20 test entity, release-date range) |
+| [`phase3_2_correction_log.md`](phase3_data_quality/phase3_2_correction_log.md) | Corrections C-06 to C-13 (budget-line grain, DQ-04 count, value semantics, artefact repair, DQ-19, DQ-20 test entity, release-date range, DQ-21 award scale flag) |
 
 ## Phase 4 — Relational Data Model
 
@@ -92,6 +92,8 @@ The ERD is in [`../diagrams/erd/`](../diagrams/erd/nocopo_erd.md) and the DDL is
 | [`claim_trace.md`](phase10_findings/claim_trace.md) | Gate D evidence: every figure in the findings mapped to its script, result set, row, column and value |
 | [`claim_trace_check_results.md`](phase10_findings/claim_trace_check_results.md) | Generated result of the automated claim-trace check |
 | [`source_verification.md`](phase10_findings/source_verification.md) | Generated raw-source evidence for the three open items, release dates and award-to-budget ratio clustering |
+| [`phase10_1_correction_pass.md`](phase10_findings/phase10_1_correction_pass.md) | Phase 10.1: C-12 release-date correction, DQ-21 award scale flag (rule, size, sensitivity, validation) |
+| [`phase10_validation_results.md`](phase10_findings/phase10_validation_results.md) | Generated Phase 10.1 results: DQ-21 flag checks (14 GATE + 3 INFO) |
 
 ## Generated Reports
 
@@ -112,6 +114,7 @@ script rather than editing them by hand.
 | `../dashboard/reconciliation_log.md` | `python/validation/06_generate_reconciliation_log.py` (not overwritten once signed) |
 | `phase10_findings/claim_trace_check_results.md` | `python/validation/07_check_findings_trace.py --live` |
 | `phase10_findings/source_verification.md` | `python/validation/08_verify_source_items.py` |
+| `phase10_findings/phase10_validation_results.md` | `python/validation/04_run_validation_suite.py --phase 10` |
 
 ⚠ `data_profiling_report.md` (§13) and `targeted_validation_report.md` (§5, C-12)
 contain manual correction notes. Re-running their scripts would overwrite those notes.

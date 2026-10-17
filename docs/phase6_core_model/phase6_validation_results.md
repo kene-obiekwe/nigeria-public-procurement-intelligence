@@ -1,7 +1,7 @@
 # Phase 6 — Gate B Validation Results
 
 > **Runner:** `python/validation/04_run_validation_suite.py --phase 6`  
-> **Run date:** 2026-10-08 18:37:42  
+> **Run date:** 2026-10-17 19:00:59  
 > **Database:** `nocopo_db` on localhost:5433 (PostgreSQL 17.4)  
 > **Gate B result:** **PASSED**. Stage 1 passed; 107 / 107 GATE checks passed; 17 INFO measurements.
 

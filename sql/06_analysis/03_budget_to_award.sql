@@ -237,3 +237,67 @@ SELECT count(*) FILTER (WHERE award_to_budget_ratio BETWEEN 900 AND 1100)       
              / nullif(count(*) FILTER (WHERE award_to_budget_ratio > 10), 0), 1)                AS ratio_900_to_1100_pct_of_above_10x,
        'a "budget recorded in thousands" pattern would put most of the above-10x OCIDs near 1,000; it does not' AS reading
 FROM analytics.vw_budget_award_comparison;
+
+-- ------------------------------------------------------------
+-- Phase 10.1 sensitivity (DQ-21, correction C-13). The result sets above are
+-- unchanged. The ones below repeat the headline measures without the awards in
+-- analytics.vw_award_scale_flag (POSSIBLE_SCALE_ERROR). Nothing is excluded from
+-- the comparison: "as published" remains the reported figure.
+-- ------------------------------------------------------------
+
+-- [RS11] Sensitivity (DQ-21): totals, ratios and the above-10x band, as published and without flagged awards
+WITH flagged AS MATERIALIZED (SELECT award_id FROM analytics.vw_award_scale_flag),
+base AS MATERIALIZED (
+    SELECT b.*, EXISTS (SELECT 1 FROM flagged f WHERE f.award_id = b.award_id) AS is_flagged
+    FROM analytics.vw_budget_award_comparison b
+),
+scenario AS (
+    SELECT '1  as published (RS1, RS3)' AS scenario, b.* FROM base b
+    UNION ALL
+    SELECT '2  without DQ-21 flagged awards', b.* FROM base b WHERE NOT b.is_flagged
+)
+SELECT scenario,
+       count(*)                                                                          AS comparable_ocids,
+       (SELECT count(*) FROM base WHERE is_flagged)                                      AS flagged_ocids_in_comparison,
+       round(sum(budget_amount) / 1e9, 1)                                                AS total_budget_ngn_bn,
+       round(sum(award_value_amount) / 1e9, 1)                                           AS total_award_ngn_bn,
+       round(sum(award_value_amount) / sum(budget_amount), 4)                            AS aggregate_award_to_budget_ratio,
+       round((percentile_cont(0.5) WITHIN GROUP (ORDER BY award_to_budget_ratio))::numeric, 4) AS median_ratio,
+       count(*) FILTER (WHERE award_to_budget_ratio > 10)                                AS ocids_above_10x,
+       round(sum(award_value_amount) FILTER (WHERE award_to_budget_ratio > 10) / 1e9, 1) AS above_10x_award_ngn_bn,
+       round(100.0 * sum(award_value_amount) FILTER (WHERE award_to_budget_ratio > 10)
+             / sum(award_value_amount), 2)                                               AS above_10x_pct_of_award_value
+FROM scenario
+GROUP BY scenario
+ORDER BY scenario;
+
+-- [RS11a] Footprint of the DQ-21 flag: awards flagged POSSIBLE_SCALE_ERROR, their value and where they sit
+WITH flagged AS MATERIALIZED (SELECT * FROM analytics.vw_award_scale_flag),
+mv01 AS MATERIALIZED (SELECT award_id, award_value_amount FROM analytics.vw_award_value_eligible)
+SELECT count(*)                                                                         AS flagged_awards,
+       count(*) FILTER (WHERE dropped_decimal_test)                                     AS dropped_decimal,
+       count(*) FILTER (WHERE sibling_lot_test)                                         AS sibling_lot,
+       round(sum(award_value_amount) / 1e9, 1)                                          AS flagged_value_ngn_bn,
+       round(100 * sum(award_value_amount) / (SELECT sum(award_value_amount) FROM mv01), 1) AS pct_of_m_v01_award_value,
+       count(*) FILTER (WHERE award_id IN (SELECT award_id FROM analytics.vw_budget_award_comparison)) AS in_budget_comparison,
+       count(DISTINCT buyer_id)                                                         AS entities
+FROM flagged;
+
+-- [RS11b] Sensitivity (DQ-21): the above-10x band by entity without flagged awards (compare RS9)
+WITH flagged AS MATERIALIZED (SELECT award_id FROM analytics.vw_award_scale_flag),
+band AS MATERIALIZED (
+    SELECT b.* FROM analytics.vw_budget_award_comparison b
+    WHERE b.award_to_budget_ratio > 10
+      AND NOT EXISTS (SELECT 1 FROM flagged f WHERE f.award_id = b.award_id)
+)
+SELECT rank() OVER (ORDER BY sum(award_value_amount) DESC)                              AS rank_in_band,
+       buyer_id, max(buyer_name)                                                        AS buyer_name,
+       count(*)                                                                         AS ocids_above_10x,
+       round(sum(award_value_amount) / 1e9, 1)                                          AS award_ngn_bn,
+       round(100.0 * sum(award_value_amount) / sum(sum(award_value_amount)) OVER (), 1) AS pct_of_band_value,
+       sum(count(*)) OVER ()                                                            AS band_ocids,
+       round(sum(sum(award_value_amount)) OVER () / 1e9, 1)                             AS band_award_ngn_bn
+FROM band
+GROUP BY buyer_id
+ORDER BY rank_in_band
+LIMIT 5;

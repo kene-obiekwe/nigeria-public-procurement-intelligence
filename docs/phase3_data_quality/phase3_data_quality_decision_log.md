@@ -423,6 +423,25 @@ RETAIN + FLAG + EXCLUDE_FROM_METRIC for a given metric.
 
 ---
 
+## Issue DQ-21 - Award Magnitude Inconsistent with Its Own Process Record (Possible Scale Error)
+
+| Attribute | Detail |
+|-----------|--------|
+| **Issue ID** | DQ-21 |
+| **Data field / entity** | awards[].value.amount, compared with planning.budget.amount of the same OCID and with the same supplier's other awards from the same buyer |
+| **Observed problem** | Some award amounts are out of scale with their own process record in a way that matches an entry error: (a) a whole-naira award that is 50 to 200 times its budget line, so that the award divided by 100 lands near the budget (a two-decimal amount entered without its decimal point; one award is exactly 100 times its budget); (b) an award at least 500 times the same supplier's largest other award from the same buyer (for example a drainage lot at about 986 times the same supplier's similar lot). These awards sit below the DQ-07 EXTREME threshold, so no earlier rule flags them. |
+| **Evidence** | Raw-source checks: `docs/phase10_findings/source_verification.md` §A, §C and §E (`python/validation/08_verify_source_items.py`). Ratios near 100 are more frequent than ratios near 1,000 (29 against 9 comparable OCIDs), and the Phase 8 unit test (script 03 RS10) covered only the latter. Flag implemented in `analytics.vw_award_scale_flag` (`sql/05_views/11_award_scale_flag.sql`); 45 M-V01 awards flagged (39 dropped-decimal, 6 sibling-lot), NGN 509.5bn, 15.5% of M-V01 award value (script 03 RS11a). Validation: `sql/03_data_quality/12_award_scale_flag_checks.sql` (SF-01 to SF-17). |
+| **Severity** | High for value totals and concentration (15.5% of eligible award value); none for counts, medians or timing |
+| **Treatment** | RETAIN + FLAG + sensitivity result sets. **Not EXCLUDE_FROM_METRIC**: every metric keeps the awards as published. |
+| **Retained?** | Yes. Nothing is deleted or corrected; the published amounts stay in every view and metric. |
+| **Flagged?** | Yes - `scale_flag = POSSIBLE_SCALE_ERROR` with `flag_reason` DROPPED_DECIMAL / SIBLING_LOT, in the separate view `analytics.vw_award_scale_flag`. No existing view reads it. |
+| **Excluded from which metrics?** | None. Scripts 01 (RS6, RS6b), 03 (RS11, RS11a, RS11b) and 05 (RS7, RS7b) report the headline measures with and without the flagged awards. |
+| **Reason** | The tests show inconsistency inside a process record, not that the amount is wrong. Outliers are not removed by rule (Data-Quality Plan outlier rules), and a corrected amount cannot be known from the data. Sensitivity results show how far each headline depends on these records. |
+| **Known limitation** | The tests need a comparator. An award with no budget line and no usable supplier ID (for example the FMC Taraba award in `source_verification.md` §B) cannot be tested and stays unresolved. A flagged award may be correct, and an unflagged award may still carry an entry error. |
+| **Approved by** | Project owner, 2026-10-17 (correction C-13; rule A, FLAG + sensitivity only) |
+
+---
+
 ## Summary Matrix
 
 | Issue ID | Entity | Severity | RETAIN | FLAG | EXCLUDE_FROM_METRIC | DEFER | UNRESOLVED |
@@ -447,6 +466,7 @@ RETAIN + FLAG + EXCLUDE_FROM_METRIC for a given metric.
 | DQ-18 | No parties array (20 records) | Low | Yes | Yes | Yes | - | - |
 | DQ-19 | Bare NG-BPP- buyer ID (26 releases) | Low | Yes | Yes | Yes (entity-level) | - | - |
 | DQ-20 | Portal test entity NG-BPP-BPP-NOC-90 (427 releases) | Medium | Yes | Yes | Yes (all metrics) | - | - |
+| DQ-21 | Possible award scale error (45 awards; sensitivity only) | High | Yes | Yes | - (sensitivity result sets) | - | - |
 
 ---
 
@@ -466,10 +486,12 @@ columns are not yet created.
 | party_flag | release level | NULL (normal) / NO_PARTIES | Absence of parties array |
 | buyer_id_flag | core.dim_buyer (added via C-10) | NULL (normal) / INCOMPLETE | Bare NG-BPP- buyer ID (DQ-19) |
 | test_entity_flag | core.dim_buyer (added via C-11) | NULL (normal) / TEST_ENTITY | Portal test entity (DQ-20) |
+| scale_flag, flag_reason | analytics.vw_award_scale_flag (added via C-13; flagged rows only) | POSSIBLE_SCALE_ERROR; DROPPED_DECIMAL / SIBLING_LOT | Award amount inconsistent with its own process record (DQ-21) |
 
 ---
 
-*Document version: 1.5 - 2026-10-17. DQ-10 observed problem corrected (C-12); the DQ-10 rule is unchanged.*
+*Document version: 1.6 - 2026-10-17. DQ-21 added (C-13).*
+*Version 1.5 - 2026-10-17. DQ-10 observed problem corrected (C-12); the DQ-10 rule is unchanged.*
 *Version 1.4 - 2026-10-08. DQ-20 added (C-11).*
 *Version 1.3 - 2026-10-07. DQ-19 added (C-10).*
 *Version 1.2 - 2026-10-07. Phase 3.2 corrections C-07 (DQ-04 count) and C-09 (field-name artefact repair) applied.*

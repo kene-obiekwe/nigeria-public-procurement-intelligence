@@ -201,3 +201,72 @@ SELECT value_quartile,
 FROM tiered t, params p
 GROUP BY value_quartile
 ORDER BY value_quartile;
+
+-- ------------------------------------------------------------
+-- Phase 10.1 sensitivity (DQ-21, correction C-13). The result sets above are
+-- unchanged. The ones below recompute entity award value without the awards in
+-- analytics.vw_award_scale_flag (POSSIBLE_SCALE_ERROR), from the same M-V01
+-- awards that feed vw_entity_benchmark (complete buyer IDs only). Nothing is
+-- excluded from the benchmark: "as published" remains the reported figure.
+-- ------------------------------------------------------------
+
+-- [RS7] Sensitivity (DQ-21): share of award value held by the largest entities, as published and without flagged awards
+WITH flagged AS MATERIALIZED (SELECT award_id FROM analytics.vw_award_scale_flag),
+base AS MATERIALIZED (
+    SELECT a.buyer_id, a.award_value_amount,
+           EXISTS (SELECT 1 FROM flagged f WHERE f.award_id = a.award_id) AS is_flagged
+    FROM analytics.vw_award_value_eligible a
+    WHERE a.buyer_id_flag IS NULL
+),
+entity AS (
+    SELECT buyer_id,
+           sum(award_value_amount)                                            AS value_published,
+           coalesce(sum(award_value_amount) FILTER (WHERE NOT is_flagged), 0) AS value_without
+    FROM base
+    GROUP BY buyer_id
+),
+ranked AS (
+    SELECT value_published, value_without,
+           row_number() OVER (ORDER BY value_published DESC, buyer_id) AS rank_published,
+           row_number() OVER (ORDER BY value_without DESC, buyer_id)   AS rank_without
+    FROM entity
+)
+SELECT g.top_n                                                                                              AS largest_entities,
+       round(100.0 * sum(value_published) FILTER (WHERE rank_published <= g.top_n) / sum(value_published), 1) AS pct_of_award_value_published,
+       round(100.0 * sum(value_without) FILTER (WHERE rank_without <= g.top_n) / sum(value_without), 1)       AS pct_of_award_value_without_flagged,
+       round(sum(value_published) / 1e9, 1)                                                                 AS total_award_value_published_ngn_bn,
+       round(sum(value_without) / 1e9, 1)                                                                   AS total_award_value_without_flagged_ngn_bn
+FROM ranked
+CROSS JOIN (VALUES (1), (5), (10), (20), (50), (100)) AS g(top_n)
+GROUP BY g.top_n
+ORDER BY g.top_n;
+
+-- [RS7b] Sensitivity (DQ-21): the 10 largest entities by award value without flagged awards, with their published rank
+WITH flagged AS MATERIALIZED (SELECT award_id FROM analytics.vw_award_scale_flag),
+base AS MATERIALIZED (
+    SELECT a.buyer_id, a.buyer_name, a.award_value_amount,
+           EXISTS (SELECT 1 FROM flagged f WHERE f.award_id = a.award_id) AS is_flagged
+    FROM analytics.vw_award_value_eligible a
+    WHERE a.buyer_id_flag IS NULL
+),
+entity AS (
+    SELECT buyer_id, max(buyer_name) AS buyer_name,
+           sum(award_value_amount)                                            AS value_published,
+           coalesce(sum(award_value_amount) FILTER (WHERE NOT is_flagged), 0) AS value_without,
+           count(*) FILTER (WHERE is_flagged)                                 AS flagged_awards
+    FROM base
+    GROUP BY buyer_id
+),
+ranked AS (
+    SELECT *,
+           row_number() OVER (ORDER BY value_published DESC, buyer_id) AS rank_published,
+           row_number() OVER (ORDER BY value_without DESC, buyer_id)   AS rank_without
+    FROM entity
+)
+SELECT rank_without, rank_published, buyer_id, buyer_name,
+       round(value_published / 1e9, 1) AS award_value_published_ngn_bn,
+       flagged_awards,
+       round(value_without / 1e9, 1)   AS award_value_without_flagged_ngn_bn
+FROM ranked
+WHERE rank_without <= 10
+ORDER BY rank_without;
