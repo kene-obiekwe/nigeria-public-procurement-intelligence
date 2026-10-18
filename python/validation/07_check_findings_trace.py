@@ -63,7 +63,7 @@ REC_SQL = os.path.join(ROOT, "dashboard", "reconciliation_expected_values.sql")
 OUTPUT = os.path.join(ROOT, "docs", "phase10_findings", "claim_trace_check_results.md")
 
 ALSO_CHECKED = ["README.md", "docs/business_requirements.md", "docs/methodology.md",
-                "docs/data_dictionary.md", "docs/assumptions_and_limitations.md"]
+                "docs/data_dictionary.md", "docs/assumptions_and_limitations.md", "docs/phase12_qa/qa_checklist.md"]
 DISCLAIMER_HEADING = "About this report"
 PROHIBITED = re.compile(r"fraud|corrupt|collu|misconduct|kickback", re.I)
 TAG = re.compile(r"\[([A-Z]\d+)\]")

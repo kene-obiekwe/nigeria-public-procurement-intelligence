@@ -114,6 +114,13 @@ The ERD is in [`../diagrams/erd/`](../diagrams/erd/nocopo_erd.md) and the DDL is
 | [`../diagrams/architecture/README.md`](../diagrams/architecture/README.md) | Architecture and gate diagrams (Mermaid) |
 | [`../README.md`](../README.md) | Entry point for readers: summary, key findings, dashboard, reproduction steps |
 
+## Phase 12 — Final QA
+
+| Document | Purpose |
+|---|---|
+| [`qa_checklist.md`](phase12_qa/qa_checklist.md) | Clean-rebuild results, dashboard re-confirmation, business-question walkthrough, anti-pattern and non-goal review, Definition of Success, outstanding-items register |
+| [`signoff_note.md`](phase12_qa/signoff_note.md) | What was delivered, gate results, limitations, open items, proposed release tag |
+
 ## Generated Reports
 
 The following files are written by scripts. Regenerate them by running the

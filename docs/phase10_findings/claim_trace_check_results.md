@@ -1,7 +1,7 @@
 # Findings Claim-Trace Check (Gate D)
 # Nigeria Public Procurement Intelligence
 
-> **Generated:** 2026-10-17 21:44 by `python/validation/07_check_findings_trace.py` --live  
+> **Generated:** 2026-10-18 09:53 by `python/validation/07_check_findings_trace.py` --live  
 > **Checks:** `docs/phase10_findings/findings.md` against `docs/phase10_findings/claim_trace.md`, `docs/phase8_analysis/phase8_analysis_results.md` and the reconciliation pack  
 > **Result:** PASS
 
@@ -13,8 +13,8 @@
 | Figures without a matching claim-trace row | 0 |
 | Claim-trace rows whose figure is not extracted from the findings text (verified, but not auto-located) | 16 |
 | Prohibited terms outside the disclaimer section | 0 |
-| Tagged figures in the README and portfolio documents (5 files) matched to claim-trace rows | 42 of 42 |
-| Reconciliation pack re-run against the database | run 2026-10-17 21:44: 177 figures returned; 8 cited figures compared, 0 mismatches |
+| Tagged figures in the README and portfolio documents (6 files) matched to claim-trace rows | 69 of 69 |
+| Reconciliation pack re-run against the database | run 2026-10-18 09:53: 177 figures returned; 8 cited figures compared, 0 mismatches |
 
 ## Rows verified but not auto-located in the text
 

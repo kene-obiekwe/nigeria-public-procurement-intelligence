@@ -11,7 +11,7 @@ to a validated SQL output.**
 > validated views through a read-only role, and the executive findings are checked figure by figure against the SQL
 > that produced them. One command rebuilds and re-validates everything from the raw file.
 >
-> **Status:** Phases 0–10.1 complete (Gate D signed off); Phase 11 packaging in progress; release tag after Phase 12 QA.
+> **Status:** Phases 0–12 complete; final QA passed on a clean rebuild on 2026-10-18 ([QA checklist](docs/phase12_qa/qa_checklist.md)); sign-off and release tag `v1.0` pending owner approval.
 
 **Read first:** [executive findings](docs/phase10_findings/findings.md) ·
 [dashboard screenshots](dashboard/screenshots/README.md) · [methodology](docs/methodology.md) ·
