@@ -130,7 +130,7 @@ Phase 11B (2026-10-18) changed text and layout only: the footer and sidebar sour
 
 | Item | Detail |
 |---|---|
-| Template on a second computer | `dashboard/NOCOPO_Dashboard.pbit` was exported from the finished report. Opening it on another computer, signing in as `nocopo_bi` and refreshing has not been tested |
+| Template on a second computer | Passed on 2026-10-18 (separate Windows user account, no saved credentials); see `dashboard/USAGE.md` |
 | Header wrap, page 5 | Resolved in Phase 11B: the Implementation coverage column was widened and the screenshot retaken |
 
 ---

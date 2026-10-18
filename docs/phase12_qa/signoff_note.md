@@ -2,7 +2,7 @@
 # Nigeria Public Procurement Intelligence
 
 > **Date:** 2026-10-18 · **Phase:** 12 — Final QA · **QA result:** pass ([`qa_checklist.md`](qa_checklist.md))
-> **Sign-off:** pending the project owner's approval of this note and of the release tag (§5).
+> **Sign-off:** approved by the project owner on 2026-10-18, including the release tag (§5).
 
 ## 1. What was delivered
 
@@ -40,18 +40,18 @@ errors and shown with and without them; and nothing in the project establishes c
 
 ## 4. Open items
 
-Sixteen items are registered in [`qa_checklist.md`](qa_checklist.md) §8. None blocks sign-off. The ones needing the
-owner: confirm the `.pbit` on a second machine (OI-09), decide on the unused `pandas` / `SQLAlchemy` dependencies
-(OI-10), and approve the release tag (OI-15). Record-level confirmation of the flagged and unresolved awards
+Sixteen items are registered in [`qa_checklist.md`](qa_checklist.md) §8. None blocks sign-off. Resolved on 2026-10-18: the `.pbit` was confirmed on a
+second machine (OI-09), the unused `pandas` / `SQLAlchemy` dependencies were removed (OI-10), and the release tag was approved
+(OI-15). Record-level confirmation of the flagged and unresolved awards
 (OI-01 to OI-03) needs the published award notices.
 
 Possible technical extensions, outside this project: automated runs of the pipeline and checks in CI against a
 containerised PostgreSQL; scheduled ingestion of newer portal exports with versioned snapshots; an auditable
 canonical supplier mapping; and DQ-21 sensitivity in the data-quality impact view and the dashboard.
 
-## 5. Proposed release tag (not created)
+## 5. Release tag
 
-Annotated tag `v1.0` on the commit that adds this note, created and pushed only after the owner approves:
+Annotated tag `v1.0`, approved by the owner on 2026-10-18 and created on the release commit with this message:
 
 ```text
 v1.0 — Nigeria Public Procurement Intelligence

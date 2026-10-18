@@ -48,7 +48,7 @@ To open the template:
    support SSL, untick *Encrypt connections* (local server).
 4. Power BI imports the data. The row counts should match `README.md` §4.1. Then save the result as a `.pbix`.
 
-The template was exported from the finished report. Opening it on a second computer has not been tested.
+The template was exported from the finished report. On 2026-10-18 it was opened under a separate Windows user account with no saved credentials (test passed).
 
 ## 3. Reading the report
 

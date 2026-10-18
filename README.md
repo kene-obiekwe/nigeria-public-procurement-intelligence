@@ -197,7 +197,7 @@ reproducible only from the pinned file. Details: [`data/README.md`](data/README.
 ## Tech stack
 
 PostgreSQL 17 (CTEs, window functions, materialised views, generated columns, role-based access) · Python 3.12
-(standard library, psycopg 3, pandas) · Power BI Desktop · Mermaid · Git and GitHub.
+(standard library, psycopg 3) · Power BI Desktop · Mermaid · Git and GitHub.
 
 ---
 

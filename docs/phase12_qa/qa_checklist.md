@@ -99,7 +99,7 @@ page serves one of the seven questions).
 | No orchestration for a one-time dataset | Met | One-command script (`run_pipeline.py`), no scheduler |
 | No containers before the local workflow is stable | Met | None used |
 | No machine learning | Met | None used |
-| Every tool has a clear role | **Minor finding** | `pandas` and `SQLAlchemy` are listed in `requirements.txt`, and pandas in the README tech stack, but no script imports either (item OI-10). They are unused, not misused. |
+| Every tool has a clear role | Met | `pandas` and `SQLAlchemy` were unused and were removed from `requirements.txt` and the README tech stack (item OI-10, resolved 2026-10-18); every remaining dependency (`psycopg`) is imported by a script |
 
 ---
 
@@ -151,13 +151,13 @@ page serves one of the seven questions).
 | OI-06 | DQ-13 / DQ-15 canonical supplier mapping | Deferred; concentration reported as a lower bound | Future work | Would need an approved, auditable mapping |
 | OI-07 | DQ-17 identifier scheme uniformity | Deferred; no record-level footprint | — | — |
 | OI-08 | Phase 7 suite planner setting (`enable_nestloop = off`) | Accepted workaround (owner decision, Phase 11); results identical | Owner | Optional: an index-friendly restructuring of the Phase 7 recounts, with approval |
-| OI-09 | `.pbit` opened on a second machine | Not yet done | Owner (Kene) | Open the template on another machine, confirm it prompts for credentials and loads after the pipeline build; record the result in `dashboard/USAGE.md` |
-| OI-10 | Unused dependencies: `pandas`, `SQLAlchemy` in `requirements.txt`; pandas named in the README tech stack | QA finding (low) | Owner | Decide: remove both from `requirements.txt` and the README, or keep for later stages |
+| OI-09 | `.pbit` opened on a second machine | **Passed** (2026-10-18) | Owner (Kene) | None. The template was opened under a separate Windows user account with no saved credentials; recorded in `dashboard/USAGE.md` |
+| OI-10 | Unused dependencies: `pandas`, `SQLAlchemy` in `requirements.txt`; pandas named in the README tech stack | **Resolved** (2026-10-18) | Owner | Removed from `requirements.txt` and the README; `09_check_links.py` and `07_check_findings_trace.py` pass on an environment built from the slimmer file |
 | OI-11 | DQ-21 not in `vw_dq_impact`, script 07 or the dashboard | By design (existing views unchanged) | — | Optional future extension |
 | OI-12 | No shared date dimension (P-10) | Accepted limitation (L-06) | — | — |
 | OI-13 | Optional CI (GitHub Actions) | Not implemented; optional in the architecture | Future work | Could run `run_pipeline.py` against a containerised PostgreSQL |
 | OI-14 | `dashboard/screenshots/.gitkeep` in a non-empty folder | Cosmetic | Owner | Remove in a later dashboard commit |
-| OI-15 | Release tag `v1.0` | Proposed, not created | Owner (Kene) | Approve the tag in [`signoff_note.md`](signoff_note.md) §5 |
+| OI-15 | Release tag `v1.0` | **Approved and created** (2026-10-18) | Owner (Kene) | None; see [`signoff_note.md`](signoff_note.md) §5 |
 | OI-16 | Portfolio-stage positioning (Implementation Plan Phase 12) | Closed: intentionally omitted (owner decision) | — | — |
 
 ---
