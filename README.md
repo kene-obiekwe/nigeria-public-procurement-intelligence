@@ -3,7 +3,7 @@
 **An audited PostgreSQL analytics build over Nigeria's open contracting data, where every published figure traces
 to a validated SQL output.**
 
-> **In 30 seconds.** The Nigeria Open Contracting Portal (NOCOPO) publishes procurement records as a 210 MB nested
+> The Nigeria Open Contracting Portal (NOCOPO) publishes procurement records as a 210 MB nested
 > OCDS JSON file. This project audits that file before modelling it, loads it into a staged PostgreSQL model
 > (`stg` → `core` → `analytics`), and answers seven business questions on supplier concentration, competition,
 > budget against award, cycle timing, entity benchmarking, implementation reporting and data-quality impact.
@@ -11,7 +11,6 @@ to a validated SQL output.**
 > validated views through a read-only role, and the executive findings are checked figure by figure against the SQL
 > that produced them. One command rebuilds and re-validates everything from the raw file.
 >
-> **Status:** Phases 0–12 complete; final QA passed on a clean rebuild on 2026-10-18 ([QA checklist](docs/phase12_qa/qa_checklist.md)); sign-off and release tag `v1.0` pending owner approval.
 
 **Read first:** [executive findings](docs/phase10_findings/findings.md) ·
 [dashboard screenshots](dashboard/screenshots/README.md) · [methodology](docs/methodology.md) ·
