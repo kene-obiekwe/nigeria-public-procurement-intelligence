@@ -12,7 +12,7 @@ An 8-page report over the validated `analytics.*` views of the NOCOPO database. 
 scope. Every figure is calculated in PostgreSQL views or in a DAX measure that only aggregates (sum, count, median, rate); no
 eligibility or data-quality exclusion is re-decided in Power BI. Every figure is shown with the number of records it is based on.
 
-The report describes what was published to the Nigeria Open Contracting Portal (source file published 2021-05-03). It shows patterns
+The report describes what was published to the Nigeria Open Contracting Portal (NOCOPO OCDS export; package metadata dated 2021-05-03, releases dated to 2026-07-29; SHA-256 `6151466…bc90c`). It shows patterns
 in reported data, not findings about conduct.
 
 | Page | Question it answers |

@@ -126,10 +126,12 @@ Then follow `dashboard/README.md` to build the report and complete the log (`das
 
 ### Items left for Phase 12 (final QA)
 
+Phase 11B (2026-10-18) changed text and layout only: the footer and sidebar source line now follow correction C-12 (package metadata dated 2021-05-03, releases dated to 2026-07-29, SHA-256 `6151466…bc90c`), and the page 5 header no longer wraps. The reconciliation was re-run on the changed report: 177 figures, values identical to the signed run.
+
 | Item | Detail |
 |---|---|
 | Template on a second computer | `dashboard/NOCOPO_Dashboard.pbit` was exported from the finished report. Opening it on another computer, signing in as `nocopo_bi` and refreshing has not been tested |
-| Header wrap, page 5 | In the entity KPI table the header "Implementation coverage" breaks mid-word in the screenshot (`05_entity_benchmark.png`). Cosmetic; fixing it means widening that column, re-exporting and re-capturing the screenshot |
+| Header wrap, page 5 | Resolved in Phase 11B: the Implementation coverage column was widened and the screenshot retaken |
 
 ---
 

@@ -76,7 +76,7 @@
 - The whole layer is about 300,000 rows across 15 tables (a few tens of MB compressed). Import is small and fast.
 - Medians, percentiles and `TOPN` are the core measures. They are complete and fast in the Import engine and
   restricted or slow over DirectQuery.
-- The analysis is pinned to one source file (SHA-256 `6151466…bc90c`, published 2021-05-03). The data change
+- The analysis is pinned to one source file (SHA-256 `6151466…bc90c`; package metadata dated 2021-05-03, releases dated to 2026-07-29). The data change
   only when the database is rebuilt, so a stored snapshot is the right shape: the dashboard shows exactly what
   was validated, and it never queries a half-rebuilt database.
 - A local PostgreSQL needs a gateway for the Power BI service; Import with a `.pbix` shared as a file avoids that.
@@ -625,7 +625,7 @@ between recorded figures, requires further validation*. Do not use red/green tra
 
 | Where | Text |
 |---|---|
-| Every page, footer | "Figures describe what was published to the Nigeria Open Contracting Portal (source file published 2021-05-03). They show patterns in reported data, not findings about conduct." |
+| Every page, footer | "Figures describe what was published to the Nigeria Open Contracting Portal (NOCOPO OCDS export; package metadata dated 2021-05-03, releases dated to 2026-07-29; SHA-256 6151466…bc90c). They show patterns in reported data, not findings about conduct." |
 | Pages 1 and 2, supplier visuals | `[M-S01 Disclosure]` (dynamic). Also: "Supplier concentration is a lower bound. Suppliers are identified by source ID and are not merged on name similarity." |
 | Page 2, competition | "Number of tenderers as recorded; the meaning (bids received or expressions of interest) is unconfirmed. A single bidder is a count pattern, not evidence of impropriety. Direct Procurement, Sole Source and Repeat Procurement are single-supplier by design, so compare like with like." |
 | Page 3 | "A budget is a plan, not a contract estimate or spend. A ratio above or below 1 is a difference between two recorded figures, not an overrun or a saving. Budgets under NGN 100,000 look like placeholder entries and are kept; extreme ratios come from them." |
