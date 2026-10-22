@@ -1,0 +1,115 @@
+{
+ "generated_at": "2026-10-22T10:48:41Z",
+ "generator": "python/web/export_web_data.py",
+ "source_sha256": "615146696f51d18f72c12c0152888280c12f280981096aae8408843e7d1bc90c",
+ "database": "nocopo_db",
+ "server_version": "17.4",
+ "role": "nocopo_bi",
+ "read_only": "on",
+ "view_row_counts": {
+  "vw_dim_buyer": 665,
+  "vw_dim_procurement_method": 11,
+  "vw_lifecycle_stage": 98454,
+  "vw_budget_eligible": 96802,
+  "vw_competition_eligible": 17266,
+  "vw_award_value_eligible": 15763,
+  "vw_supplier_award_eligible": 13537,
+  "vw_award_scale_flag": 45,
+  "vw_budget_award_comparison": 15574,
+  "vw_tender_duration_eligible": 9040,
+  "vw_award_lag_eligible": 7462,
+  "vw_signature_lag_eligible": 12006,
+  "vw_contract_implementation_coverage": 16221,
+  "vw_entity_benchmark": 665,
+  "vw_metric_population": 12,
+  "vw_dq_impact": 47
+ },
+ "files": {
+  "dims.json": {
+   "rows": 676,
+   "bytes": 80506,
+   "gzip_bytes": 14124,
+   "sha256": "275145f434ae153fd1c5781d31dc8a099f886afe63d16479ffdce5f89d3f4712"
+  },
+  "lifecycle.json": {
+   "rows": 98454,
+   "bytes": 10689,
+   "gzip_bytes": 3327,
+   "sha256": "b1b2ee056c9ffbc4a6963099dbbcae901d06610ca21c1ca8d7d5b6ea2cfc8dc3"
+  },
+  "budget.json": {
+   "rows": 96802,
+   "bytes": 13339,
+   "gzip_bytes": 6453,
+   "sha256": "c46d83063c24e1805b89a55b1b407803f71cccddae6cbbc71868b80e03974f35"
+  },
+  "suppliers.json": {
+   "rows": 9800,
+   "bytes": 514920,
+   "gzip_bytes": 129748,
+   "sha256": "f70fc87ae0eb77496de1175e203b1ca60046d81c24929b1e06929ba0c0926bb4"
+  },
+  "competition.json": {
+   "rows": 17266,
+   "bytes": 239254,
+   "gzip_bytes": 15248,
+   "sha256": "aceab909b2c01403dac92a11f36c27bdc4017a3ab8939c2cfb7e923455c0ca91"
+  },
+  "awards.json": {
+   "rows": 15763,
+   "bytes": 369065,
+   "gzip_bytes": 110430,
+   "sha256": "298cfd353a06e33b6dbd8142f9874a9e1e5fd13cbcf5ccb394cf316c6bed3715"
+  },
+  "budget_award.json": {
+   "rows": 15574,
+   "bytes": 570420,
+   "gzip_bytes": 139575,
+   "sha256": "5680122c07ed3bb58d2a29888f304f146eee8ce25b93b69ff6eac50f049aadc6"
+  },
+  "tender_duration.json": {
+   "rows": 9040,
+   "bytes": 123774,
+   "gzip_bytes": 8685,
+   "sha256": "62cec44b17eb6250e8179938d4f3c3fbe20078a6304bcd4db6358e947ad1c310"
+  },
+  "award_lag.json": {
+   "rows": 7462,
+   "bytes": 106181,
+   "gzip_bytes": 9700,
+   "sha256": "9dc45381ca2ddd671549820d2e6780e3d6c9d2bd839d3dcc04127d2934304e20"
+  },
+  "signature_lag.json": {
+   "rows": 12006,
+   "bytes": 75152,
+   "gzip_bytes": 13250,
+   "sha256": "bdfb20b8683db495d44fc95695f4d6eccf3403be8d4a3d41d83117ea7c007127"
+  },
+  "contracts.json": {
+   "rows": 16221,
+   "bytes": 6058,
+   "gzip_bytes": 1482,
+   "sha256": "67d494826ef5d989f78e4d2de4c6c50d3ba290fc6513ad69eef2335ebb1bdea8"
+  },
+  "entities.json": {
+   "rows": 665,
+   "bytes": 56972,
+   "gzip_bytes": 17152,
+   "sha256": "8392cb729e559de31954d2356086e04e010a041ffe0e29718b5ef415b77a7d69"
+  },
+  "registers.json": {
+   "rows": 59,
+   "bytes": 14575,
+   "gzip_bytes": 3102,
+   "sha256": "9468d5ae288b4d0d75576bc551c652df0099ebb39a00930ac04582678245d270"
+  },
+  "expected.json": {
+   "rows": 177,
+   "bytes": 41144,
+   "gzip_bytes": 6739,
+   "sha256": "7567a9078e358092eead10b053e388c06238a32f874abfdef147746fefc6ba82"
+  }
+ },
+ "total_bytes": 2222049,
+ "total_gzip_bytes": 479015
+}
