@@ -1,7 +1,8 @@
 # Web Dashboard
 # Nigeria Public Procurement Intelligence
 
-> **Phase:** 13 (release v1.1) · **Date:** 2026-10-22 · **Status:** built and verified locally; not yet deployed
+> **Phase:** 13 (release v1.1) · **Date:** 2026-10-22 · **Status:** deployed and verified live
+> **Live:** <https://nocopo-dashboard.vercel.app> · **Live check:** <https://nocopo-dashboard.vercel.app/check.html>
 > **Code:** [`web/`](../../web/) · **Data export and check:** [`python/web/`](../../python/web/) ·
 > **Design and decisions:** [`web_design_note.md`](web_design_note.md) · **Check results:** [`web_reconciliation_results.md`](web_reconciliation_results.md)
 
@@ -101,7 +102,17 @@ server already enforces it; the other headers in `web/vercel.json` apply only on
 
 ## 6. Deploying and redeploying (Vercel)
 
-The site is deployed from GitHub, with `web/` as the project root and no build step. First deployment:
+The site is deployed from GitHub, with `web/` as the project root and no build step. It is live at <https://nocopo-dashboard.vercel.app>.
+
+Deployment facts (as configured):
+
+- **Root directory:** `web`, set under **Settings → Build and Deployment**.
+- **Framework preset:** Other.
+- **Build Command** and **Install Command:** overridden, and both left empty.
+- **Output Directory:** left as it is (the root directory is served as is).
+- **If `web` is missing from the folder picker:** the import screen's picker can show a stale repository tree. Type `web` into the Root Directory field under **Settings → Build and Deployment** instead.
+
+First deployment:
 
 1. Push the repository to GitHub, so that `web/` is on the `main` branch.
 2. Go to <https://vercel.com>, choose **Sign Up** (or **Log In**) and then **Continue with GitHub**. When GitHub asks
@@ -122,7 +133,7 @@ The site is deployed from GitHub, with `web/` as the project root and no build s
    page under **Domains**), in the form `https://<project-name>.vercel.app`.
 7. Open the address and then `/check.html`: it must show "PASS: figures 177/177 …". In the browser's developer tools
    (Network, the document request) the response should carry the `Content-Security-Policy` header from `vercel.json`.
-8. Replace the placeholder after "Live dashboard" in the repository [`README.md`](../../README.md) with the address and commit.
+8. Put the address after "Live dashboard" in the repository [`README.md`](../../README.md) and commit (done: see above).
 
 Redeploying: every push to `main` deploys again automatically, so a data refresh is: rebuild the database,
 re-export (section 3), check, commit `web/data/` and push. Pushes to other branches create preview deployments only.

@@ -1,7 +1,7 @@
 # Web Dashboard Reconciliation Results
 # Nigeria Public Procurement Intelligence
 
-> **Generated:** 2026-10-22 12:57 by `python/web/check_web_data.py` (role `nocopo_bi`, read-only)  
+> **Generated:** 2026-10-22 13:36 by `python/web/check_web_data.py` (role `nocopo_bi`, read-only)  
 > **Data:** `web/data/` exported 2026-10-22T10:48:41Z by role `nocopo_bi` from `nocopo_db` (PostgreSQL 17.4); source SHA-256 `6151466…bc90c`  
 > **Result:** PASS: manifest verified; reconciliation 177/177 PASS; DQ-21 sensitivity 277/277 cells PASS; wording 0 finding(s)
 

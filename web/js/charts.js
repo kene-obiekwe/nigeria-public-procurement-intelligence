@@ -50,7 +50,8 @@ export function hbar(el, label, categories, values, fmt, { max = null, tooltip =
   const narrow = el.clientWidth < 520;
   return chart(el, (t) => ({
     grid: { left: 8, right: 64, top: 8, bottom: 24, containLabel: true },
-    xAxis: { type: 'value', max, ...axisCommon(t), axisLabel: { color: t.text, formatter: (v) => fmt(v, true) } },
+    xAxis: { type: 'value', max, ...axisCommon(t), splitNumber: narrow ? 2 : 5,
+      axisLabel: { color: t.text, formatter: (v) => fmt(v, true), hideOverlap: true } },
     yAxis: { type: 'category', inverse: true, data: categories, ...axisCommon(t),
       axisLabel: { color: t.text, width: narrow ? 130 : 260, overflow: 'truncate' } },
     tooltip: { trigger: 'item', renderMode: 'richText', backgroundColor: t.surface, borderColor: t.grid, textStyle: { color: t.fg },
@@ -67,7 +68,8 @@ export function columns(el, label, categories, values, fmt, { tooltip = null } =
     grid: { left: 8, right: 8, top: 24, bottom: 8, containLabel: true },
     xAxis: { type: 'category', data: categories, ...axisCommon(t),
       axisLabel: { color: t.text, interval: 0, width: slot, overflow: 'break', fontSize: 11, lineHeight: 13 } },
-    yAxis: { type: 'value', ...axisCommon(t), axisLabel: { color: t.text, formatter: (v) => fmt(v, true) } },
+    yAxis: { type: 'value', ...axisCommon(t), splitNumber: el.clientWidth < 520 ? 3 : 5,
+      axisLabel: { color: t.text, formatter: (v) => fmt(v, true), hideOverlap: true } },
     tooltip: { trigger: 'item', renderMode: 'richText', backgroundColor: t.surface, borderColor: t.grid, textStyle: { color: t.fg },
       formatter: (p) => tooltip ? tooltip(p.dataIndex) : `${p.name}\n${fmt(p.value)}` },
     series: [{ type: 'bar', data: values, itemStyle: { color: t.bar }, barMaxWidth: 48,
@@ -79,8 +81,8 @@ export function columns(el, label, categories, values, fmt, { tooltip = null } =
 export function line(el, label, xs, ys, ns, fmt) {
   return chart(el, (t) => ({
     grid: { left: 8, right: 16, top: 24, bottom: 8, containLabel: true },
-    xAxis: { type: 'category', data: xs.map(String), ...axisCommon(t) },
-    yAxis: { type: 'value', ...axisCommon(t) },
+    xAxis: { type: 'category', data: xs.map(String), ...axisCommon(t), axisLabel: { color: t.text, hideOverlap: true } },
+    yAxis: { type: 'value', ...axisCommon(t), splitNumber: el.clientWidth < 520 ? 3 : 5 },
     tooltip: { trigger: 'item', renderMode: 'richText', backgroundColor: t.surface, borderColor: t.grid, textStyle: { color: t.fg },
       formatter: (p) => `${p.name}: ${fmt(p.value)} (n = ${ns[p.dataIndex].toLocaleString('en')})` },
     series: [{ type: 'line', data: ys, itemStyle: { color: t.bar }, lineStyle: { color: t.bar, width: 2 }, symbolSize: 7,
