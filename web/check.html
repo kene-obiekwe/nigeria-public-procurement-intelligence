@@ -4,34 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <title>Data Self-Check</title>
-<style>
-  :root {
-    --bg: #ffffff; --fg: #1f2328; --muted: #59636e; --line: #d1d9e0; --pass: #1a7f37; --fail: #b3261e; --head: #f6f8fa;
-    color-scheme: light dark;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --line: #3d444d; --pass: #3fb950; --fail: #f85149; --head: #151b23; }
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; padding: 16px; background: var(--bg); color: var(--fg);
-         font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  main { max-width: 1100px; margin: 0 auto; }
-  h1 { font-size: 20px; margin: 0 0 4px; }
-  h2 { font-size: 16px; margin: 24px 0 8px; }
-  p { margin: 4px 0 12px; color: var(--muted); }
-  #summary { font-size: 16px; font-weight: 600; padding: 12px; border: 1px solid var(--line); border-radius: 6px; }
-  .pass { color: var(--pass); } .fail { color: var(--fail); }
-  .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; max-height: 70vh; }
-  table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
-  th, td { padding: 4px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
-  th { position: sticky; top: 0; background: var(--head); }
-  td.num { text-align: right; white-space: nowrap; }
-  label { color: var(--muted); }
-</style>
+<link rel="stylesheet" href="css/check.css">
+<script type="module" src="js/check_page.js"></script>
 </head>
 <body>
 <main>
+  <p><a href="./">Back to the dashboard</a></p>
   <h1>Data self-check</h1>
   <p>Recomputes every figure in <code>data/expected.json</code> with the site's own functions (<code>js/metrics.js</code>)
      and compares it with the SQL value: the 177 figures of the dashboard reconciliation pack and the DQ-21 sensitivity
@@ -44,41 +25,5 @@
   <h2>DQ-21 sensitivity cells</h2>
   <div class="scroll"><table id="cells"><thead><tr><th>Result set</th><th>Row</th><th>Column</th><th>SQL</th><th>Web</th><th>Result</th></tr></thead><tbody></tbody></table></div>
 </main>
-<script type="module">
-  import { loadData } from './js/data.js';
-  import { runChecks } from './js/check.js';
-
-  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const result = (ok) => `<td class="${ok ? 'pass' : 'fail'}">${ok ? 'PASS' : 'FAIL'}</td>`;
-  const summary = document.getElementById('summary');
-
-  try {
-    const t0 = performance.now();
-    const d = await loadData('data/');
-    const { figures, cells } = runChecks(d);
-    const ms = Math.round(performance.now() - t0);
-    const fOk = figures.filter((x) => x.ok).length;
-    const cOk = cells.filter((x) => x.ok).length;
-    const allOk = fOk === figures.length && cOk === cells.length;
-    summary.className = allOk ? 'pass' : 'fail';
-    summary.textContent = `${allOk ? 'PASS' : 'FAIL'}: figures ${fOk}/${figures.length} PASS; DQ-21 sensitivity ${cOk}/${cells.length} cells PASS; `
-      + `${Object.keys(d.manifest.files).length} data files verified against manifest SHA-256`;
-    document.getElementById('meta').textContent = `Data exported ${d.manifest.generated_at} (role ${d.manifest.role}); `
-      + `expected.json SHA-256 ${d.manifest.files['expected.json'].sha256.slice(0, 16)}…; loaded and checked in ${ms} ms; `
-      + `${navigator.userAgent}`;
-    document.querySelector('#figures tbody').innerHTML = figures.map((f) => `<tr data-ok="${f.ok}"><td>${esc(f.id)}</td><td>${esc(f.figure)}</td>`
-      + `<td>${esc(f.slice)}</td><td class="num">${esc(f.sql)}</td><td class="num">${esc(f.web)}</td>${result(f.ok)}</tr>`).join('');
-    document.querySelector('#cells tbody').innerHTML = cells.map((c) => `<tr data-ok="${c.ok}"><td>${esc(c.key)}</td><td class="num">${c.row}</td>`
-      + `<td>${esc(c.col)}</td><td class="num">${esc(c.sql)}</td><td class="num">${esc(c.web)}</td>${result(c.ok)}</tr>`).join('');
-    document.body.dataset.result = allOk ? 'pass' : 'fail';
-  } catch (exc) {
-    summary.className = 'fail';
-    summary.textContent = `FAIL: ${exc.message}`;
-    document.body.dataset.result = 'error';
-  }
-  document.getElementById('only-fail').addEventListener('change', (e) => {
-    document.querySelectorAll('tbody tr').forEach((tr) => { tr.hidden = e.target.checked && tr.dataset.ok === 'true'; });
-  });
-</script>
 </body>
 </html>

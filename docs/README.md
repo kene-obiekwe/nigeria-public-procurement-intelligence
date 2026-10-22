@@ -121,6 +121,15 @@ The ERD is in [`../diagrams/erd/`](../diagrams/erd/nocopo_erd.md) and the DDL is
 | [`qa_checklist.md`](phase12_qa/qa_checklist.md) | Clean-rebuild results, dashboard re-confirmation, business-question walkthrough, anti-pattern and non-goal review, Definition of Success, outstanding-items register |
 | [`signoff_note.md`](phase12_qa/signoff_note.md) | What was delivered, gate results, limitations, open items, proposed release tag |
 
+## Phase 13 — Web Dashboard (v1.1)
+
+| Document | Purpose |
+|---|---|
+| [`web_dashboard.md`](phase13_web_dashboard/web_dashboard.md) | The static web dashboard in `web/`: structure, how to rebuild the data, check it, preview it and redeploy it; roles; verification results |
+| [`web_design_note.md`](phase13_web_dashboard/web_design_note.md) | Design: data shape per page, pre-aggregation grain, file sizes, filter scoping, non-summable measures, decisions F-2 to F-4 and D-1 |
+| [`web_reconciliation_results.md`](phase13_web_dashboard/web_reconciliation_results.md) | Generated: manifest, the 177 figures recomputed from the web data, DQ-21 sensitivity cells, browser self-check, wording scan |
+| [`screenshots/`](phase13_web_dashboard/screenshots/) | Every page at 1440 px and at 375 px |
+
 ## Generated Reports
 
 The following files are written by scripts. Regenerate them by running the
@@ -141,6 +150,8 @@ script rather than editing them by hand.
 | `phase10_findings/claim_trace_check_results.md` | `python/validation/07_check_findings_trace.py --live` |
 | `phase10_findings/source_verification.md` | `python/validation/08_verify_source_items.py` |
 | `phase10_findings/phase10_validation_results.md` | `python/validation/04_run_validation_suite.py --phase 10` |
+| `phase13_web_dashboard/web_reconciliation_results.md` | `python/web/check_web_data.py` (the browser result is recorded with `--browser-result`) |
+| `../web/data/*.json` | `python/web/export_web_data.py` |
 
 ⚠ `data_profiling_report.md` (§13) and `targeted_validation_report.md` (§5, C-12)
 contain manual correction notes. Re-running their scripts would overwrite those notes.

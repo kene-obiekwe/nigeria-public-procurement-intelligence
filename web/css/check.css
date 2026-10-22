@@ -1,0 +1,23 @@
+/* Styles of check.html (the data self-check page). */
+:root {
+  --bg: #ffffff; --fg: #1f2328; --muted: #59636e; --line: #d1d9e0; --pass: #1a7f37; --fail: #b3261e; --head: #f6f8fa;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --line: #3d444d; --pass: #3fb950; --fail: #f85149; --head: #151b23; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; padding: 16px; background: var(--bg); color: var(--fg);
+       font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+main { max-width: 1100px; margin: 0 auto; }
+h1 { font-size: 20px; margin: 0 0 4px; }
+h2 { font-size: 16px; margin: 24px 0 8px; }
+p { margin: 4px 0 12px; color: var(--muted); }
+#summary { font-size: 16px; font-weight: 600; padding: 12px; border: 1px solid var(--line); border-radius: 6px; }
+.pass { color: var(--pass); } .fail { color: var(--fail); }
+.scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; max-height: 70vh; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { padding: 4px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { position: sticky; top: 0; background: var(--head); }
+td.num { text-align: right; white-space: nowrap; }
+label { color: var(--muted); }

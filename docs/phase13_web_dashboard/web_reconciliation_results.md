@@ -1,7 +1,7 @@
 # Web Dashboard Reconciliation Results
 # Nigeria Public Procurement Intelligence
 
-> **Generated:** 2026-10-22 12:08 by `python/web/check_web_data.py` (role `nocopo_bi`, read-only)  
+> **Generated:** 2026-10-22 12:39 by `python/web/check_web_data.py` (role `nocopo_bi`, read-only)  
 > **Data:** `web/data/` exported 2026-10-22T10:48:41Z by role `nocopo_bi` from `nocopo_db` (PostgreSQL 17.4); source SHA-256 `6151466…bc90c`  
 > **Result:** PASS: manifest verified; reconciliation 177/177 PASS; DQ-21 sensitivity 277/277 cells PASS; wording 0 finding(s)
 
@@ -547,11 +547,11 @@ The Phase 10.1 result sets (`sql/06_analysis/01`, `03`, `05`), re-run live and r
 
 `web/check.html` loads the same JSON with the site's own modules (`js/data.js`, `js/metrics.js`, `js/format.js`) and compares every figure in `expected.json` (the 177 and the sensitivity cells) under the same tolerance. Serve `web/` (`python -m http.server --directory web 8000`) and open `http://localhost:8000/check.html`.
 
-**Recorded result:** PASS: figures 177/177 PASS; DQ-21 sensitivity 277/277 cells PASS; 14 data files verified against manifest SHA-256. Chromium 152 (desktop app browser pane), web/ served by python -m http.server (expected.json SHA-256 `7567a9078e358092…`, recorded 2026-10-22 11:46)
+**Recorded result:** PASS: figures 177/177 PASS; DQ-21 sensitivity 277/277 cells PASS; 14 data files verified against manifest SHA-256. Chromium 152 (desktop app browser pane) at 1440 px and at 375 px, web/ served locally with the web/vercel.json headers (Content-Security-Policy enforced) (expected.json SHA-256 `7567a9078e358092…`, recorded 2026-10-22 12:31)
 
 ## 5. Wording scan
 
-Words from `dashboard/README.md` §7.3 (19): fraud, corrupt/corruption, collusion, bid rigging, kickback, embezzle, misconduct, irregularity, suspicious, red flag, overpriced, inflated, overrun, loss, saving, wasteful, underperforming, non-performing, failed contractor. The 11 mandatory caveat sentences of §8 are allowed verbatim. Files scanned: `web\check.html`, `web\js\check.js`, `web\js\data.js`, `web\js\format.js`, `web\js\metrics.js`.
+Words from `dashboard/README.md` §7.3 (19): fraud, corrupt/corruption, collusion, bid rigging, kickback, embezzle, misconduct, irregularity, suspicious, red flag, overpriced, inflated, overrun, loss, saving, wasteful, underperforming, non-performing, failed contractor. The 11 mandatory caveat sentences of §8 are allowed verbatim. Files scanned: `web\check.html`, `web\css\check.css`, `web\css\site.css`, `web\index.html`, `web\js\app.js`, `web\js\charts.js`, `web\js\check.js`, `web\js\check_page.js`, `web\js\data.js`, `web\js\format.js`, `web\js\metrics.js`, `web\js\pages\budget.js`, `web\js\pages\common.js`, `web\js\pages\competition.js`, `web\js\pages\data_quality.js`, `web\js\pages\entities.js`, `web\js\pages\implementation.js`, `web\js\pages\overview.js`, `web\js\pages\suppliers.js`, `web\js\pages\timing.js`, `web\js\state.js`, `web\js\text.js`, `web\js\theme.js`, `web\js\ui.js`.
 
 No findings.
 

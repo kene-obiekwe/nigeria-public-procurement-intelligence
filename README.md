@@ -47,6 +47,10 @@ The project does not make claims of misconduct or causation; patterns are prompt
 
 ## Dashboard
 
+**Live dashboard:** *link to be added after deployment.* An interactive web version of the eight report pages, a static
+site in [`web/`](web/) that computes every figure in the browser from exported data and reconciles to the same 177
+figures ([web dashboard notes](docs/phase13_web_dashboard/web_dashboard.md)).
+
 Power BI report built on `analytics.*` only, through the read-only role `nocopo_bi`; 177 dashboard figures were
 reconciled to SQL and signed off page by page ([reconciliation log](dashboard/reconciliation_log.md)). The repository
 holds the `.pbit` template and screenshots; the `.pbix`, which contains imported data, is never committed.
@@ -173,12 +177,14 @@ reproducible only from the pinned file. Details: [`data/README.md`](data/README.
 │   ├── business_requirements.md · methodology.md · data_dictionary.md · assumptions_and_limitations.md
 │   ├── 00_project_planning/  Scope, architecture, data-quality plan, implementation plan
 │   ├── phase2_profiling/ … phase9_dashboard/   Evidence and generated validation logs per phase
-│   └── phase10_findings/     Executive findings, claim trace, source verification, Phase 10.1
+│   ├── phase10_findings/     Executive findings, claim trace, source verification, Phase 10.1
+│   └── phase13_web_dashboard/ Web dashboard design, reconciliation results, screenshots
 ├── python/
 │   ├── run_pipeline.py       One-command rebuild and validation
 │   ├── ingest/               Staging loader and raw-to-staging reconciliation
 │   ├── profiling/            Phase 2 profiling scripts
-│   └── validation/           Suite runner, analysis runner, trace check, source verification, link check
+│   ├── validation/           Suite runner, analysis runner, trace check, source verification, link check
+│   └── web/                  Web dashboard data export and its reconciliation check
 ├── sql/
 │   ├── 01_staging/           (reserved: the staging DDL lives in 02_schema)
 │   ├── 02_schema/            00_draft_core_schema.sql = the executed stg + core schema (v1.x); upgrade migrations
@@ -188,7 +194,8 @@ reproducible only from the pinned file. Details: [`data/README.md`](data/README.
 │   └── 06_analysis/          One read-only script per business question
 ├── database/seed_and_setup/  Read-only Power BI role and its test
 ├── diagrams/                 ERD (Mermaid) and architecture notes
-└── dashboard/                Power BI template (.pbit), build guide, reconciliation log, screenshots
+├── dashboard/                Power BI template (.pbit), build guide, reconciliation log, screenshots
+└── web/                      Static web dashboard (HTML, CSS, JavaScript, vendored ECharts, exported JSON data)
 ```
 
 ---
