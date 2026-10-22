@@ -3,7 +3,7 @@
 
 import { BANDS, measure } from '../metrics.js';
 import { columns, hbar } from '../charts.js';
-import { card, cards, caveat, entityControl, grid, h, methodControl, panel, table } from '../ui.js';
+import { card, cards, caveat, controlBar, entityControl, grid, h, methodControl, panel, table } from '../ui.js';
 import { CAVEATS } from '../text.js';
 import { compact, int, labelOf, pct, pctAxis } from './common.js';
 
@@ -22,7 +22,7 @@ export function render({ d, el, params, set, after }) {
   const m = (name, p) => measure(d, name, f, p);
   const nPrim = m('[Competition n (primary)]');
 
-  el.append(h('div', { class: 'controls' },
+  el.append(controlBar(
     entityControl(d, f.buyer, (v) => set({ buyer: v })),
     methodControl(d, f.method, (v) => set({ method: v }))));
 

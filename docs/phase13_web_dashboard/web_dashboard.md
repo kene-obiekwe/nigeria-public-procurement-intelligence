@@ -85,7 +85,7 @@ set `PGUSER=nocopo_bi` and supply its password through `PGPASSWORD` or `pgpass.c
 | Filtered cards | The pack's sliced figures (method, buyer, contract status, tender start year: SUP-16 to 18, COM-07/08/10, BVA-08/09, TIM-14 to 17, IMP-04/05); table figures BVA-10 and ENT-11 to 14 | 14 / 14 and 5 / 5 PASS |
 | Entity and method filters | One entity and one method filter on each page that has them, compared with values computed by `check_web_data.py`'s functions | 48 / 48 PASS |
 | DQ-21 switch (page 5) | Top N share at N = 1, 5, 10, 20, 50, 100 with and without flagged awards against 05 RS7; the top-10 order against 05 RS7b | 12 / 12 and 10 / 10 PASS |
-| Layout | Every page at 1440 px and at 375 px: no horizontal page scroll; long tables scroll in their own box | 0 px overflow on all 8 pages at both widths |
+| Layout | Every page at 1440, 800 and 375 px: no horizontal page scroll; long tables scroll in their own box; filters collapsed on phones, open on wider screens | 0 px overflow on all 8 pages at all three widths |
 | Browser console and CSP | All pages and filtered views, chart tooltips and card taps, served with the `vercel.json` headers | 0 errors, 0 policy violations, 0 requests to other sites |
 | Wording | The words of `dashboard/README.md` §7.3 in the site's HTML, JavaScript and CSS; the §8 caveat sentences allowed verbatim | 24 files, 0 findings |
 

@@ -4,7 +4,7 @@ import { measure, rs6, rs6b, ranked, supplierValues, supplierRows, sumBig, topNS
 import { pick } from '../data.js';
 import { hbar } from '../charts.js';
 import { int as intParam } from '../state.js';
-import { card, cards, entityControl, grid, h, methodControl, panel, table, topNControl } from '../ui.js';
+import { card, cards, controlBar, entityControl, grid, h, methodControl, panel, table, topNControl } from '../ui.js';
 import { disclosurePanel, int, ngn, pct, pctAxis, sensitivityPanel } from './common.js';
 
 export function render({ d, el, params, set, after }) {
@@ -13,7 +13,7 @@ export function render({ d, el, params, set, after }) {
   const m = (name, p) => measure(d, name, f, p);
   const eligible = m('[M-S01 Eligible Awards]');
 
-  el.append(h('div', { class: 'controls' },
+  el.append(controlBar(
     entityControl(d, f.buyer, (v) => set({ buyer: v })),
     methodControl(d, f.method, (v) => set({ method: v })),
     topNControl(n, (v) => set({ topn: v === 10 ? null : v }))));

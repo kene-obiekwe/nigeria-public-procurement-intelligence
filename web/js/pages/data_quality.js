@@ -2,7 +2,7 @@
 
 import { measure, rs11a } from '../metrics.js';
 import { decimalToScaled } from '../format.js';
-import { card, cards, caveat, grid, h, panel, selectControl, table } from '../ui.js';
+import { card, cards, caveat, controlBar, grid, h, panel, selectControl, table } from '../ui.js';
 import { CAVEATS } from '../text.js';
 import { int, ngn, pct } from './common.js';
 
@@ -18,7 +18,7 @@ export function render({ d, el, params, set }) {
   const impact = params.impact ?? null;
   const dq = dqAll.filter((r) => (!metric || r.metric_id === metric) && (!impact || r.impact_type === impact));
 
-  el.append(h('div', { class: 'controls' },
+  el.append(controlBar(
     selectControl('Metric', [['', 'All'], ...metrics.map((x) => [x, x])], metric ?? '', (v) => set({ metric: v || null })),
     selectControl('Impact type', [['', 'All'], ...impacts.map((x) => [x, x])], impact ?? '', (v) => set({ impact: v || null }))));
 

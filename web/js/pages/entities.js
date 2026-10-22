@@ -7,7 +7,7 @@
 import { divide, entityAwardScenarios, entityValues, median, sumBig, topNSum } from '../metrics.js';
 import { hbar } from '../charts.js';
 import { int as intParam } from '../state.js';
-import { card, cards, caveat, checkControl, entityControl, grid, h, numberControl, panel, table, topNControl } from '../ui.js';
+import { card, cards, caveat, checkControl, controlBar, entityControl, grid, h, numberControl, panel, table, topNControl } from '../ui.js';
 import { CAVEATS } from '../text.js';
 import { dec, int, labelOf, ngn, ngnCompact, pct } from './common.js';
 
@@ -20,7 +20,7 @@ export function render({ d, el, params, set, after }) {
   const minP = intParam(params, 'minp', 30);
   const includeFlagged = params.dq21 !== 'off';
 
-  el.append(h('div', { class: 'controls' },
+  el.append(controlBar(
     entityControl(d, buyer, (v) => set({ buyer: v })),
     topNControl(n, (v) => set({ topn: v === 10 ? null : v }), 'Top N'),
     numberControl('Minimum tenders', minT, 1, 200, (v) => set({ mint: v === 30 ? null : v })),

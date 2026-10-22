@@ -5,7 +5,7 @@ import { BANDS, measure, bandDays, median } from '../metrics.js';
 import { rows as filterRows, pick } from '../data.js';
 import { columns, line } from '../charts.js';
 import { int as intParam } from '../state.js';
-import { card, cards, caveat, entityControl, grid, h, methodControl, panel, selectControl, table } from '../ui.js';
+import { card, cards, caveat, controlBar, entityControl, grid, h, methodControl, panel, selectControl, table } from '../ui.js';
 import { CAVEATS } from '../text.js';
 import { compact, dec, int, pct } from './common.js';
 
@@ -38,7 +38,7 @@ export function render({ d, el, params, set, after }) {
   const fal = { ...base, awardYear: ay };
   const fsl = { buyer: base.buyer };
 
-  el.append(h('div', { class: 'controls' },
+  el.append(controlBar(
     entityControl(d, base.buyer, (v) => set({ buyer: v })),
     methodControl(d, base.method, (v) => set({ method: v })),
     selectControl('Tender start year (tender duration)', [['', 'All'], ...years(d.tender_duration.y).map((y) => [y, String(y)])], tsy ?? '',

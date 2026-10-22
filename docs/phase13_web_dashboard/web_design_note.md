@@ -160,7 +160,10 @@ One page, `index.html`, with hash routing (`#overview`, `#suppliers`, `#competit
 - **Tablet (600–1023 px):** the sidebar becomes a top bar; cards two per row; panels stack.
 - **Phone (375 px):** a page menu (native `<select>`, so it is accessible and needs no script to open); cards one or two per
   row; every panel full width; long tables scroll inside their own box (`overflow-x: auto`) so the page itself never scrolls
-  sideways; charts redraw on resize.
+  sideways; charts redraw on resize. The page's filters sit in a native `<details>` "Filters" section: closed by default on phones
+  with a one-line summary of the active filters (it stays as the reader leaves it while a filter changes), two controls per row
+  when open, and always open with the summary hidden from 600 px upward. At 600 to 1023 px the 20-supplier table uses tighter
+  cells and wrapping headers so its value column stays whole.
 - **Cards** show the compact value (98K, 93T) and the eligible n, as in Power BI; the exact value is in the card's tooltip and
   `title`, and in a `data-value` attribute that the self-check reads.
 - **Entity dropdown:** 665 entries is too long for a plain list on a phone, so it is a searchable input (`<input list>` with a

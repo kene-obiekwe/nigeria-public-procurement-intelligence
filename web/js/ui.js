@@ -2,6 +2,7 @@
 // CSSOM, so no markup is built from data and the Content-Security-Policy needs no inline styles.
 
 import { formatCompact, formatExact, roundTo } from './format.js';
+import { current } from './state.js';
 
 export function h(tag, attrs = {}, ...children) {
   const el = document.createElement(tag);
@@ -170,4 +171,31 @@ export function methodControl(d, value, onChange) {
 
 export function topNControl(value, onChange, label = 'Top N (default 10)') {
   return numberControl(label, value, 1, 100, onChange);
+}
+
+// ---------------------------------------------------------------- filter bar
+
+// The filters of a page in a native <details>. On wide screens it is always open and the summary line is hidden (CSS); on
+// phones it starts closed, with one line saying which filters are active, and keeps the reader's choice while filters change.
+const FILTER_NAMES = { buyer: 'entity', method: 'method', topn: 'Top N', mint: 'minimum tenders', mina: 'minimum awards',
+  minc: 'minimum contracts', minp: 'minimum processes', dq21: 'flagged awards excluded', metric: 'metric', impact: 'impact type',
+  status: 'contract status', tyear: 'tender start year', ayear: 'award year' };
+const phone = window.matchMedia('(max-width: 599px)');
+let userOpen = null;
+phone.addEventListener('change', () => {
+  userOpen = null;
+  const el = document.querySelector('details.filters');
+  if (el) el.open = !phone.matches;
+});
+
+export function controlBar(...controls) {
+  const { params } = current();
+  const active = Object.keys(params).filter((k) => FILTER_NAMES[k] && params[k] !== '').map((k) => FILTER_NAMES[k]);
+  const summary = h('summary', {},
+    h('span', { class: 'filters-title', text: 'Filters' }),
+    h('span', { class: 'filters-active', text: active.length ? `${active.length} active: ${active.join(', ')}` : 'none active (all records)' }));
+  const el = h('details', { class: 'filters' }, summary, h('div', { class: 'controls' }, ...controls));
+  el.open = userOpen ?? !phone.matches;
+  el.addEventListener('toggle', () => { if (phone.matches) userOpen = el.open; });
+  return el;
 }

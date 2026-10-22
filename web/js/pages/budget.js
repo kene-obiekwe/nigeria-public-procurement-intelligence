@@ -3,7 +3,7 @@
 import { BANDS, measure, rs11, sumBig, median, divide } from '../metrics.js';
 import { rows as filterRows, pick } from '../data.js';
 import { columns } from '../charts.js';
-import { card, cards, caveat, entityControl, grid, h, methodControl, panel, table } from '../ui.js';
+import { card, cards, caveat, controlBar, entityControl, grid, h, methodControl, panel, table } from '../ui.js';
 import { CAVEATS } from '../text.js';
 import { compact, dec, int, labelOf, ngn, sensitivityPanel } from './common.js';
 
@@ -14,7 +14,7 @@ export function render({ d, el, params, set, after }) {
   const m = (name, p) => measure(d, name, f, p);
   const n = m('[Comparable OCIDs]');
 
-  el.append(h('div', { class: 'controls' },
+  el.append(controlBar(
     entityControl(d, f.buyer, (v) => set({ buyer: v })),
     methodControl(d, f.method, (v) => set({ method: v }))));
 

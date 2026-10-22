@@ -2,7 +2,7 @@
 
 import { BANDS, measure } from '../metrics.js';
 import { donut, hbar } from '../charts.js';
-import { card, cards, caveat, entityControl, grid, h, panel, selectControl, table } from '../ui.js';
+import { card, cards, caveat, controlBar, entityControl, grid, h, panel, selectControl, table } from '../ui.js';
 import { CAVEATS } from '../text.js';
 import { compact, int, labelOf, pct, pctAxis } from './common.js';
 import { extremes } from './competition.js';
@@ -15,7 +15,7 @@ export function render({ d, el, params, set, after }) {
   const m = (name, p) => measure(d, name, fc, p);
   const n = m('[Contracts (n)]');
 
-  el.append(h('div', { class: 'controls' },
+  el.append(controlBar(
     entityControl(d, fc.buyer, (v) => set({ buyer: v })),
     selectControl('Contract status', [['', 'All'], ...d.dims.contract_statuses.map((s) => [s, s])], fc.contractStatus ?? '',
       (v) => set({ status: v || null }))));

@@ -173,7 +173,7 @@ reproducible only from the pinned file. Details: [`data/README.md`](data/README.
 ```
 ├── README.md                 This page
 ├── data/README.md            Source inventory, SHA-256, licence, acquisition
-├── docs/                     Portfolio documents + evidence by phase (index: docs/README.md)
+├── docs/                     Project documents + evidence by phase (index: docs/README.md)
 │   ├── business_requirements.md · methodology.md · data_dictionary.md · assumptions_and_limitations.md
 │   ├── 00_project_planning/  Scope, architecture, data-quality plan, implementation plan
 │   ├── phase2_profiling/ … phase9_dashboard/   Evidence and generated validation logs per phase
@@ -210,4 +210,4 @@ PostgreSQL 17 (CTEs, window functions, materialised views, generated columns, ro
 ## Licence
 
 Code and documentation: MIT ([`LICENSE`](LICENSE)). Source data: Bureau of Public Procurement, ODC-PDDL
-([`NOTICE.md`](NOTICE.md)). This is an independent portfolio analysis, not endorsed by the BPP.
+([`NOTICE.md`](NOTICE.md)). This is an independent analysis, not endorsed by the BPP.
