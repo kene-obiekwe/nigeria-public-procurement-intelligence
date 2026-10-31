@@ -1,7 +1,7 @@
 # Web Dashboard Reconciliation Results
 # Nigeria Public Procurement Intelligence
 
-> **Generated:** 2026-10-31 16:00 by `python/web/check_web_data.py` (role `nocopo_bi`, read-only)  
+> **Generated:** 2026-10-31 16:07 by `python/web/check_web_data.py` (role `nocopo_bi`, read-only)  
 > **Data:** `web/data/` exported 2026-10-22T10:48:41Z by role `nocopo_bi` from `nocopo_db` (PostgreSQL 17.4); source SHA-256 `6151466…bc90c`  
 > **Result:** PASS: manifest verified; reconciliation 177/177 PASS; DQ-21 sensitivity 277/277 cells PASS; wording 0 finding(s); landing figures 45/45 PASS, 0 failure(s); routes PASS
 
@@ -561,53 +561,53 @@ Every figure on `web/index.html` and on `python/web/og_card.html` (drawn into `w
 
 | Where | Figure as written | Source | Source figure | Result |
 |---|---|---|---|---|
-| `web/index.html`:71 | 108,277 | source_verification.md §D, releases | 108,277 | PASS |
-| `web/index.html`:73 | 98,454 | expected.json EXE-01, count | 98,454 | PASS |
-| `web/index.html`:75 | 665 | expected.json ENT-01, count | 665 | PASS |
-| `web/index.html`:77 | 9,800 | expected.json SUP-02, count | 9,800 | PASS |
-| `web/index.html`:80 | 3 May 2021 | source_verification.md §D, earliest release date | 3 May 2021 | PASS |
-| `web/index.html`:81 | 29 July 2026 | source_verification.md §D, latest release date | 29 July 2026 | PASS |
-| `web/index.html`:94 | 44.0% | expected.json EXE-05, pct1 | 44.0% | PASS |
-| `web/index.html`:95 | 2 | expected.json EXE-06, count | 2 | PASS |
-| `web/index.html`:96 | 39.6% | claim_trace.md [C3] | 39.6% | PASS |
-| `web/index.html`:97 | 10,129 | claim_trace.md [C3] | 10,129 | PASS |
-| `web/index.html`:98 | 17,253 | expected.json COM-01, count | 17,253 | PASS |
-| `web/index.html`:104 | 29.0% | expected.json EXE-07, pct1 | 29.0% | PASS |
-| `web/index.html`:106 | 139.4 | expected.json SUP-09, index1 | 139.4 | PASS |
-| `web/index.html`:107 | 61.4% | claim_trace.md [S4] | 61.4% | PASS |
-| `web/index.html`:108 | 13,537 | expected.json SUP-01, count | 13,537 | PASS |
-| `web/index.html`:109 | 2,226 | expected.json SUP-11, count | 2,226 | PASS |
-| `web/index.html`:110 | 20.4% | expected.json SUP-13, pct1 | 20.4% | PASS |
-| `web/index.html`:116 | 0.93 | expected.json EXE-09, ratio2 | 0.93 | PASS |
-| `web/index.html`:117 | 227 | expected.json BVA-B6, count | 227 | PASS |
-| `web/index.html`:118 | 1.5% | claim_trace.md [B3] | 1.5% | PASS |
-| `web/index.html`:119 | 49.8% | claim_trace.md [B3] | 49.8% | PASS |
-| `web/index.html`:120 | 15,574 | expected.json BVA-01, count | 15,574 | PASS |
-| `web/index.html`:126 | 76.0% | expected.json ENT-06, pct1 | 76.0% | PASS |
-| `web/index.html`:128 | 40.6% | expected.json ENT-05, pct1 | 40.6% | PASS |
-| `web/index.html`:129 | 665 | expected.json ENT-01, count | 665 | PASS |
-| `web/index.html`:135 | 97 | expected.json EXE-11, days | 97 | PASS |
-| `web/index.html`:137 | 45.2% | expected.json TIM-11, pct1 | 45.2% | PASS |
-| `web/index.html`:139 | 7,462 | expected.json TIM-02, count | 7,462 | PASS |
-| `web/index.html`:145 | 87.2% | expected.json EXE-12, pct1 | 87.2% | PASS |
-| `web/index.html`:147 | 2,081 | expected.json IMP-T4, count | 2,081 | PASS |
-| `web/index.html`:148 | 16,221 | expected.json IMP-01, count | 16,221 | PASS |
-| `web/index.html`:153 | 45 | claim_trace.md [X1] | 45 awards | PASS |
-| `web/index.html`:154 | ₦509.5bn | claim_trace.md [X1] | ₦509.5bn | PASS |
-| `web/index.html`:154 | 15.5% | claim_trace.md [X1] | 15.5% | PASS |
-| `web/index.html`:156 | 26.1% | claim_trace.md [S6] | 26.1% | PASS |
-| `web/index.html`:157 | 29.0% | expected.json EXE-07, pct1 | 29.0% | PASS |
-| `web/index.html`:158 | 0.93 | claim_trace.md [B8] | 0.93 | PASS |
-| `web/index.html`:183 | 21 | decision log, DQ-01 to DQ-21 | 21 | PASS |
-| `web/index.html`:187 | 259 | the six suite result logs, Phases 5 to 10.1, all passed | 259 | PASS |
-| `web/index.html`:189 | 177 | figures in expected.json (the reconciliation pack) | 177 | PASS |
-| `web/index.html`:236 | 82.3% | expected.json EXE-13, pct1 | 82.3% | PASS |
+| `web/index.html`:70 | 108,277 | source_verification.md §D, releases | 108,277 | PASS |
+| `web/index.html`:72 | 98,454 | expected.json EXE-01, count | 98,454 | PASS |
+| `web/index.html`:74 | 665 | expected.json ENT-01, count | 665 | PASS |
+| `web/index.html`:76 | 9,800 | expected.json SUP-02, count | 9,800 | PASS |
+| `web/index.html`:79 | 3 May 2021 | source_verification.md §D, earliest release date | 3 May 2021 | PASS |
+| `web/index.html`:80 | 29 July 2026 | source_verification.md §D, latest release date | 29 July 2026 | PASS |
+| `web/index.html`:93 | 44.0% | expected.json EXE-05, pct1 | 44.0% | PASS |
+| `web/index.html`:94 | 2 | expected.json EXE-06, count | 2 | PASS |
+| `web/index.html`:95 | 39.6% | claim_trace.md [C3] | 39.6% | PASS |
+| `web/index.html`:96 | 10,129 | claim_trace.md [C3] | 10,129 | PASS |
+| `web/index.html`:97 | 17,253 | expected.json COM-01, count | 17,253 | PASS |
+| `web/index.html`:103 | 29.0% | expected.json EXE-07, pct1 | 29.0% | PASS |
+| `web/index.html`:105 | 139.4 | expected.json SUP-09, index1 | 139.4 | PASS |
+| `web/index.html`:106 | 61.4% | claim_trace.md [S4] | 61.4% | PASS |
+| `web/index.html`:107 | 13,537 | expected.json SUP-01, count | 13,537 | PASS |
+| `web/index.html`:108 | 2,226 | expected.json SUP-11, count | 2,226 | PASS |
+| `web/index.html`:109 | 20.4% | expected.json SUP-13, pct1 | 20.4% | PASS |
+| `web/index.html`:115 | 0.93 | expected.json EXE-09, ratio2 | 0.93 | PASS |
+| `web/index.html`:116 | 227 | expected.json BVA-B6, count | 227 | PASS |
+| `web/index.html`:117 | 1.5% | claim_trace.md [B3] | 1.5% | PASS |
+| `web/index.html`:118 | 49.8% | claim_trace.md [B3] | 49.8% | PASS |
+| `web/index.html`:119 | 15,574 | expected.json BVA-01, count | 15,574 | PASS |
+| `web/index.html`:125 | 76.0% | expected.json ENT-06, pct1 | 76.0% | PASS |
+| `web/index.html`:127 | 40.6% | expected.json ENT-05, pct1 | 40.6% | PASS |
+| `web/index.html`:128 | 665 | expected.json ENT-01, count | 665 | PASS |
+| `web/index.html`:134 | 97 | expected.json EXE-11, days | 97 | PASS |
+| `web/index.html`:136 | 45.2% | expected.json TIM-11, pct1 | 45.2% | PASS |
+| `web/index.html`:138 | 7,462 | expected.json TIM-02, count | 7,462 | PASS |
+| `web/index.html`:144 | 87.2% | expected.json EXE-12, pct1 | 87.2% | PASS |
+| `web/index.html`:146 | 2,081 | expected.json IMP-T4, count | 2,081 | PASS |
+| `web/index.html`:147 | 16,221 | expected.json IMP-01, count | 16,221 | PASS |
+| `web/index.html`:152 | 45 | claim_trace.md [X1] | 45 awards | PASS |
+| `web/index.html`:153 | ₦509.5bn | claim_trace.md [X1] | ₦509.5bn | PASS |
+| `web/index.html`:153 | 15.5% | claim_trace.md [X1] | 15.5% | PASS |
+| `web/index.html`:155 | 26.1% | claim_trace.md [S6] | 26.1% | PASS |
+| `web/index.html`:156 | 29.0% | expected.json EXE-07, pct1 | 29.0% | PASS |
+| `web/index.html`:157 | 0.93 | claim_trace.md [B8] | 0.93 | PASS |
+| `web/index.html`:182 | 21 | decision log, DQ-01 to DQ-21 | 21 | PASS |
+| `web/index.html`:186 | 259 | the six suite result logs, Phases 5 to 10.1, all passed | 259 | PASS |
+| `web/index.html`:188 | 177 | figures in expected.json (the reconciliation pack) | 177 | PASS |
+| `web/index.html`:235 | 82.3% | expected.json EXE-13, pct1 | 82.3% | PASS |
 | `python/web/og_card.html`:36 | 98,454 | expected.json EXE-01, count | 98,454 | PASS |
 | `python/web/og_card.html`:37 | 44.0% | expected.json EXE-05, pct1 | 44.0% | PASS |
 | `python/web/og_card.html`:38 | 177 | figures in expected.json (the reconciliation pack) | 177 | PASS |
 | `python/web/og_card.html`:38 | 177 | figures in expected.json (the reconciliation pack) | 177 | PASS |
 
-Labels marked `data-nofig` (page numbers and versions, not figures): `web/index.html`:204 1; `web/index.html`:205 2a; `web/index.html`:206 2b; `web/index.html`:207 3; `web/index.html`:208 4; `web/index.html`:209 5; `web/index.html`:210 6; `web/index.html`:211 7; `web/index.html`:223 1; `web/index.html`:224 2a; `web/index.html`:224 3; `web/index.html`:225 5; `web/index.html`:251 5.6.0; `web/index.html`:251 2.0.
+Labels marked `data-nofig` (page numbers and versions, not figures): `web/index.html`:203 1; `web/index.html`:204 2a; `web/index.html`:205 2b; `web/index.html`:206 3; `web/index.html`:207 4; `web/index.html`:208 5; `web/index.html`:209 6; `web/index.html`:210 7; `web/index.html`:222 1; `web/index.html`:223 2a; `web/index.html`:223 3; `web/index.html`:224 5; `web/index.html`:250 5.6.0; `web/index.html`:250 2.0.
 
 Routes: `web/js/route.js` forwards 8 dashboard page IDs from the landing page to `dashboard.html` (`#overview`, `#suppliers`, `#competition`, `#budget`, `#timing`, `#entities`, `#implementation`, `#data-quality`); they equal `web/js/text.js` PAGES, and every `dashboard.html#…` link on the site names one of them.
 

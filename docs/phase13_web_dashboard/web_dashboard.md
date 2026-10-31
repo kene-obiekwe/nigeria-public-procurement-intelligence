@@ -213,5 +213,4 @@ Inspector (<https://www.linkedin.com/post-inspector/>) to refresh it. After chan
 python python/web/make_og_image.py
 ```
 
-**Placeholder.** The credit line links LinkedIn as `LINKEDIN_URL`; replace it in `web/index.html` with the profile address
-before deploying.
+**Credit line.** "Built by Kene Obiekwe", with links to GitHub and LinkedIn (decision L-4).

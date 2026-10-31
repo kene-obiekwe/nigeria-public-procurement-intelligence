@@ -14,6 +14,8 @@
 > **Phase 10.1 (2026-10-17):** corrections C-12 (release dates) and C-13 / DQ-21 (possible award scale errors,
 > flagged, not excluded) applied; headline value figures are shown with and without the flagged awards
 > ([`phase10_1_correction_pass.md`](phase10_1_correction_pass.md)).
+> **Wording correction (2026-10-31):** the headlines of findings 2 and 3 in §1 were reworded (W-1, W-2) so that they
+> match the figures beneath them; no figure, tag or population changed.
 
 ---
 
@@ -28,11 +30,11 @@ they are not conclusions about how any entity or supplier behaved (see §2).
    usable supplier ID. *Caveat:* 2,226 awards (₦670.4bn, 20.4% of eligible award value) have no usable supplier ID
    and are left out, so concentration is a lower bound. Without the awards flagged as possible scale errors (§10)
    the top ten hold 26.1% and the Emergency share is 55.3%, so the pattern holds. [S1] [S2] [S4] [S6]
-2. **Almost half of tenders record a single bidder.** 44.0% of tenders record one tenderer (median 2 tenderers).
+2. **More than two in five tenders record a single bidder.** 44.0% of tenders record one tenderer (median 2 tenderers).
    Even in National Competitive Bidding the rate is 39.6% across 10,129 tenders. *Population:* 17,253 tenders with
    a plausible recorded count (one to a hundred tenderers). *Caveat:* the count is what was published; the source
    does not define whether it counts bids received or bids found responsive. [C1] [C3]
-3. **Most processes are awarded close to budget, but a small group is far above it.** The median award is 0.93 of
+3. **The typical award is close to budget, but a small group is far above it.** The median award is 0.93 of
    its budget line and 42.2% of processes are awarded within a tenth of their budget. Yet 227 processes (1.5%) are
    awarded more than ten times their budget and hold 49.8% of the compared award value. Without the awards flagged as
    possible scale errors, 186 processes remain above ten times budget with 39.9% of the value, and the median stays at
@@ -414,5 +416,5 @@ None of these recommendations presumes a cause. Each one tests a pattern before 
 
 ---
 
-*Findings version 1.1 — 2026-10-17 (Phase 10.1: C-12, DQ-21 sensitivity). Version 1.0 — 2026-10-17.*
+*Findings version 1.2 — 2026-10-31 (wording correction W-1, W-2: the headlines of findings 2 and 3 in §1 now read "More than two in five tenders record a single bidder" (was "Almost half of tenders …") and "The typical award is close to budget, but a small group is far above it" (was "Most processes are awarded close to budget …", while 42.2% are within a tenth of budget and 34.0% below half of it [B2]); no figure changed). Version 1.1 — 2026-10-17 (Phase 10.1: C-12, DQ-21 sensitivity). Version 1.0 — 2026-10-17.*
 *Raw dataset not modified; no stg.* or core.* object changed; one analytics view added (DQ-21 flag).*

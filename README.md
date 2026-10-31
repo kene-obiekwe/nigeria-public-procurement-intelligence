@@ -29,10 +29,10 @@ recommendations: [`findings.md`](docs/phase10_findings/findings.md).
   61.4%, and still 55.3% without the awards flagged as possible scale errors. *Population:* 13,537 awards.
   *Caveat:* 2,226 awards (₦670.4bn, 20.4% of eligible award value) have no usable supplier ID, so concentration is
   a lower bound. [S1] [S2] [S4] [S6]
-- **Almost half of tenders record a single bidder.** 44.0% of 17,253 tenders record one tenderer, and 39.6% of
+- **More than two in five tenders record a single bidder.** 44.0% of 17,253 tenders record one tenderer, and 39.6% of
   10,129 tenders under National Competitive Bidding. *Caveat:* the source does not define what the tenderer count
   counts. [C1] [C3]
-- **Most processes are awarded close to budget, but a small group far above it holds much of the value.** The median
+- **The typical award is close to budget, but a small group is far above it.** The median
   award is 0.93 of its budget across 15,574 processes, yet 227 processes (1.5%) above ten times budget hold 49.8% of
   the compared award value (39.9% without the flagged awards). *Caveat:* a budget is a plan, not spend. [B1] [B3] [B8]
 - **Timing is measurable for under half of processes.** The median award lag is 97 days, but only 45.2% of candidate
