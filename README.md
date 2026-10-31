@@ -53,6 +53,8 @@ pages, a static site in [`web/`](web/) that computes every figure in the browser
 the same 177 figures ([web dashboard notes](docs/phase13_web_dashboard/web_dashboard.md)). The live reconciliation check is at
 <https://nocopo-dashboard.vercel.app/check.html>: it recomputes the 177 figures and the DQ-21 sensitivity cells in your browser and shows PASS or FAIL.
 
+[![Landing page of the live site](docs/phase13_web_dashboard/screenshots/00_landing_top.png)](https://nocopo-dashboard.vercel.app)
+
 Power BI report built on `analytics.*` only, through the read-only role `nocopo_bi`; 177 dashboard figures were
 reconciled to SQL and signed off page by page ([reconciliation log](dashboard/reconciliation_log.md)). The repository
 holds the `.pbit` template and screenshots; the `.pbix`, which contains imported data, is never committed.

@@ -168,7 +168,7 @@ copied from the npm package `echarts@5.6.0`, whose sha512 integrity was verified
 
 [`screenshots/`](screenshots/): every page at 1440 px (`*_desktop.png`) and at 375 px (`*_375px.png`), full page, light
 theme, no filters, captured from the local preview with the `vercel.json` headers. The landing page (v1.2) is
-`00_landing_desktop.png`, `00_landing_375px.png` and their `_dark` versions.
+`00_landing_desktop.png`, `00_landing_375px.png` and their `_dark` versions; `00_landing_top.png` is the top of `00_landing_desktop.png` (hero, scope and key findings), shown in the repository README.
 
 ## 10. Landing page and link previews (Phase 14, release v1.2)
 
