@@ -1,9 +1,9 @@
 # Web Dashboard Reconciliation Results
 # Nigeria Public Procurement Intelligence
 
-> **Generated:** 2026-10-22 13:36 by `python/web/check_web_data.py` (role `nocopo_bi`, read-only)  
+> **Generated:** 2026-10-31 16:00 by `python/web/check_web_data.py` (role `nocopo_bi`, read-only)  
 > **Data:** `web/data/` exported 2026-10-22T10:48:41Z by role `nocopo_bi` from `nocopo_db` (PostgreSQL 17.4); source SHA-256 `6151466…bc90c`  
-> **Result:** PASS: manifest verified; reconciliation 177/177 PASS; DQ-21 sensitivity 277/277 cells PASS; wording 0 finding(s)
+> **Result:** PASS: manifest verified; reconciliation 177/177 PASS; DQ-21 sensitivity 277/277 cells PASS; wording 0 finding(s); landing figures 45/45 PASS, 0 failure(s); routes PASS
 
 The figures below are recomputed from the JSON files alone, by Python functions that mirror the DAX measures (`dashboard/README.md` §5), and compared with the live SQL. The site's JavaScript is checked separately by `web/check.html` (section 4).
 
@@ -547,13 +547,69 @@ The Phase 10.1 result sets (`sql/06_analysis/01`, `03`, `05`), re-run live and r
 
 `web/check.html` loads the same JSON with the site's own modules (`js/data.js`, `js/metrics.js`, `js/format.js`) and compares every figure in `expected.json` (the 177 and the sensitivity cells) under the same tolerance. Serve `web/` (`python -m http.server --directory web 8000`) and open `http://localhost:8000/check.html`.
 
-**Recorded result:** PASS: figures 177/177 PASS; DQ-21 sensitivity 277/277 cells PASS; 14 data files verified against manifest SHA-256. Chromium 152 (desktop app browser pane) at 1440 px and at 375 px, web/ served locally with the web/vercel.json headers (Content-Security-Policy enforced) (expected.json SHA-256 `7567a9078e358092…`, recorded 2026-10-22 12:31)
+**Recorded result:** PASS: figures 177/177 PASS; DQ-21 sensitivity 277/277 cells PASS; 14 data files verified against manifest SHA-256. Chromium (desktop app browser pane) at 1440 px, check.html at its path after the v1.2 move of the dashboard to dashboard.html, web/ served locally with the web/vercel.json headers (Content-Security-Policy enforced) (expected.json SHA-256 `7567a9078e358092…`, recorded 2026-10-31 16:00)
 
 ## 5. Wording scan
 
-Words from `dashboard/README.md` §7.3 (19): fraud, corrupt/corruption, collusion, bid rigging, kickback, embezzle, misconduct, irregularity, suspicious, red flag, overpriced, inflated, overrun, loss, saving, wasteful, underperforming, non-performing, failed contractor. The 11 mandatory caveat sentences of §8 are allowed verbatim. Files scanned: `web\check.html`, `web\css\check.css`, `web\css\site.css`, `web\index.html`, `web\js\app.js`, `web\js\charts.js`, `web\js\check.js`, `web\js\check_page.js`, `web\js\data.js`, `web\js\format.js`, `web\js\metrics.js`, `web\js\pages\budget.js`, `web\js\pages\common.js`, `web\js\pages\competition.js`, `web\js\pages\data_quality.js`, `web\js\pages\entities.js`, `web\js\pages\implementation.js`, `web\js\pages\overview.js`, `web\js\pages\suppliers.js`, `web\js\pages\timing.js`, `web\js\state.js`, `web\js\text.js`, `web\js\theme.js`, `web\js\ui.js`.
+Words from `dashboard/README.md` §7.3 (19): fraud, corrupt/corruption, collusion, bid rigging, kickback, embezzle, misconduct, irregularity, suspicious, red flag, overpriced, inflated, overrun, loss, saving, wasteful, underperforming, non-performing, failed contractor. The 11 mandatory caveat sentences of §8 are allowed verbatim. Files scanned: `python\web\og_card.html`, `web\check.html`, `web\css\check.css`, `web\css\landing.css`, `web\css\site.css`, `web\dashboard.html`, `web\index.html`, `web\js\app.js`, `web\js\charts.js`, `web\js\check.js`, `web\js\check_page.js`, `web\js\data.js`, `web\js\format.js`, `web\js\landing.js`, `web\js\metrics.js`, `web\js\pages\budget.js`, `web\js\pages\common.js`, `web\js\pages\competition.js`, `web\js\pages\data_quality.js`, `web\js\pages\entities.js`, `web\js\pages\implementation.js`, `web\js\pages\overview.js`, `web\js\pages\suppliers.js`, `web\js\pages\timing.js`, `web\js\route.js`, `web\js\state.js`, `web\js\text.js`, `web\js\theme.js`, `web\js\ui.js`.
 
 No findings.
+
+## 6. Landing page and link preview: 45/45 figures PASS
+
+Every figure on `web/index.html` and on `python/web/og_card.html` (drawn into `web/og-image.png` by `python/web/make_og_image.py`) is marked in the HTML and compared here: `data-fig` with its value in `expected.json`, formatted as the page formats it (`js/landing.js`); `data-claim` with a stated figure under that tag in `docs/phase10_findings/claim_trace.md`; `data-project` with the record that holds it. Any other figure in the visible text or the preview meta tags is a failure: 0 found. The §8 caveat sentences are allowed verbatim.
+
+| Where | Figure as written | Source | Source figure | Result |
+|---|---|---|---|---|
+| `web/index.html`:71 | 108,277 | source_verification.md §D, releases | 108,277 | PASS |
+| `web/index.html`:73 | 98,454 | expected.json EXE-01, count | 98,454 | PASS |
+| `web/index.html`:75 | 665 | expected.json ENT-01, count | 665 | PASS |
+| `web/index.html`:77 | 9,800 | expected.json SUP-02, count | 9,800 | PASS |
+| `web/index.html`:80 | 3 May 2021 | source_verification.md §D, earliest release date | 3 May 2021 | PASS |
+| `web/index.html`:81 | 29 July 2026 | source_verification.md §D, latest release date | 29 July 2026 | PASS |
+| `web/index.html`:94 | 44.0% | expected.json EXE-05, pct1 | 44.0% | PASS |
+| `web/index.html`:95 | 2 | expected.json EXE-06, count | 2 | PASS |
+| `web/index.html`:96 | 39.6% | claim_trace.md [C3] | 39.6% | PASS |
+| `web/index.html`:97 | 10,129 | claim_trace.md [C3] | 10,129 | PASS |
+| `web/index.html`:98 | 17,253 | expected.json COM-01, count | 17,253 | PASS |
+| `web/index.html`:104 | 29.0% | expected.json EXE-07, pct1 | 29.0% | PASS |
+| `web/index.html`:106 | 139.4 | expected.json SUP-09, index1 | 139.4 | PASS |
+| `web/index.html`:107 | 61.4% | claim_trace.md [S4] | 61.4% | PASS |
+| `web/index.html`:108 | 13,537 | expected.json SUP-01, count | 13,537 | PASS |
+| `web/index.html`:109 | 2,226 | expected.json SUP-11, count | 2,226 | PASS |
+| `web/index.html`:110 | 20.4% | expected.json SUP-13, pct1 | 20.4% | PASS |
+| `web/index.html`:116 | 0.93 | expected.json EXE-09, ratio2 | 0.93 | PASS |
+| `web/index.html`:117 | 227 | expected.json BVA-B6, count | 227 | PASS |
+| `web/index.html`:118 | 1.5% | claim_trace.md [B3] | 1.5% | PASS |
+| `web/index.html`:119 | 49.8% | claim_trace.md [B3] | 49.8% | PASS |
+| `web/index.html`:120 | 15,574 | expected.json BVA-01, count | 15,574 | PASS |
+| `web/index.html`:126 | 76.0% | expected.json ENT-06, pct1 | 76.0% | PASS |
+| `web/index.html`:128 | 40.6% | expected.json ENT-05, pct1 | 40.6% | PASS |
+| `web/index.html`:129 | 665 | expected.json ENT-01, count | 665 | PASS |
+| `web/index.html`:135 | 97 | expected.json EXE-11, days | 97 | PASS |
+| `web/index.html`:137 | 45.2% | expected.json TIM-11, pct1 | 45.2% | PASS |
+| `web/index.html`:139 | 7,462 | expected.json TIM-02, count | 7,462 | PASS |
+| `web/index.html`:145 | 87.2% | expected.json EXE-12, pct1 | 87.2% | PASS |
+| `web/index.html`:147 | 2,081 | expected.json IMP-T4, count | 2,081 | PASS |
+| `web/index.html`:148 | 16,221 | expected.json IMP-01, count | 16,221 | PASS |
+| `web/index.html`:153 | 45 | claim_trace.md [X1] | 45 awards | PASS |
+| `web/index.html`:154 | ₦509.5bn | claim_trace.md [X1] | ₦509.5bn | PASS |
+| `web/index.html`:154 | 15.5% | claim_trace.md [X1] | 15.5% | PASS |
+| `web/index.html`:156 | 26.1% | claim_trace.md [S6] | 26.1% | PASS |
+| `web/index.html`:157 | 29.0% | expected.json EXE-07, pct1 | 29.0% | PASS |
+| `web/index.html`:158 | 0.93 | claim_trace.md [B8] | 0.93 | PASS |
+| `web/index.html`:183 | 21 | decision log, DQ-01 to DQ-21 | 21 | PASS |
+| `web/index.html`:187 | 259 | the six suite result logs, Phases 5 to 10.1, all passed | 259 | PASS |
+| `web/index.html`:189 | 177 | figures in expected.json (the reconciliation pack) | 177 | PASS |
+| `web/index.html`:236 | 82.3% | expected.json EXE-13, pct1 | 82.3% | PASS |
+| `python/web/og_card.html`:36 | 98,454 | expected.json EXE-01, count | 98,454 | PASS |
+| `python/web/og_card.html`:37 | 44.0% | expected.json EXE-05, pct1 | 44.0% | PASS |
+| `python/web/og_card.html`:38 | 177 | figures in expected.json (the reconciliation pack) | 177 | PASS |
+| `python/web/og_card.html`:38 | 177 | figures in expected.json (the reconciliation pack) | 177 | PASS |
+
+Labels marked `data-nofig` (page numbers and versions, not figures): `web/index.html`:204 1; `web/index.html`:205 2a; `web/index.html`:206 2b; `web/index.html`:207 3; `web/index.html`:208 4; `web/index.html`:209 5; `web/index.html`:210 6; `web/index.html`:211 7; `web/index.html`:223 1; `web/index.html`:224 2a; `web/index.html`:224 3; `web/index.html`:225 5; `web/index.html`:251 5.6.0; `web/index.html`:251 2.0.
+
+Routes: `web/js/route.js` forwards 8 dashboard page IDs from the landing page to `dashboard.html` (`#overview`, `#suppliers`, `#competition`, `#budget`, `#timing`, `#entities`, `#implementation`, `#data-quality`); they equal `web/js/text.js` PAGES, and every `dashboard.html#…` link on the site names one of them.
 
 ---
 

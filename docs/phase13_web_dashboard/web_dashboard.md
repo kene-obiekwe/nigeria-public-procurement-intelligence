@@ -1,8 +1,8 @@
 # Web Dashboard
 # Nigeria Public Procurement Intelligence
 
-> **Phase:** 13 (release v1.1) · **Date:** 2026-10-22 · **Status:** deployed and verified live
-> **Live:** <https://nocopo-dashboard.vercel.app> · **Live check:** <https://nocopo-dashboard.vercel.app/check.html>
+> **Phase:** 13 (release v1.1); landing page and link previews Phase 14 (release v1.2, §10) · **Date:** 2026-10-22, updated 2026-10-31 · **Status:** v1.1 deployed and verified live; v1.2 committed locally, not yet deployed
+> **Live:** <https://nocopo-dashboard.vercel.app> (landing page from v1.2) · **Dashboard:** <https://nocopo-dashboard.vercel.app/dashboard.html> (from v1.2) · **Live check:** <https://nocopo-dashboard.vercel.app/check.html>
 > **Code:** [`web/`](../../web/) · **Data export and check:** [`python/web/`](../../python/web/) ·
 > **Design and decisions:** [`web_design_note.md`](web_design_note.md) · **Check results:** [`web_reconciliation_results.md`](web_reconciliation_results.md)
 
@@ -17,15 +17,20 @@ and the browser computes every figure from those files with functions that mirro
 
 - Plain HTML, CSS and JavaScript modules; Apache ECharts 5.6.0, vendored. No framework and no build step.
 - 2.17 MB of JSON (0.47 MB compressed); ECharts adds 1.0 MB (0.35 MB compressed).
-- Every page has its own address (`#overview`, `#suppliers`, `#competition`, `#budget`, `#timing`, `#entities`,
-  `#implementation`, `#data-quality`), and the filters are part of it (for example `#competition?method=Emergency`), so a
-  view can be shared and the back button works.
+- Three HTML pages: `index.html`, the landing page (§10); `dashboard.html`, the eight dashboard pages; `check.html`, the
+  self-check. Until v1.1 the dashboard was `index.html`.
+- Every dashboard page has its own address (`dashboard.html#overview`, `#suppliers`, `#competition`, `#budget`, `#timing`,
+  `#entities`, `#implementation`, `#data-quality`), and the filters are part of it (for example
+  `dashboard.html#competition?method=Emergency`), so a view can be shared and the back button works. Old links to the site
+  root with a page hash (`/#suppliers`, `/#competition?method=Emergency`) are forwarded to `dashboard.html` with the same
+  hash (§10).
 - Light and dark themes (system setting, or the button at the top right; the choice is kept in the browser).
 - No cookies, analytics, tracking or requests to any other site. The Content-Security-Policy allows only the site itself.
 
 ## 2. Pages and filters
 
-A filter changes only the visuals whose data carries that field, as the Power BI slicers do (design note §2.3).
+A filter changes only the visuals whose data carries that field, as the Power BI slicers do (design note §2.3). Addresses
+below are hashes of `dashboard.html`.
 
 | Page | Address | Filters | What does not respond |
 |---|---|---|---|
@@ -88,7 +93,9 @@ set `PGUSER=nocopo_bi` and supply its password through `PGPASSWORD` or `pgpass.c
 | DQ-21 switch (page 5) | Top N share at N = 1, 5, 10, 20, 50, 100 with and without flagged awards against 05 RS7; the top-10 order against 05 RS7b | 12 / 12 and 10 / 10 PASS |
 | Layout | Every page at 1440, 800 and 375 px: no horizontal page scroll; long tables scroll in their own box; filters collapsed on phones, open on wider screens | 0 px overflow on all 8 pages at all three widths |
 | Browser console and CSP | All pages and filtered views, chart tooltips and card taps, served with the `vercel.json` headers | 0 errors, 0 policy violations, 0 requests to other sites |
-| Wording | The words of `dashboard/README.md` §7.3 in the site's HTML, JavaScript and CSS; the §8 caveat sentences allowed verbatim | 24 files, 0 findings |
+| Wording | The words of `dashboard/README.md` §7.3 in the site's HTML, JavaScript and CSS; the §8 caveat sentences allowed verbatim | 24 files, 0 findings (v1.2: 29 files including the landing page and the preview card, 0 findings) |
+| Landing figures (v1.2) | Every figure on the landing page and the preview card against `expected.json`, `claim_trace.md` or the project record that holds it; any unmarked figure fails (§10) | 45 / 45 PASS, 0 unmarked |
+| Routes (v1.2) | `js/route.js` page IDs equal `js/text.js` PAGES; every old hash (`/#overview` … `/#data-quality`, with and without filters) opens the same view on `dashboard.html` | 8 / 8 forwarded in the browser |
 
 ## 5. Previewing locally
 
@@ -96,8 +103,8 @@ set `PGUSER=nocopo_bi` and supply its password through `PGPASSWORD` or `pgpass.c
 python -m http.server 8000 --directory web
 ```
 
-Open `http://localhost:8000/` for the site and `http://localhost:8000/check.html` for the self-check (also linked as
-"Data checks" in the footer). The HTML pages carry the same Content-Security-Policy as a `<meta>` tag, so a plain local
+Open `http://localhost:8000/` for the landing page, `http://localhost:8000/dashboard.html` for the dashboard and
+`http://localhost:8000/check.html` for the self-check (also linked as "Data checks" in the footer). The HTML pages carry the same Content-Security-Policy as a `<meta>` tag, so a plain local
 server already enforces it; the other headers in `web/vercel.json` apply only on Vercel.
 
 ## 6. Deploying and redeploying (Vercel)
@@ -160,4 +167,51 @@ copied from the npm package `echarts@5.6.0`, whose sha512 integrity was verified
 ## 9. Screenshots
 
 [`screenshots/`](screenshots/): every page at 1440 px (`*_desktop.png`) and at 375 px (`*_375px.png`), full page, light
-theme, no filters, captured from the local preview with the `vercel.json` headers.
+theme, no filters, captured from the local preview with the `vercel.json` headers. The landing page (v1.2) is
+`00_landing_desktop.png`, `00_landing_375px.png` and their `_dark` versions.
+
+## 10. Landing page and link previews (Phase 14, release v1.2)
+
+Visitors arriving from a shared link land on `index.html`, a one-page introduction in plain English: what the data is, six
+headline findings (each with its figure, the records it rests on and a link to its dashboard page), how the pipeline was
+built, why the numbers can be trusted (with a link to `check.html`), how to read the dashboard, and the limitations. It uses
+the dashboard's colour tokens (`css/site.css`, plus `css/landing.css`), the same light/dark toggle, no external fonts,
+images or scripts, and no tracking.
+
+**Files**
+
+| File | Role |
+|---|---|
+| `web/index.html` | The landing page, with Open Graph and Twitter card tags |
+| `web/css/landing.css` | Landing layout (phone first; 1, 2 or 3 finding cards per row; pipeline as a row or a column) |
+| `web/js/landing.js` | Theme toggle; re-renders every `data-fig` figure from `data/expected.json` after checking its SHA-256 against the manifest |
+| `web/js/route.js` | Forwards old dashboard links (`/#suppliers`, `/#competition?method=…`) to `dashboard.html` with the same hash, before the page paints |
+| `web/og-image.png` | 1200 × 630 link-preview image (58 KB) |
+| `python/web/og_card.html` | Source of the preview image (figures marked as on the landing page) |
+| `python/web/make_og_image.py` | Draws `og-image.png` from the card with a headless Edge or Chrome and checks its size |
+
+**Figures (decision L-3).** No figure is typed without a source. Each one sits in an element that names it:
+
+- `data-fig="EXE-05" data-format="pct1"`: a figure of `data/expected.json` (the SQL values of the reconciliation pack),
+  re-rendered from the JSON when the page loads. The static text is the same figure, so the page reads correctly without
+  script.
+- `data-claim="S4"`: a stated figure under that tag in `docs/phase10_findings/claim_trace.md`.
+- `data-project="releases"`: a figure about the project read from the record that holds it (release count and date span from
+  `source_verification.md` §D, the number of DQ issues from the decision log, the suite totals from the six result logs,
+  the number of reconciled figures from `expected.json`).
+
+`check_web_data.py` (section 6 of its report) recomputes each one, fails on any figure in the text or the preview meta tags
+that is not marked, and lists the `data-nofig` labels (page numbers and versions). The wording scan covers the landing page
+and the preview card.
+
+**Link previews.** `index.html` carries `og:title`, `og:description`, `og:type`, `og:url`, `og:image` (absolute URL, with
+width, height and alt text) and `twitter:card=summary_large_image`; `dashboard.html` and `check.html` have their own titles
+and descriptions with the same image. LinkedIn caches previews: after deploying, paste the address into LinkedIn's Post
+Inspector (<https://www.linkedin.com/post-inspector/>) to refresh it. After changing the card, run:
+
+```bash
+python python/web/make_og_image.py
+```
+
+**Placeholder.** The credit line links LinkedIn as `LINKEDIN_URL`; replace it in `web/index.html` with the profile address
+before deploying.

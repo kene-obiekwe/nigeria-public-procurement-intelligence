@@ -25,8 +25,15 @@ figures, and write docs/phase13_web_dashboard/web_reconciliation_results.md:
    over the same JSON against expected.json; its result is recorded with
    --browser-result and kept while expected.json is unchanged.
 5. Wording. The site's own text (web/**/*.html, *.js, *.css; not data/ or
-   vendor/) is scanned for the words in dashboard/README.md §7.3, except inside
-   the mandatory caveat sentences of §8.
+   vendor/) and the link-preview card (python/web/og_card.html) are scanned for
+   the words in dashboard/README.md §7.3, except inside the mandatory caveat
+   sentences of §8.
+6. Landing page and link preview (Phase 14). Every figure on web/index.html and
+   python/web/og_card.html (the source of web/og-image.png) is marked and
+   verified: data-fig against expected.json, data-claim against a claim_trace.md
+   row under that tag, data-project against the record that holds it. Any other
+   figure in the text or the preview meta tags fails. The dashboard page IDs that
+   js/route.js forwards from old links must equal js/text.js PAGES.
 
 This is an independent implementation of the measures: it shares no code with
 the site's JavaScript, so a defect in either shows up as a disagreement.
@@ -56,6 +63,7 @@ import re
 import sys
 from datetime import datetime
 from decimal import ROUND_HALF_UP, Decimal, getcontext
+from html.parser import HTMLParser
 
 import psycopg
 
@@ -606,6 +614,7 @@ def scan_wording():
     words, allowed = banned_words()
     files = [p for ext in ("html", "js", "css") for p in glob.glob(os.path.join(ROOT, "web", "**", f"*.{ext}"), recursive=True)
              if os.sep + "data" + os.sep not in p and os.sep + "vendor" + os.sep not in p]
+    files.append(os.path.join(ROOT, "python", "web", "og_card.html"))
     hits = []
     for path in sorted(files):
         text = open(path, encoding="utf-8").read()
@@ -616,6 +625,175 @@ def scan_wording():
                 line = text.count("\n", 0, m.start()) + 1
                 hits.append(f"{os.path.relpath(path, ROOT)}:{line}: '{m.group(0)}'")
     return words, len(allowed), [os.path.relpath(p, ROOT) for p in sorted(files)], hits
+
+
+# ================================================================ landing page and link-preview figures
+# Every figure on the landing page and the link-preview card sits in an element marked data-fig (a figure of
+# expected.json, with data-format and optionally data-field="n"), data-claim (a figure of claim_trace.md under that
+# tag) or data-project (a count read from the project's own records, project_figures). Digits elsewhere fail, except
+# inside data-nofig labels (page numbers, versions), identifiers such as DQ-21, and the §8 caveat sentences.
+LANDING_FILES = ["web/index.html", "python/web/og_card.html"]
+CLAIM_TRACE = os.path.join(ROOT, "docs", "phase10_findings", "claim_trace.md")
+SOURCE_VERIFICATION = os.path.join(ROOT, "docs", "phase10_findings", "source_verification.md")
+DQ_LOG = os.path.join(ROOT, "docs", "phase3_data_quality", "phase3_data_quality_decision_log.md")
+SUITE_LOGS = ["docs/phase5_staging/phase5_staging_results.md", "docs/phase6_core_model/phase6_validation_results.md",
+              "docs/phase7_analytics/phase7_view_validation_results.md", "docs/phase8_analysis/phase8_validation_results.md",
+              "docs/phase9_dashboard/phase9_validation_results.md", "docs/phase10_findings/phase10_validation_results.md"]
+META_SCANNED = {"description", "og:title", "og:description", "og:image:alt", "twitter:title", "twitter:description",
+                "twitter:image:alt"}
+VOID_TAGS = {"meta", "link", "br", "img", "input", "hr", "source", "wbr"}
+IDENTIFIER = re.compile(r"\b[A-Za-z]+-[A-Z]?\d+[a-z]?\b")
+
+
+def landing_format(value, kind):
+    """The figure as the landing page writes it (js/landing.js FORMATS; half away from zero)."""
+    v = Decimal(value)
+    q = lambda x, places: x.quantize(Decimal(1).scaleb(-places), rounding=ROUND_HALF_UP)
+    if kind in ("count", "days"):
+        return f"{q(v, 0):,}"
+    if kind == "pct1":
+        return f"{q(v * 100, 1)}%"
+    if kind == "ratio2":
+        return f"{q(v, 2)}"
+    if kind == "index1":
+        return f"{q(v, 1)}"
+    if kind == "bn1":
+        return f"₦{q(v / Decimal(10) ** 9, 1):,}bn"
+    raise ValueError(f"unknown data-format '{kind}'")
+
+
+def project_figures(expected):
+    """Figures about the project itself, each read from the record that holds it: {key: (text, source)}."""
+    sv = open(SOURCE_VERIFICATION, encoding="utf-8").read()
+    releases = re.search(r"^\| Releases \| ([\d,]+) \|", sv, re.M).group(1)
+    first, last = re.search(r"^\| Earliest / latest release `date` \| (\d{4}-\d\d-\d\d)T\S* / (\d{4}-\d\d-\d\d)T", sv, re.M).groups()
+    day = lambda iso: f"{int(iso[8:])} {datetime.strptime(iso, '%Y-%m-%d'):%B %Y}"
+    issues = sorted(set(re.findall(r"\bDQ-\d\d\b", open(DQ_LOG, encoding="utf-8").read())))
+    checks = 0
+    for rel in SUITE_LOGS:
+        head = open(os.path.join(ROOT, rel), encoding="utf-8").read()[:2000]
+        m = re.search(r"\b(\d+) / (\d+) GATE checks passed", head) or re.search(r"ALL CHECKS PASSED \((\d+) checks\)", head)
+        if not m or (m.lastindex == 2 and m.group(1) != m.group(2)):
+            raise ValueError(f"{rel}: no all-passed result line")
+        checks += int(m.group(1))
+    return {
+        "releases": (releases, "source_verification.md §D, releases"),
+        "first_release_date": (day(first), "source_verification.md §D, earliest release date"),
+        "last_release_date": (day(last), "source_verification.md §D, latest release date"),
+        "dq_issues": (str(len(issues)), f"decision log, {issues[0]} to {issues[-1]}"),
+        "validation_checks": (f"{checks:,}", "the six suite result logs, Phases 5 to 10.1, all passed"),
+        "dashboard_figures": (str(len(expected["pack"])), "figures in expected.json (the reconciliation pack)"),
+    }
+
+
+def claim_rows():
+    rows = {}
+    for line in open(CLAIM_TRACE, encoding="utf-8"):
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        if len(cells) == 9 and re.fullmatch(r"[A-Z]\d+", cells[0]):
+            rows.setdefault(cells[0], []).append(cells[2])
+    return rows
+
+
+class FigureScan(HTMLParser):
+    """Collects figure elements, data-nofig labels and any digits outside them (visible text and preview meta tags)."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.stack, self.figures, self.labels, self.loose = [], [], [], []
+
+    def _loose(self, text):
+        for m in re.finditer(r"\S*\d\S*", IDENTIFIER.sub("", text)):
+            self.loose.append((self.getpos()[0], m.group(0)))
+
+    def handle_starttag(self, tag, attrs):
+        a = dict(attrs)
+        if tag == "meta" and (a.get("name") in META_SCANNED or a.get("property") in META_SCANNED):
+            self._loose(a.get("content", ""))
+        if tag in VOID_TAGS:
+            return
+        if tag in ("script", "style"):
+            kind = "skip"
+        elif any(k in a for k in ("data-fig", "data-claim", "data-project")):
+            kind = {"attrs": a, "text": "", "line": self.getpos()[0]}
+            self.figures.append(kind)
+        elif "data-nofig" in a:
+            kind = {"label": "", "line": self.getpos()[0]}
+            self.labels.append(kind)
+        else:
+            kind = None
+        self.stack.append((tag, kind))
+
+    def handle_endtag(self, tag):
+        while self.stack:
+            if self.stack.pop()[0] == tag:
+                break
+
+    def handle_data(self, data):
+        kind = next((k for _, k in reversed(self.stack) if k is not None), None)
+        if kind == "skip":
+            return
+        if isinstance(kind, dict) and "attrs" in kind:
+            kind["text"] += data
+        elif isinstance(kind, dict):
+            kind["label"] += data
+        else:
+            self._loose(data)
+
+
+def check_landing(expected):
+    """Verify every figure on the landing page and the preview card. Returns (report rows, labels, failures, count)."""
+    pack = {f["id"]: f for f in expected["pack"]}
+    claims = claim_rows()
+    project = project_figures(expected)
+    _, allowed = banned_words()
+    rows, labels, failures, n = [], [], [], 0
+    for rel in LANDING_FILES:
+        text = open(os.path.join(ROOT, rel), encoding="utf-8").read()
+        for sentence in allowed:
+            text = text.replace(sentence, "")
+        scan = FigureScan()
+        scan.feed(text)
+        scan.close()
+        for fig in scan.figures:
+            a, shown = fig["attrs"], " ".join(fig["text"].split())
+            n += 1
+            if "data-fig" in a:
+                field = a.get("data-field", "value")
+                try:
+                    p = pack[a["data-fig"]]
+                    want = landing_format(p["n"] if field == "n" else p["value"], a.get("data-format"))
+                except Exception as exc:          # unknown ID or format
+                    want = f"(error: {exc})"
+                source = f"expected.json {a['data-fig']}{' n' if field == 'n' else ''}, {a.get('data-format')}"
+                ok = shown == want
+            elif "data-claim" in a:
+                stated = claims.get(a["data-claim"], [])
+                match = next((s for s in stated if s == shown or s.startswith(shown + " ")), None)
+                want, source, ok = match or "(no matching row)", f"claim_trace.md [{a['data-claim']}]", match is not None
+            else:
+                want, source = project.get(a["data-project"], ("(unknown key)", a["data-project"]))
+                ok = shown == want
+            if not ok:
+                failures.append(f"landing: {rel}:{fig['line']} '{shown}' ({source}: {want})")
+            rows.append(f"| `{rel}`:{fig['line']} | {shown} | {source} | {want} | {'PASS' if ok else 'FAIL'} |")
+        for line, token in scan.loose:
+            failures.append(f"landing: {rel}:{line} figure '{token}' is not marked data-fig, data-claim or data-project")
+        labels += [f"`{rel}`:{lab['line']} {' '.join(lab['label'].split())}" for lab in scan.labels]
+    return rows, labels, failures, n
+
+
+def check_routes():
+    """The dashboard page IDs forwarded by js/route.js equal js/text.js PAGES, and every dashboard link names one."""
+    route = open(os.path.join(ROOT, "web", "js", "route.js"), encoding="utf-8").read()
+    forwarded = re.findall(r"'([a-z-]+)'", re.search(r"PAGES = \[(.*?)\]", route, re.S).group(1))
+    pages = re.findall(r"\{ id: '([a-z-]+)'", open(os.path.join(ROOT, "web", "js", "text.js"), encoding="utf-8").read())
+    failures = [] if forwarded == pages else [f"routes: js/route.js {forwarded} differs from js/text.js PAGES {pages}"]
+    for rel in ("web/index.html", "web/check.html", "web/dashboard.html"):
+        for target in re.findall(r'href="dashboard\.html#([^"?]+)', open(os.path.join(ROOT, rel), encoding="utf-8").read()):
+            if target not in pages:
+                failures.append(f"routes: {rel} links to unknown dashboard page #{target}")
+    return pages, failures
 
 
 # ================================================================ main
@@ -722,6 +900,11 @@ def main():
     words, n_allowed, scanned, hits = scan_wording()
     failures += [f"wording: {h}" for h in hits]
 
+    # ---- 6. landing page, link preview and routes
+    land_rows, land_labels, land_fail, land_n = check_landing(expected)
+    pages, route_fail = check_routes()
+    failures += land_fail + route_fail
+
     total = len(expected["pack"])
     out = [
         "# Web Dashboard Reconciliation Results",
@@ -732,7 +915,8 @@ def main():
         f"(PostgreSQL {manifest['server_version']}); source SHA-256 `{manifest['source_sha256'][:7]}…{manifest['source_sha256'][-5:]}`  ",
         f"> **Result:** {'PASS' if not failures else 'FAIL'}: manifest {'verified' if not any(x.startswith('manifest') for x in failures) else 'FAILED'}; "
         f"reconciliation {passed}/{total} PASS; DQ-21 sensitivity {sens_pass}/{sens_cells} cells PASS; "
-        f"wording {len(hits)} finding(s)",
+        f"wording {len(hits)} finding(s); landing figures {sum(r.endswith('PASS |') for r in land_rows)}/{land_n} PASS, "
+        f"{len(land_fail)} failure(s); routes {'PASS' if not route_fail else 'FAIL'}",
         "",
         "The figures below are recomputed from the JSON files alone, by Python functions that mirror the DAX measures "
         "(`dashboard/README.md` §5), and compared with the live SQL. The site's JavaScript is checked separately by "
@@ -781,6 +965,26 @@ def main():
         "",
         *(["Findings:", ""] + [f"- {h}" for h in hits] if hits else ["No findings."]),
         "",
+        f"## 6. Landing page and link preview: {sum(r.endswith('PASS |') for r in land_rows)}/{land_n} figures PASS",
+        "",
+        "Every figure on `web/index.html` and on `python/web/og_card.html` (drawn into `web/og-image.png` by "
+        "`python/web/make_og_image.py`) is marked in the HTML and compared here: `data-fig` with its value in "
+        "`expected.json`, formatted as the page formats it (`js/landing.js`); `data-claim` with a stated figure under "
+        "that tag in `docs/phase10_findings/claim_trace.md`; `data-project` with the record that holds it. Any other "
+        "figure in the visible text or the preview meta tags is a failure: "
+        f"{sum(1 for x in land_fail if 'is not marked' in x)} found. The §8 caveat sentences are allowed verbatim.",
+        "",
+        "| Where | Figure as written | Source | Source figure | Result |",
+        "|---|---|---|---|---|",
+        *land_rows,
+        "",
+        "Labels marked `data-nofig` (page numbers and versions, not figures): "
+        + ("; ".join(land_labels) if land_labels else "none") + ".",
+        "",
+        f"Routes: `web/js/route.js` forwards {len(pages)} dashboard page IDs from the landing page to `dashboard.html` "
+        f"({', '.join(f'`#{p}`' for p in pages)}); they {'equal' if not route_fail else 'DO NOT equal'} `web/js/text.js` PAGES, "
+        "and every `dashboard.html#…` link on the site names one of them.",
+        "",
     ]
     if failures:
         out += ["## Failures", ""] + [f"- {x}" for x in failures] + [""]
@@ -793,6 +997,8 @@ def main():
     print(f"DQ-21 sensitivity: {sens_pass}/{sens_cells} cells PASS")
     print(f"Browser self-check: {browser or 'not recorded'}")
     print(f"Wording: {len(scanned)} file(s) scanned, {len(hits)} finding(s)")
+    print(f"Landing figures: {sum(r.endswith('PASS |') for r in land_rows)}/{land_n} PASS, {len(land_fail)} failure(s); "
+          f"routes {'PASS' if not route_fail else 'FAIL'}")
     for x in failures:
         print("  FAIL " + x)
     print(f"Report: {OUTPUT_REL}")

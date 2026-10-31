@@ -1,0 +1,110 @@
+/* Landing page (index.html). Uses the colour tokens of site.css, so light and dark follow the same toggle. */
+
+.landing { font-size: 16px; line-height: 1.55; }
+.landing .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+.landing h2 { font-size: 24px; line-height: 1.25; margin: 0 0 12px; color: var(--brand); }
+.landing h3 { font-size: 16px; line-height: 1.35; margin: 0 0 8px; }
+.landing p { margin: 0 0 12px; }
+.landing code { font-size: 0.92em; background: var(--surface-2); border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; overflow-wrap: anywhere; }
+:root[data-theme="dark"] .landing h2 { color: var(--fg); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .landing h2 { color: var(--fg); } }
+
+/* ---------- top bar and hero ---------- */
+.topbar { background: var(--brand); color: var(--brand-fg); }
+.topbar-in { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; flex-wrap: wrap; }
+.topbar-brand { color: var(--brand-fg); font-size: 20px; font-weight: 700; letter-spacing: 0.5px; text-decoration: none; }
+.topbar-links { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.topbar-links a { color: var(--brand-fg); font-size: 14px; }
+.topbar .theme-toggle { border-color: rgba(255, 255, 255, 0.45); background: transparent; color: var(--brand-fg); }
+
+.hero { background: var(--brand); color: var(--brand-fg); padding: 36px 0 44px; }
+.hero h1 { font-size: 40px; line-height: 1.15; margin: 0 0 14px; max-width: 760px; }
+.eyebrow { font-size: 13px; letter-spacing: 0.6px; text-transform: uppercase; opacity: 0.85; margin: 0 0 8px; }
+.lead { font-size: 19px; max-width: 760px; }
+.hero .lead { color: var(--brand-fg); opacity: 0.95; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 22px 0 0; }
+.button {
+  display: inline-block; padding: 11px 18px; border-radius: 4px; font-weight: 600; font-size: 15px;
+  text-decoration: none; border: 1px solid transparent;
+}
+.button.primary { background: var(--accent-2); color: #1d2733; }
+.button.primary:hover { filter: brightness(1.06); }
+.hero .button.secondary { color: var(--brand-fg); border-color: rgba(255, 255, 255, 0.6); }
+.button.secondary { color: var(--accent); border-color: var(--accent); background: var(--surface); }
+.hero .button.secondary { background: transparent; }
+
+/* ---------- sections ---------- */
+.section { padding: 40px 0; background: var(--bg); }
+.section.alt { background: var(--surface); }
+.note { color: var(--muted); font-size: 14px; }
+
+.stats { list-style: none; margin: 20px 0 16px; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.stats li { background: var(--surface); border-top: 4px solid var(--brand); border-radius: 2px; box-shadow: var(--shadow); padding: 12px 14px; min-width: 0; }
+:root[data-theme="dark"] .stats li { border-top-color: var(--accent); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .stats li { border-top-color: var(--accent); } }
+.stat-v { display: block; font-size: 28px; font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.stat-k { display: block; color: var(--muted); font-size: 14px; line-height: 1.4; margin-top: 4px; }
+
+.findings { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 18px 0 20px; }
+.finding {
+  background: var(--bg); border-top: 4px solid var(--brand); border-radius: 2px; padding: 14px 16px 16px;
+  display: flex; flex-direction: column; min-width: 0;
+}
+:root[data-theme="dark"] .finding { border-top-color: var(--accent); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .finding { border-top-color: var(--accent); } }
+.finding .big { font-size: 34px; font-weight: 700; line-height: 1.1; margin: 2px 0 8px; font-variant-numeric: tabular-nums; color: var(--brand); }
+:root[data-theme="dark"] .finding .big { color: var(--fg); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .finding .big { color: var(--fg); } }
+.finding p { font-size: 15px; }
+.finding .n { color: var(--muted); font-size: 14px; }
+.finding .more { margin-top: auto; font-size: 14px; font-weight: 600; }
+.finding .more::after { content: " \2192"; }
+.callout { border-left: 4px solid var(--accent-2); background: var(--bg); padding: 12px 16px; font-size: 15px; }
+
+/* Pipeline: a row of steps with arrows on wide screens, a column on narrow ones. */
+.pipeline { list-style: none; margin: 18px 0 20px; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 28px; }
+.pipeline li {
+  position: relative; background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--accent);
+  border-radius: 3px; padding: 12px 12px 14px; min-width: 0;
+}
+.pipeline li:last-child { border-top-color: var(--accent-2); }
+.pipeline strong { display: block; font-size: 15px; margin-bottom: 4px; }
+.pipeline span { display: block; color: var(--muted); font-size: 14px; line-height: 1.45; }
+.pipeline li + li::before {
+  content: "\2192"; position: absolute; left: -22px; top: 50%; transform: translateY(-50%);
+  color: var(--accent); font-size: 20px; font-weight: 700;
+}
+
+.trust { margin: 0 0 16px; padding-left: 20px; }
+.trust li { margin-bottom: 10px; }
+.pages { margin: 0 0 20px; padding-left: 20px; }
+.pages li { margin-bottom: 6px; }
+.guide { margin: 0; }
+.guide dt { font-weight: 700; margin-top: 12px; }
+.guide dd { margin: 2px 0 0; }
+
+.landing .footer { padding: 18px 20px 28px; margin-top: 0; font-size: 13px; }
+.landing .footer .links a { margin-right: 14px; display: inline-block; }
+.credit { color: var(--fg); }
+
+/* ---------- responsive ---------- */
+@media (max-width: 959px) {
+  .findings { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pipeline { grid-template-columns: minmax(0, 1fr); gap: 26px; }
+  .pipeline li + li::before { content: "\25BC"; font-size: 14px; left: 50%; top: -22px; transform: translateX(-50%); }
+}
+@media (max-width: 599px) {
+  .landing .wrap { padding: 0 16px; }
+  .hero { padding: 26px 0 32px; }
+  .hero h1 { font-size: 30px; }
+  .lead { font-size: 17px; }
+  .landing h2 { font-size: 21px; }
+  .section { padding: 30px 0; }
+  .findings { grid-template-columns: minmax(0, 1fr); }
+  .stats { grid-template-columns: minmax(0, 1fr); }
+  .stat-v { font-size: 24px; }
+  .finding .big { font-size: 30px; }
+  .button { flex: 1 1 100%; text-align: center; }
+  .landing .footer { padding: 16px 16px 24px; }
+}

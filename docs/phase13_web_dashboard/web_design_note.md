@@ -151,7 +151,7 @@ same results document, as a separate section.
 
 ### 5.1 Layout
 
-One page, `index.html`, with hash routing (`#overview`, `#suppliers`, `#competition`, `#budget`, `#timing`, `#entities`,
+One page, `index.html` (since v1.2 `dashboard.html`; `index.html` is the landing page, `web_dashboard.md` §10), with hash routing (`#overview`, `#suppliers`, `#competition`, `#budget`, `#timing`, `#entities`,
 `#implementation`, `#data-quality`), so each page has a shareable link and the back button works.
 
 - **Desktop (≥ 1024 px):** left sidebar with the eight page tabs and the "About this data" note, as in Power BI; main area:
@@ -181,7 +181,8 @@ One page, `index.html`, with hash routing (`#overview`, `#suppliers`, `#competit
 
 ```
 web/
-├── index.html                 single page: sidebar/menu, page container, footer
+├── index.html                 landing page (v1.2; web_dashboard.md §10)
+├── dashboard.html             single page: sidebar/menu, page container, footer (index.html until v1.1)
 ├── check.html                 in-browser reconciliation self-check (linked from the footer as "Data checks")
 ├── vercel.json                headers only: Content-Security-Policy ('self' only), security headers, cache rules; no build
 ├── favicon.svg

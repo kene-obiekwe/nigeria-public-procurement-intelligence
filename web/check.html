@@ -6,13 +6,28 @@
 <meta name="robots" content="noindex">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<title>Data Self-Check</title>
+<title>Data Self-Check · Nigeria Procurement Dashboard</title>
+<meta name="description" content="Recomputes every figure of the Nigeria procurement dashboard in your browser from its published data files and compares each with its SQL value.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Nigeria Public Procurement Intelligence">
+<meta property="og:title" content="Data Self-Check · Nigeria Procurement Dashboard">
+<meta property="og:description" content="Recomputes every figure of the Nigeria procurement dashboard in your browser from its published data files and compares each with its SQL value.">
+<meta property="og:url" content="https://nocopo-dashboard.vercel.app/check.html">
+<meta property="og:image" content="https://nocopo-dashboard.vercel.app/og-image.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Nigeria Public Procurement Intelligence: headline figures from the NOCOPO open contracting data">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Data Self-Check · Nigeria Procurement Dashboard">
+<meta name="twitter:description" content="Recomputes every figure of the Nigeria procurement dashboard in your browser from its published data files and compares each with its SQL value.">
+<meta name="twitter:image" content="https://nocopo-dashboard.vercel.app/og-image.png">
 <link rel="stylesheet" href="css/check.css">
 <script type="module" src="js/check_page.js"></script>
 </head>
 <body>
 <main>
-  <p><a href="./">Back to the dashboard</a></p>
+  <p><a href="dashboard.html">Back to the dashboard</a> · <a href="./">About this project</a></p>
   <h1>Data self-check</h1>
   <p>Recomputes every figure in <code>data/expected.json</code> with the site's own functions (<code>js/metrics.js</code>)
      and compares it with the SQL value: the 177 figures of the dashboard reconciliation pack and the DQ-21 sensitivity

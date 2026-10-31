@@ -4,57 +4,260 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
-<meta name="description" content="Interactive dashboard of Nigeria's published public procurement records (NOCOPO OCDS export): suppliers, competition, budgets, timing, entities, implementation and data quality.">
-<title>Nigeria Procurement Dashboard</title>
+<script src="js/route.js"></script>
+<title>Nigeria Public Procurement Intelligence</title>
+<meta name="description" content="Nigeria's published public procurement records (NOCOPO, OCDS format), audited and turned into a validated PostgreSQL database and an interactive dashboard. Every dashboard figure is reconciled to SQL.">
+<link rel="canonical" href="https://nocopo-dashboard.vercel.app/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Nigeria Public Procurement Intelligence">
+<meta property="og:title" content="Nigeria Public Procurement Intelligence">
+<meta property="og:description" content="Nigeria's published procurement records, audited and turned into a validated analytics database and an interactive dashboard. Every dashboard figure is reconciled to SQL.">
+<meta property="og:url" content="https://nocopo-dashboard.vercel.app/">
+<meta property="og:image" content="https://nocopo-dashboard.vercel.app/og-image.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Nigeria Public Procurement Intelligence: headline figures from the NOCOPO open contracting data">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Nigeria Public Procurement Intelligence">
+<meta name="twitter:description" content="Nigeria's published procurement records, audited and turned into a validated analytics database and an interactive dashboard. Every dashboard figure is reconciled to SQL.">
+<meta name="twitter:image" content="https://nocopo-dashboard.vercel.app/og-image.png">
+<meta name="twitter:image:alt" content="Nigeria Public Procurement Intelligence: headline figures from the NOCOPO open contracting data">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/landing.css">
 <script src="js/theme.js"></script>
-<script src="vendor/echarts-5.6.0.min.js" defer></script>
-<script type="module" src="js/app.js"></script>
+<script type="module" src="js/landing.js"></script>
 </head>
-<body>
-<div class="layout">
-  <aside class="sidebar" aria-label="Pages">
-    <div class="brand">
-      <p class="brand-name">NOCOPO</p>
-      <p class="brand-sub">Nigeria Public Procurement Intelligence</p>
-    </div>
-    <nav><ul class="nav" id="nav"></ul></nav>
-    <div class="about">
-      <h2>About this report</h2>
-      <p id="about-source"></p>
-      <p>Each figure shows the number of records it is based on. Records that do not meet a metric's eligibility rules are excluded from that metric only.</p>
-    </div>
-  </aside>
-  <div class="content">
-    <div class="menu-bar">
-      <span class="brand-name">NOCOPO</span>
-      <label class="visually-hidden" for="page-menu">Page</label>
-      <select id="page-menu"></select>
-    </div>
-    <main class="main" id="main" tabindex="-1">
-      <div class="page-head">
-        <div>
-          <h1 class="page-title" id="page-title">Loading</h1>
-          <p class="page-question" id="page-question"></p>
-        </div>
-        <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch between light and dark colours">Dark</button>
-      </div>
-      <div id="page"><p class="loading">Loading the data…</p></div>
-      <footer class="footer" id="footer">
-        <p id="footer-caveat"></p>
-        <p>Data: NOCOPO OCDS export published by the Bureau of Public Procurement under the Open Data Commons Public Domain
-           Dedication and Licence (ODC-PDDL). Independent analysis, not endorsed by the Bureau of Public Procurement.</p>
-        <p>Code and documentation: MIT licence. Charts: Apache ECharts 5.6.0, Apache License 2.0
-           (<a href="vendor/ECHARTS-LICENSE.txt">licence</a>, <a href="vendor/ECHARTS-NOTICE.txt">notice</a>).</p>
-        <p class="links">
-          <a href="https://github.com/kene-obiekwe/nigeria-public-procurement-intelligence" rel="noopener">Source code and method (GitHub)</a>
-          <a href="check.html">Data checks</a>
-        </p>
-        <p class="about-inline" id="about-inline"></p>
-      </footer>
-    </main>
+<body class="landing">
+<!-- Every figure on this page sits in an element marked data-fig (a figure of data/expected.json, re-rendered from the
+     JSON at load time), data-claim (a figure of docs/phase10_findings/claim_trace.md under that tag) or data-project
+     (a count read from the project's own records). Digits marked data-nofig are labels, not figures.
+     python/web/check_web_data.py verifies every one and fails on any figure outside them. -->
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <a class="topbar-brand" href="./">NOCOPO</a>
+    <nav class="topbar-links" aria-label="Site">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="https://github.com/kene-obiekwe/nigeria-public-procurement-intelligence" rel="noopener">GitHub</a>
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch between light and dark colours">Dark</button>
+    </nav>
   </div>
-</div>
+</header>
+
+<main id="main">
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Open procurement data · Nigeria</p>
+      <h1>Nigeria Public Procurement Intelligence</h1>
+      <p class="lead">Nigeria's public procurement records, as published on the national open contracting portal, audited,
+        built into a validated analytics database and shown in an interactive dashboard where every figure is reconciled
+        to SQL.</p>
+      <p class="actions">
+        <a class="button primary" href="dashboard.html">Open the dashboard</a>
+        <a class="button secondary" href="https://github.com/kene-obiekwe/nigeria-public-procurement-intelligence" rel="noopener">See the code on GitHub</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="section" id="what" aria-labelledby="what-h">
+    <div class="wrap">
+      <h2 id="what-h">What this is</h2>
+      <p>Nigeria's Bureau of Public Procurement publishes procurement records on its open contracting portal, NOCOPO, in
+        the Open Contracting Data Standard (OCDS): plans, tenders, awards, contracts and implementation. This project takes
+        one bulk export of that data, audits it, loads it into a PostgreSQL database and answers seven questions about
+        suppliers, competition, budgets, timing, procuring entities, implementation and data quality.</p>
+      <ul class="stats">
+        <li><span class="stat-v" data-project="releases">108,277</span>
+          <span class="stat-k">published releases: updates to procurement records</span></li>
+        <li><span class="stat-v" data-fig="EXE-01" data-format="count">98,454</span>
+          <span class="stat-k">procurement processes, one record each, with the portal's test entity set aside</span></li>
+        <li><span class="stat-v" data-fig="ENT-01" data-format="count">665</span>
+          <span class="stat-k">procuring entities (ministries, agencies and other public bodies)</span></li>
+        <li><span class="stat-v" data-fig="SUP-02" data-format="count">9,800</span>
+          <span class="stat-k">suppliers with a usable supplier ID</span></li>
+      </ul>
+      <p class="note">Releases are dated from <span data-project="first_release_date">3 May 2021</span> to
+        <span data-project="last_release_date">29 July 2026</span>. The export's package date is file metadata, not
+        the date of every record.</p>
+    </div>
+  </section>
+
+  <section class="section alt" id="findings" aria-labelledby="findings-h">
+    <div class="wrap">
+      <h2 id="findings-h">Key findings</h2>
+      <p>Patterns in the published records. Each figure gives the records it is based on, and none is a finding about
+        anyone's conduct.</p>
+      <div class="findings">
+        <article class="finding">
+          <h3>Almost half of tenders record a single bidder</h3>
+          <p class="big"><span data-fig="EXE-05" data-format="pct1">44.0%</span></p>
+          <p>of tenders record one tenderer; the median is <span data-fig="EXE-06" data-format="count">2</span>
+            tenderers. Under National Competitive Bidding the rate is <span data-claim="C3">39.6%</span>
+            (<span data-claim="C3">10,129</span> tenders).</p>
+          <p class="n">Based on <span data-fig="COM-01" data-format="count">17,253</span> tenders with a plausible
+            recorded count. The source does not say whether the count is bids received or bids found responsive.</p>
+          <a class="more" href="dashboard.html#competition">Competition page</a>
+        </article>
+        <article class="finding">
+          <h3>Supplier value is spread widely, except in emergency procurement</h3>
+          <p class="big"><span data-fig="EXE-07" data-format="pct1">29.0%</span></p>
+          <p>of attributable award value goes to the ten largest suppliers (Herfindahl index
+            <span data-fig="SUP-09" data-format="index1">139.4</span>, low on its scale). In Emergency procurement the
+            largest supplier holds <span data-claim="S4">61.4%</span>.</p>
+          <p class="n">Based on <span data-fig="SUP-01" data-format="count">13,537</span> awards with a usable supplier
+            ID. <span data-fig="SUP-11" data-format="count">2,226</span> awards
+            (<span data-fig="SUP-13" data-format="pct1">20.4%</span> of award value) have none and are left out, so this
+            is a lower bound.</p>
+          <a class="more" href="dashboard.html#suppliers">Supplier concentration page</a>
+        </article>
+        <article class="finding">
+          <h3>Most awards are close to budget; a small group is far above it</h3>
+          <p class="big"><span data-fig="EXE-09" data-format="ratio2">0.93</span></p>
+          <p>is the median award as a ratio of its budget line. Yet <span data-fig="BVA-B6" data-format="count">227</span>
+            processes (<span data-claim="B3">1.5%</span>) awarded more than ten times their budget hold
+            <span data-claim="B3">49.8%</span> of the compared award value.</p>
+          <p class="n">Based on <span data-fig="BVA-01" data-format="count">15,574</span> processes with one usable
+            budget line. A budget is a plan, not spend.</p>
+          <a class="more" href="dashboard.html#budget">Budget versus award page</a>
+        </article>
+        <article class="finding">
+          <h3>Award value sits with a few entities</h3>
+          <p class="big"><span data-fig="ENT-06" data-format="pct1">76.0%</span></p>
+          <p>of award value sits with the ten largest procuring entities; the largest alone holds
+            <span data-fig="ENT-05" data-format="pct1">40.6%</span>.</p>
+          <p class="n">Based on <span data-fig="ENT-01" data-format="count">665</span> procuring entities. Value shares
+            depend on a handful of very large awards.</p>
+          <a class="more" href="dashboard.html#entities">Entity benchmark page</a>
+        </article>
+        <article class="finding">
+          <h3>Timing can be measured for under half of processes</h3>
+          <p class="big"><span data-fig="EXE-11" data-format="days">97</span> days</p>
+          <p>is the median time from tender start to award. Only
+            <span data-fig="TIM-11" data-format="pct1">45.2%</span> of the processes it applies to publish the two valid
+            dates it needs.</p>
+          <p class="n">Based on <span data-fig="TIM-02" data-format="count">7,462</span> processes. Results describe the
+            processes that published valid dates, not the rest.</p>
+          <a class="more" href="dashboard.html#timing">Procurement-cycle timing page</a>
+        </article>
+        <article class="finding">
+          <h3>Implementation reporting is broad</h3>
+          <p class="big"><span data-fig="EXE-12" data-format="pct1">87.2%</span></p>
+          <p>of contracts have some implementation data published (milestones or transactions);
+            <span data-fig="IMP-T4" data-format="count">2,081</span> have none.</p>
+          <p class="n">Based on <span data-fig="IMP-01" data-format="count">16,221</span> contracts. This is reporting
+            coverage, not a measure of contract performance.</p>
+          <a class="more" href="dashboard.html#implementation">Implementation and lifecycle page</a>
+        </article>
+      </div>
+      <p class="callout"><strong>Possible scale errors (DQ-21).</strong> <span data-claim="X1">45</span> awards
+        (<span data-claim="X1">₦509.5bn</span>, <span data-claim="X1">15.5%</span> of award value) look out of scale
+        with their own process record, for example a decimal point that seems to be missing. They are kept in every
+        figure and flagged. Without them the ten largest suppliers hold <span data-claim="S6">26.1%</span> rather than
+        <span data-fig="EXE-07" data-format="pct1">29.0%</span>, and the median award-to-budget ratio stays at
+        <span data-claim="B8">0.93</span>.</p>
+    </div>
+  </section>
+
+  <section class="section" id="built" aria-labelledby="built-h">
+    <div class="wrap">
+      <h2 id="built-h">How it was built</h2>
+      <ol class="pipeline" aria-label="Data pipeline, from the raw file to the dashboards">
+        <li><strong>Raw OCDS JSON</strong><span>One bulk export, pinned by its checksum and never modified.</span></li>
+        <li><strong>Staging</strong><span>Loaded as published, with data-quality flags set in SQL. Nothing is deleted.</span></li>
+        <li><strong>Core model</strong><span>Entities, suppliers and one snapshot per process, taken from its latest releases.</span></li>
+        <li><strong>Analytics views</strong><span>One view per metric, each with its own eligibility rules and record count.</span></li>
+        <li><strong>Dashboards</strong><span>A Power BI report and this web version, both reading only the validated views.</span></li>
+      </ol>
+      <p>PostgreSQL holds the logic; Python loads the file and runs the checks. One command,
+        <code>python/run_pipeline.py</code>, rebuilds the whole database from the raw file and re-runs every check. The
+        Power BI report reads the views through a read-only database role. This web version exports the same views to
+        static data files and computes each figure in your browser.</p>
+    </div>
+  </section>
+
+  <section class="section alt" id="trust" aria-labelledby="trust-h">
+    <div class="wrap">
+      <h2 id="trust-h">Why you can trust the numbers</h2>
+      <ul class="trust">
+        <li><strong><span data-project="dq_issues">21</span> data-quality issues logged and handled.</strong>
+          Questionable records are flagged rather than deleted, and left out only of the metrics they would distort.</li>
+        <li><strong>Eligibility per metric.</strong> There is no single "clean" dataset: each metric states which records
+          qualify, and every figure shows how many records it is based on.</li>
+        <li><strong><span data-project="validation_checks">259</span> automated validation checks</strong> from the raw
+          file to the analytics views, all passing on a clean rebuild.</li>
+        <li><strong>All <span data-project="dashboard_figures">177</span> dashboard figures reconciled to SQL</strong>,
+          in the Power BI report and again in this web version.</li>
+      </ul>
+      <p class="actions">
+        <a class="button secondary" href="check.html">Run the check in your browser</a>
+      </p>
+      <p class="note">The check page recomputes every dashboard figure from the published data files and compares each
+        one with its SQL value.</p>
+    </div>
+  </section>
+
+  <section class="section" id="read" aria-labelledby="read-h">
+    <div class="wrap">
+      <h2 id="read-h">How to read the dashboard</h2>
+      <ul class="pages">
+        <li><a href="dashboard.html#overview"><span data-nofig>1</span> Executive overview</a>: the headline figures and how complete the record is.</li>
+        <li><a href="dashboard.html#suppliers"><span data-nofig>2a</span> Supplier concentration</a>: how award value is shared among suppliers.</li>
+        <li><a href="dashboard.html#competition"><span data-nofig>2b</span> Competition</a>: how many tenderers processes record, by method and entity.</li>
+        <li><a href="dashboard.html#budget"><span data-nofig>3</span> Budget versus award</a>: awarded value against the recorded budget line.</li>
+        <li><a href="dashboard.html#timing"><span data-nofig>4</span> Procurement-cycle timing</a>: how long stages take, where valid dates allow.</li>
+        <li><a href="dashboard.html#entities"><span data-nofig>5</span> Entity benchmark</a>: procuring entities compared on the same measures.</li>
+        <li><a href="dashboard.html#implementation"><span data-nofig>6</span> Implementation and lifecycle</a>: whether implementation data was published, and how far processes progress.</li>
+        <li><a href="dashboard.html#data-quality"><span data-nofig>7</span> Data quality and coverage</a>: which data issues affect which figures.</li>
+      </ul>
+      <dl class="guide">
+        <dt>Records (n)</dt>
+        <dd>Each card shows its result and the number of records it is based on. Records that do not meet a metric's
+          eligibility rules are left out of that metric only, so the count differs from card to card. Tap or click a
+          card to see its exact value.</dd>
+        <dt>Filters</dt>
+        <dd>Most pages have filters at the top, such as procuring entity and procurement method. A filter changes only
+          the charts whose data carries that field, and it is kept in the page address, so a filtered view can be
+          shared. On a phone, tap Filters to open them.</dd>
+        <dt>Flagged awards (DQ-21)</dt>
+        <dd>Awards flagged as possible scale errors stay in every figure. Pages <span data-nofig>1</span>,
+          <span data-nofig>2a</span> and <span data-nofig>3</span> add a fixed panel with key figures without them,
+          and page <span data-nofig>5</span> has a switch to leave them out.</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="section alt" id="limits" aria-labelledby="limits-h">
+    <div class="wrap">
+      <h2 id="limits-h">Limitations</h2>
+      <ul class="trust">
+        <li><strong>Data as published.</strong> The figures describe one export of what was published to the portal. A
+          newer download will differ, and a missing record is not evidence that an event did not happen.</li>
+        <li><strong>Coverage gaps.</strong> <span data-fig="EXE-13" data-format="pct1">82.3%</span> of processes were
+          published at planning stage only, so later-stage figures describe a minority of processes. Timing covers only
+          processes with valid dates, and supplier figures leave out awards without a usable supplier ID.</li>
+        <li><strong>Patterns, not conclusions.</strong> The figures show patterns in reported data. They do not explain
+          why a pattern exists, and nothing here suggests wrongdoing by any entity, official or supplier.</li>
+      </ul>
+      <p><a href="https://github.com/kene-obiekwe/nigeria-public-procurement-intelligence/blob/main/docs/assumptions_and_limitations.md" rel="noopener">Full list of assumptions and limitations (GitHub)</a></p>
+    </div>
+  </section>
+</main>
+
+<footer class="footer wrap">
+  <p>Figures describe what was published to the Nigeria Open Contracting Portal (NOCOPO OCDS export; package metadata dated 2021-05-03, releases dated to 2026-07-29; SHA-256 6151466…bc90c). They show patterns in reported data, not findings about conduct.</p>
+  <p>Data: NOCOPO OCDS export published by the Bureau of Public Procurement under the Open Data Commons Public Domain
+     Dedication and Licence (ODC-PDDL). Independent analysis, not endorsed by the Bureau of Public Procurement.</p>
+  <p>Code and documentation: MIT licence. Charts: Apache ECharts <span data-nofig>5.6.0</span>, Apache License <span data-nofig>2.0</span>
+     (<a href="vendor/ECHARTS-LICENSE.txt">licence</a>, <a href="vendor/ECHARTS-NOTICE.txt">notice</a>).</p>
+  <p class="links">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="https://github.com/kene-obiekwe/nigeria-public-procurement-intelligence" rel="noopener">Source code and method (GitHub)</a>
+    <a href="check.html">Data checks</a>
+  </p>
+  <p class="credit">Built by Kene Obiekwe ·
+    <a href="https://github.com/kene-obiekwe" rel="noopener">GitHub</a> ·
+    <a href="LINKEDIN_URL" rel="noopener">LinkedIn</a></p>
+</footer>
 </body>
 </html>

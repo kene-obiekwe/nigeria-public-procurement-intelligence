@@ -47,9 +47,10 @@ The project does not make claims of misconduct or causation; patterns are prompt
 
 ## Dashboard
 
-**Live dashboard:** <https://nocopo-dashboard.vercel.app>. An interactive web version of the eight report pages, a static
-site in [`web/`](web/) that computes every figure in the browser from exported data and reconciles to the same 177
-figures ([web dashboard notes](docs/phase13_web_dashboard/web_dashboard.md)). The live reconciliation check is at
+**Live site:** <https://nocopo-dashboard.vercel.app>, a short plain-English introduction, and the
+[dashboard](https://nocopo-dashboard.vercel.app/dashboard.html) itself: an interactive web version of the eight report
+pages, a static site in [`web/`](web/) that computes every figure in the browser from exported data and reconciles to
+the same 177 figures ([web dashboard notes](docs/phase13_web_dashboard/web_dashboard.md)). The live reconciliation check is at
 <https://nocopo-dashboard.vercel.app/check.html>: it recomputes the 177 figures and the DQ-21 sensitivity cells in your browser and shows PASS or FAIL.
 
 Power BI report built on `analytics.*` only, through the read-only role `nocopo_bi`; 177 dashboard figures were

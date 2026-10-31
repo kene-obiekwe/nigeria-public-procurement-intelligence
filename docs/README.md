@@ -125,10 +125,10 @@ The ERD is in [`../diagrams/erd/`](../diagrams/erd/nocopo_erd.md) and the DDL is
 
 | Document | Purpose |
 |---|---|
-| [`web_dashboard.md`](phase13_web_dashboard/web_dashboard.md) | The static web dashboard in `web/`: structure, how to rebuild the data, check it, preview it and redeploy it; roles; verification results |
+| [`web_dashboard.md`](phase13_web_dashboard/web_dashboard.md) | The static web dashboard in `web/`: structure, how to rebuild the data, check it, preview it and redeploy it; roles; verification results; landing page and link previews (§10, v1.2) |
 | [`web_design_note.md`](phase13_web_dashboard/web_design_note.md) | Design: data shape per page, pre-aggregation grain, file sizes, filter scoping, non-summable measures, decisions F-2 to F-4 and D-1 |
-| [`web_reconciliation_results.md`](phase13_web_dashboard/web_reconciliation_results.md) | Generated: manifest, the 177 figures recomputed from the web data, DQ-21 sensitivity cells, browser self-check, wording scan |
-| [`screenshots/`](phase13_web_dashboard/screenshots/) | Every page at 1440 px and at 375 px |
+| [`web_reconciliation_results.md`](phase13_web_dashboard/web_reconciliation_results.md) | Generated: manifest, the 177 figures recomputed from the web data, DQ-21 sensitivity cells, browser self-check, wording scan, landing-page figures and routes |
+| [`screenshots/`](phase13_web_dashboard/screenshots/) | Every page at 1440 px and at 375 px; the landing page also in dark (`00_landing_*`) |
 
 ## Generated Reports
 
@@ -152,6 +152,7 @@ script rather than editing them by hand.
 | `phase10_findings/phase10_validation_results.md` | `python/validation/04_run_validation_suite.py --phase 10` |
 | `phase13_web_dashboard/web_reconciliation_results.md` | `python/web/check_web_data.py` (the browser result is recorded with `--browser-result`) |
 | `../web/data/*.json` | `python/web/export_web_data.py` |
+| `../web/og-image.png` | `python/web/make_og_image.py` (from `python/web/og_card.html`) |
 
 ⚠ `data_profiling_report.md` (§13) and `targeted_validation_report.md` (§5, C-12)
 contain manual correction notes. Re-running their scripts would overwrite those notes.
