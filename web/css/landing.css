@@ -32,6 +32,8 @@
 .hero .button.secondary { color: var(--brand-fg); border-color: rgba(255, 255, 255, 0.6); }
 .button.secondary { color: var(--accent); border-color: var(--accent); background: var(--surface); }
 .hero .button.secondary { background: transparent; }
+.hero .note { font-size: 15px; max-width: 760px; margin: 18px 0 0; color: var(--brand-fg); opacity: 0.9; }
+.hero .note a { color: var(--brand-fg); text-decoration: underline; }
 
 /* ---------- sections ---------- */
 .section { padding: 40px 0; background: var(--bg); }
